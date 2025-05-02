@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import QRCode from 'react-qr-code';
 import { useReactToPrint } from 'react-to-print';
+import { toast } from "sonner";
 
 interface BarcodeGeneratorProps {
   productName: string;
@@ -18,6 +19,13 @@ const BarcodeGenerator = ({ productName, productSku, productPrice }: BarcodeGene
     content: () => barcodeRef.current,
     documentTitle: `Barcode-${productSku}`,
   });
+
+  const handleSaveAsImage = () => {
+    // Add implementation later
+    toast("Image saving feature coming soon", {
+      description: "This functionality will be added in a future update"
+    });
+  };
 
   return (
     <Card className="p-4 flex flex-col gap-4">
@@ -46,6 +54,7 @@ const BarcodeGenerator = ({ productName, productSku, productPrice }: BarcodeGene
           Print Barcode
         </Button>
         <Button 
+          onClick={handleSaveAsImage}
           className="flex-1"
           variant="default"
         >
