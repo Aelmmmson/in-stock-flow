@@ -11,7 +11,7 @@ import {
 } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Search, Plus } from 'lucide-react';
+import { Search, Plus, Calendar, TrendingUp } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import {
   Select,
@@ -20,14 +20,48 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
 
 const Transactions = () => {
   const { transactions, products, currencySymbol } = useInventory();
   const [search, setSearch] = useState('');
   const [typeFilter, setTypeFilter] = useState('all');
+  const [currentPeriod, setCurrentPeriod] = useState('month');
+
+  // Filter transactions by period
+  const getPeriodFilteredTransactions = () => {
+    const now = new Date();
+    let startDate;
+
+    switch (currentPeriod) {
+      case 'today':
+        startDate = new Date(now.setHours(0, 0, 0, 0));
+        break;
+      case 'week':
+        startDate = new Date(now);
+        startDate.setDate(startDate.getDate() - startDate.getDay());
+        startDate.setHours(0, 0, 0, 0);
+        break;
+      case 'month':
+        startDate = new Date(now.getFullYear(), now.getMonth(), 1);
+        break;
+      case 'year':
+        startDate = new Date(now.getFullYear(), 0, 1);
+        break;
+      default:
+        startDate = new Date(0); // All time
+    }
+
+    return transactions.filter(t => new Date(t.createdAt) >= startDate);
+  };
 
   // Filter transactions
-  const filteredTransactions = transactions.filter(
+  const filteredTransactions = getPeriodFilteredTransactions().filter(
     (transaction) => {
       const product = products.find((p) => p.id === transaction.productId);
       const matchesSearch = product?.name.toLowerCase().includes(search.toLowerCase());
@@ -55,6 +89,19 @@ const Transactions = () => {
     return product?.name || 'Unknown Product';
   };
 
+  // Calculate summary statistics
+  const salesCount = filteredTransactions.filter(t => t.type === 'sale').length;
+  const salesTotal = filteredTransactions
+    .filter(t => t.type === 'sale')
+    .reduce((sum, t) => sum + t.totalAmount, 0);
+  
+  const purchasesCount = filteredTransactions.filter(t => t.type === 'purchase').length;
+  const purchasesTotal = filteredTransactions
+    .filter(t => t.type === 'purchase')
+    .reduce((sum, t) => sum + t.totalAmount, 0);
+  
+  const adjustmentsCount = filteredTransactions.filter(t => t.type === 'adjustment').length;
+
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
@@ -65,6 +112,44 @@ const Transactions = () => {
             New Transaction
           </Link>
         </Button>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm font-medium">Sales</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{currencySymbol}{salesTotal.toFixed(2)}</div>
+            <p className="text-xs text-muted-foreground">{salesCount} transactions</p>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm font-medium">Purchases</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{currencySymbol}{purchasesTotal.toFixed(2)}</div>
+            <p className="text-xs text-muted-foreground">{purchasesCount} transactions</p>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm font-medium">Profit Margin</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">
+              {salesTotal > 0 
+                ? `${((salesTotal - purchasesTotal) / salesTotal * 100).toFixed(1)}%` 
+                : '0%'}
+            </div>
+            <p className="text-xs text-muted-foreground">
+              {currencySymbol}{(salesTotal - purchasesTotal).toFixed(2)} net
+            </p>
+          </CardContent>
+        </Card>
       </div>
 
       <div className="flex flex-col gap-4 md:flex-row">
@@ -91,6 +176,23 @@ const Transactions = () => {
             <SelectItem value="sale">Sales</SelectItem>
             <SelectItem value="purchase">Purchases</SelectItem>
             <SelectItem value="adjustment">Adjustments</SelectItem>
+          </SelectContent>
+        </Select>
+
+        <Select
+          value={currentPeriod}
+          onValueChange={setCurrentPeriod}
+        >
+          <SelectTrigger className="w-full md:w-[180px]">
+            <Calendar className="mr-2 h-4 w-4" />
+            <SelectValue placeholder="Period" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="today">Today</SelectItem>
+            <SelectItem value="week">This Week</SelectItem>
+            <SelectItem value="month">This Month</SelectItem>
+            <SelectItem value="year">This Year</SelectItem>
+            <SelectItem value="all">All Time</SelectItem>
           </SelectContent>
         </Select>
       </div>

@@ -4,7 +4,7 @@ import { useInventory } from '@/contexts/InventoryContext';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { ChartContainer, ChartTooltip } from '@/components/ui/chart';
-import { BarChart, Bar, XAxis, YAxis } from 'recharts';
+import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer } from 'recharts';
 import { TrendingUp, ArrowDownRight, FileText } from 'lucide-react';
 
 const Reports = () => {
@@ -59,12 +59,20 @@ const Reports = () => {
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <h1 className="text-2xl font-bold">Reports</h1>
-        <Link to="/reports/financial">
-          <Button>
-            <FileText className="mr-2 h-4 w-4" />
-            View Financial Reports
+        <div className="flex space-x-2">
+          <Button asChild>
+            <Link to="/expenses">
+              <FileText className="mr-2 h-4 w-4" />
+              Manage Expenses
+            </Link>
           </Button>
-        </Link>
+          <Button asChild>
+            <Link to="/reports/financial">
+              <FileText className="mr-2 h-4 w-4" />
+              View Financial Reports
+            </Link>
+          </Button>
+        </div>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -123,19 +131,21 @@ const Reports = () => {
             </div>
           </CardHeader>
           <CardContent>
-            <div className="h-[300px]">
-              <ChartContainer
-                config={{
-                  inventory: { label: 'Items in Stock' },
-                }}
-              >
-                <BarChart data={chartData}>
-                  <XAxis dataKey="category" />
+            <div style={{ width: '100%', height: 300 }}>
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={chartData} margin={{ top: 10, right: 10, left: 10, bottom: 40 }}>
+                  <XAxis 
+                    dataKey="category" 
+                    angle={-45} 
+                    textAnchor="end" 
+                    tick={{ fontSize: 12 }}
+                    height={70}
+                  />
                   <YAxis />
                   <Bar dataKey="count" name="Items" fill="#3b82f6" radius={[4, 4, 0, 0]} />
                   <ChartTooltip />
                 </BarChart>
-              </ChartContainer>
+              </ResponsiveContainer>
             </div>
           </CardContent>
         </Card>

@@ -1,5 +1,5 @@
 
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useInventory } from '@/contexts/InventoryContext';
 import { Button } from '@/components/ui/button';
@@ -8,6 +8,7 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Switch } from '@/components/ui/switch';
+import { Image, X } from 'lucide-react';
 import { 
   Select, 
   SelectContent, 
@@ -19,6 +20,7 @@ import {
 const AddProduct = () => {
   const navigate = useNavigate();
   const { addProduct } = useInventory();
+  const fileInputRef = useRef<HTMLInputElement>(null);
   
   const [product, setProduct] = useState({
     name: '',
@@ -30,11 +32,13 @@ const AddProduct = () => {
     sellingPrice: 0,
     description: '',
     variants: [{ id: Date.now().toString(), name: '', value: '' }],
-    image: null,
+    image: null as string | null,
     lowStockThreshold: 5,
     taxRate: 0,
     taxInclusive: false,
   });
+
+  const [previewImage, setPreviewImage] = useState<string | null>(null);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
@@ -44,6 +48,27 @@ const AddProduct = () => {
   const handleNumberChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setProduct((prev) => ({ ...prev, [name]: parseFloat(value) || 0 }));
+  };
+
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        const imageDataUrl = reader.result as string;
+        setPreviewImage(imageDataUrl);
+        setProduct((prev) => ({ ...prev, image: imageDataUrl }));
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handleRemoveImage = () => {
+    setPreviewImage(null);
+    setProduct((prev) => ({ ...prev, image: null }));
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
   };
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -157,6 +182,40 @@ const AddProduct = () => {
                   onChange={handleChange}
                   rows={4}
                 />
+              </div>
+              
+              <div className="space-y-2">
+                <Label>Product Image</Label>
+                {!previewImage ? (
+                  <div className="border border-dashed border-gray-300 rounded-lg p-4 flex flex-col items-center justify-center">
+                    <Image className="h-8 w-8 text-gray-400 mb-2" />
+                    <p className="text-sm text-gray-500 mb-2">Upload an image of the product</p>
+                    <Input
+                      ref={fileInputRef}
+                      type="file"
+                      accept="image/*"
+                      onChange={handleImageChange}
+                      className="max-w-xs"
+                    />
+                  </div>
+                ) : (
+                  <div className="relative">
+                    <img 
+                      src={previewImage} 
+                      alt="Product preview" 
+                      className="h-48 w-full object-contain border rounded-lg"
+                    />
+                    <Button
+                      type="button"
+                      variant="destructive"
+                      size="sm"
+                      className="absolute top-2 right-2"
+                      onClick={handleRemoveImage}
+                    >
+                      <X className="h-4 w-4" />
+                    </Button>
+                  </div>
+                )}
               </div>
             </CardContent>
           </Card>

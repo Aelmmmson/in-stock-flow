@@ -5,6 +5,7 @@ import { Card } from '@/components/ui/card';
 import QRCode from 'react-qr-code';
 import { useReactToPrint } from 'react-to-print';
 import { toast } from "sonner";
+import { Download } from 'lucide-react';
 
 interface BarcodeGeneratorProps {
   productName: string;
@@ -18,13 +19,32 @@ const BarcodeGenerator = ({ productName, productSku, productPrice }: BarcodeGene
   const handlePrint = useReactToPrint({
     documentTitle: `Barcode-${productSku}`,
     onPrintError: () => toast.error("Printing failed"),
-    contentRef: barcodeRef,
+    content: () => barcodeRef.current,
   });
 
   const handleSaveAsImage = () => {
-    // Add implementation later
-    toast("Image saving feature coming soon", {
-      description: "This functionality will be added in a future update"
+    const barcodeElement = barcodeRef.current;
+    if (!barcodeElement) {
+      toast.error("Error saving barcode");
+      return;
+    }
+    
+    // Use html-to-image to convert DOM node to SVG
+    import('html-to-image').then((htmlToImage) => {
+      htmlToImage.toPng(barcodeElement, { quality: 1.0, backgroundColor: 'white' })
+        .then((dataUrl) => {
+          // Create a link element to trigger download
+          const link = document.createElement('a');
+          link.download = `barcode-${productSku}.png`;
+          link.href = dataUrl;
+          link.click();
+          
+          toast.success("Barcode image saved");
+        })
+        .catch((error) => {
+          console.error('Error generating barcode image:', error);
+          toast.error("Failed to save barcode image");
+        });
     });
   };
 
@@ -59,6 +79,7 @@ const BarcodeGenerator = ({ productName, productSku, productPrice }: BarcodeGene
           className="flex-1"
           variant="default"
         >
+          <Download className="h-4 w-4 mr-2" />
           Save as Image
         </Button>
       </div>
