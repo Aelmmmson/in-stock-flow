@@ -22,37 +22,40 @@ import NotFound from "./pages/NotFound";
 import FinancialReports from "./pages/FinancialReports";
 import LowStockItems from "./pages/LowStockItems";
 
+// Create a new QueryClient instance outside the component
 const queryClient = new QueryClient();
 
-const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <ThemeProvider>
-      <TooltipProvider>
-        <Toaster />
-        <Sonner />
-        <InventoryProvider>
-          <BrowserRouter>
-            <Routes>
-              <Route path="/" element={<AppLayout />}>
-                <Route index element={<Dashboard />} />
-                <Route path="inventory" element={<Inventory />} />
-                <Route path="inventory/add" element={<AddProduct />} />
-                <Route path="inventory/:id/edit" element={<EditProduct />} />
-                <Route path="inventory/:id/barcode" element={<ProductBarcode />} />
-                <Route path="inventory/low-stock" element={<LowStockItems />} />
-                <Route path="transactions" element={<Transactions />} />
-                <Route path="transactions/add" element={<AddTransaction />} />
-                <Route path="reports" element={<Reports />} />
-                <Route path="reports/financial" element={<FinancialReports />} />
-                <Route path="settings" element={<Settings />} />
-              </Route>
-              <Route path="*" element={<NotFound />} />
-            </Routes>
-          </BrowserRouter>
-        </InventoryProvider>
-      </TooltipProvider>
-    </ThemeProvider>
-  </QueryClientProvider>
-);
+const App = () => {
+  return (
+    <QueryClientProvider client={queryClient}>
+      <ThemeProvider>
+        <TooltipProvider>
+          <Toaster />
+          <Sonner />
+          <InventoryProvider>
+            <BrowserRouter>
+              <Routes>
+                <Route path="/" element={<AppLayout />}>
+                  <Route index element={<Dashboard />} />
+                  <Route path="inventory" element={<Inventory />} />
+                  <Route path="inventory/add" element={<AddProduct />} />
+                  <Route path="inventory/:id/edit" element={<EditProduct />} />
+                  <Route path="inventory/:id/barcode" element={<ProductBarcode />} />
+                  <Route path="inventory/low-stock" element={<LowStockItems />} />
+                  <Route path="transactions" element={<Transactions />} />
+                  <Route path="transactions/add" element={<AddTransaction />} />
+                  <Route path="reports" element={<Reports />} />
+                  <Route path="reports/financial" element={<FinancialReports />} />
+                  <Route path="settings" element={<Settings />} />
+                </Route>
+                <Route path="*" element={<NotFound />} />
+              </Routes>
+            </BrowserRouter>
+          </InventoryProvider>
+        </TooltipProvider>
+      </ThemeProvider>
+    </QueryClientProvider>
+  );
+};
 
 export default App;

@@ -18,7 +18,7 @@ const BarcodeGenerator = ({ productName, productSku, productPrice }: BarcodeGene
   const handlePrint = useReactToPrint({
     documentTitle: `Barcode-${productSku}`,
     onPrintError: () => toast.error("Printing failed"),
-    content: () => barcodeRef.current,
+    contentRef: barcodeRef,
   });
 
   const handleSaveAsImage = () => {
