@@ -22,7 +22,7 @@ import {
 } from '@/components/ui/select';
 
 const Transactions = () => {
-  const { transactions, products } = useInventory();
+  const { transactions, products, currencySymbol } = useInventory();
   const [search, setSearch] = useState('');
   const [typeFilter, setTypeFilter] = useState('all');
 
@@ -125,14 +125,14 @@ const Transactions = () => {
                   </TableCell>
                   <TableCell>{transaction.quantity}</TableCell>
                   <TableCell className="text-right">
-                    ${transaction.totalAmount.toFixed(2)}
+                    {currencySymbol}{transaction.totalAmount.toFixed(2)}
                   </TableCell>
                   <TableCell className={`text-right ${
                     transaction.priceDelta < 0 ? 'text-red-600' :
                     transaction.priceDelta > 0 ? 'text-green-600' : 'text-gray-500'
                   }`}>
                     {transaction.priceDelta !== 0 ? (
-                      `${transaction.priceDelta > 0 ? '+' : ''}$${transaction.priceDelta.toFixed(2)}`
+                      `${transaction.priceDelta > 0 ? '+' : ''}${currencySymbol}${transaction.priceDelta.toFixed(2)}`
                     ) : (
                       '—'
                     )}

@@ -44,4 +44,20 @@ export interface User {
   role: 'admin' | 'manager' | 'cashier';
 }
 
+export interface Expense {
+  id: string;
+  category: string;
+  amount: number;
+  description: string;
+  date: string;
+  recurring: boolean;
+  frequency?: 'daily' | 'weekly' | 'monthly' | 'yearly';
+}
+
 export type TabsType = 'dashboard' | 'inventory' | 'transactions' | 'reports' | 'settings';
+
+export interface FinancialPeriod {
+  startDate: string;
+  endDate: string;
+  label: string;
+}
