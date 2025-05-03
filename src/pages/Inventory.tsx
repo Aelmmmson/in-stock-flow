@@ -3,7 +3,7 @@ import { useState } from 'react';
 import { useInventory } from '@/contexts/InventoryContext';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Search, Filter } from 'lucide-react';
+import { Search, Filter, Plus } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 const Inventory = () => {
@@ -39,22 +39,24 @@ const Inventory = () => {
       {filteredProducts.length > 0 ? (
         <div className="space-y-4">
           {filteredProducts.map((product) => (
-            <div
-              key={product.id}
-              className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-sm border border-gray-100 dark:border-gray-700"
-            >
-              <div className="font-medium">{product.name}</div>
-              <div className="grid grid-cols-2 gap-2 mt-1">
-                <div className="text-xs text-gray-500 dark:text-gray-400">SKU</div>
-                <div className="text-xs text-right">{product.sku}</div>
-                <div className="text-xs text-gray-500 dark:text-gray-400">Category</div>
-                <div className="text-xs text-right">{product.category}</div>
-                <div className="text-xs text-gray-500 dark:text-gray-400">Quantity</div>
-                <div className="text-xs text-right">{product.quantity}</div>
-                <div className="text-xs text-gray-500 dark:text-gray-400">Price</div>
-                <div className="text-xs text-right font-medium">GH₵{product.sellingPrice.toFixed(2)}</div>
+            <Link key={product.id} to={`/inventory/${product.id}`}>
+              <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-sm border border-gray-100 dark:border-gray-700">
+                <div className="font-medium">{product.name}</div>
+                <div className="grid grid-cols-2 gap-2 mt-1">
+                  <div className="text-xs text-gray-500 dark:text-gray-400">SKU</div>
+                  <div className="text-xs text-right">{product.sku}</div>
+                  <div className="text-xs text-gray-500 dark:text-gray-400">Category</div>
+                  <div className="text-xs text-right">{product.category}</div>
+                  <div className="text-xs text-gray-500 dark:text-gray-400">Quantity</div>
+                  <div className={`text-xs text-right ${product.quantity <= product.lowStockThreshold ? 'text-amber-500 font-medium' : ''}`}>
+                    {product.quantity}
+                    {product.quantity <= product.lowStockThreshold && ' ⚠️'}
+                  </div>
+                  <div className="text-xs text-gray-500 dark:text-gray-400">Price</div>
+                  <div className="text-xs text-right font-medium">{currencySymbol}{product.sellingPrice.toFixed(2)}</div>
+                </div>
               </div>
-            </div>
+            </Link>
           ))}
         </div>
       ) : (
@@ -68,7 +70,9 @@ const Inventory = () => {
         size="icon"
         asChild
       >
-        <Link to="/inventory/add">+</Link>
+        <Link to="/inventory/add">
+          <Plus className="h-6 w-6" />
+        </Link>
       </Button>
     </div>
   );

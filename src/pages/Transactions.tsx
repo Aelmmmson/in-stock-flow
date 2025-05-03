@@ -6,7 +6,7 @@ import { Plus } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 const Transactions = () => {
-  const { transactions, products } = useInventory();
+  const { transactions, products, currencySymbol } = useInventory();
   
   // Sort transactions by date (newest first)
   const sortedTransactions = [...transactions].sort((a, b) => 
@@ -42,34 +42,37 @@ const Transactions = () => {
 
       <div className="space-y-4">
         {sortedTransactions.map((transaction, index) => (
-          <div
-            key={transaction.id}
-            className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-sm border border-gray-100 dark:border-gray-700"
+          <Link 
+            key={transaction.id} 
+            to={`/transactions/${transaction.id}`}
+            className="block"
           >
-            <div className="flex justify-between mb-1">
-              <div className="font-medium">#{`TR${(index + 1001).toString().padStart(3, '0')}`}</div>
-              <div className="font-medium">GH₵{transaction.totalAmount.toFixed(2)}</div>
-            </div>
-            <div className="text-xs text-gray-500 dark:text-gray-400 mb-2">
-              {formatDate(transaction.createdAt)}
-            </div>
-            
-            <div className="grid grid-cols-2 gap-1 text-sm">
-              <div className="text-gray-500 dark:text-gray-400">Items</div>
-              <div>{transaction.quantity} × {getProductName(transaction.productId)}</div>
-              
-              <div className="text-gray-500 dark:text-gray-400">Customer</div>
-              <div>{transaction.customer || 'Walk-in Customer'}</div>
-              
-              <div className="text-gray-500 dark:text-gray-400">Price Adjustment</div>
-              <div className={transaction.priceDelta < 0 ? 'text-red-500' : ''}>
-                {transaction.priceDelta !== 0 ? `${transaction.priceDelta > 0 ? '+' : ''}GH₵${transaction.priceDelta.toFixed(2)}` : 'None'}
+            <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-sm border border-gray-100 dark:border-gray-700">
+              <div className="flex justify-between mb-1">
+                <div className="font-medium">#{`TR${(index + 1001).toString().padStart(3, '0')}`}</div>
+                <div className="font-medium">{currencySymbol}{transaction.totalAmount.toFixed(2)}</div>
+              </div>
+              <div className="text-xs text-gray-500 dark:text-gray-400 mb-2">
+                {formatDate(transaction.createdAt)}
               </div>
               
-              <div className="text-gray-500 dark:text-gray-400">Payment</div>
-              <div>{transaction.paymentMethod || 'Cash'}</div>
+              <div className="grid grid-cols-2 gap-1 text-sm">
+                <div className="text-gray-500 dark:text-gray-400">Items</div>
+                <div>{transaction.quantity} × {getProductName(transaction.productId)}</div>
+                
+                <div className="text-gray-500 dark:text-gray-400">Customer</div>
+                <div>{transaction.customer || 'Walk-in Customer'}</div>
+                
+                <div className="text-gray-500 dark:text-gray-400">Price Adjustment</div>
+                <div className={transaction.priceDelta < 0 ? 'text-red-500' : ''}>
+                  {transaction.priceDelta !== 0 ? `${transaction.priceDelta > 0 ? '+' : ''}${currencySymbol}${transaction.priceDelta.toFixed(2)}` : 'None'}
+                </div>
+                
+                <div className="text-gray-500 dark:text-gray-400">Payment</div>
+                <div>{transaction.paymentMethod || 'Cash'}</div>
+              </div>
             </div>
-          </div>
+          </Link>
         ))}
         
         {transactions.length === 0 && (

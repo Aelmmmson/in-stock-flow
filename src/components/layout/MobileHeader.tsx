@@ -6,9 +6,10 @@ import { useNavigate, useLocation } from 'react-router-dom';
 
 interface MobileHeaderProps {
   activeTab: TabsType;
+  toggleNotificationsPanel: () => void;
 }
 
-const MobileHeader = ({ activeTab }: MobileHeaderProps) => {
+const MobileHeader = ({ activeTab, toggleNotificationsPanel }: MobileHeaderProps) => {
   const navigate = useNavigate();
   const location = useLocation();
   
@@ -26,6 +27,12 @@ const MobileHeader = ({ activeTab }: MobileHeaderProps) => {
       return 'Add New Item';
     } else if (location.pathname.includes('/inventory/edit')) {
       return 'Edit Item';
+    } else if (location.pathname.includes('/reports/inventory')) {
+      return 'Inventory Report';
+    } else if (location.pathname.includes('/reports/sales')) {
+      return 'Sales Report';
+    } else if (location.pathname.includes('/profile')) {
+      return 'Profile';
     }
     
     // For main tabs
@@ -41,15 +48,15 @@ const MobileHeader = ({ activeTab }: MobileHeaderProps) => {
       case 'settings':
         return 'Settings';
       default:
-        return 'Didiz Closet';
+        return 'Home';
     }
   };
 
   return (
     <header className="sticky top-0 z-10 bg-background/80 backdrop-blur-md border-b border-border">
       <div className="flex items-center justify-between h-16 px-4">
-        {isNestedPage ? (
-          <div className="flex items-center">
+        <div className="flex items-center">
+          {isNestedPage ? (
             <Button 
               variant="ghost" 
               size="icon" 
@@ -58,20 +65,35 @@ const MobileHeader = ({ activeTab }: MobileHeaderProps) => {
             >
               <ArrowLeft className="h-5 w-5" />
             </Button>
-            <h1 className="text-xl font-semibold text-foreground">{getTitle()}</h1>
-          </div>
-        ) : (
-          <h1 className="text-xl font-semibold text-foreground">{getTitle()}</h1>
-        )}
+          ) : null}
+          
+          <h1 className="text-xl font-semibold text-foreground">
+            Didiz Closet
+            <span className="text-sm font-normal text-muted-foreground ml-2">
+              {getTitle()}
+            </span>
+          </h1>
+        </div>
         
-        {!isNestedPage && (
-          <div className="flex items-center space-x-2">
-            <Button size="icon" variant="ghost" className="relative">
-              <Bell className="h-5 w-5" />
-              <span className="absolute top-1 right-1 w-2 h-2 bg-primary rounded-full"></span>
-            </Button>
+        <div className="flex items-center space-x-3">
+          <div className="h-8 w-8 relative">
+            <img 
+              src="/lovable-uploads/453620d9-01b8-4040-aec4-9f948e52aae1.png" 
+              alt="Didiz Closet Logo" 
+              className="h-full w-full object-contain rounded-full"
+            />
           </div>
-        )}
+          
+          <Button 
+            size="icon" 
+            variant="ghost" 
+            className="relative"
+            onClick={toggleNotificationsPanel}
+          >
+            <Bell className="h-5 w-5" />
+            <span className="absolute top-1 right-1 w-2 h-2 bg-pink-500 rounded-full"></span>
+          </Button>
+        </div>
       </div>
     </header>
   );

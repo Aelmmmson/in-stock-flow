@@ -1,5 +1,5 @@
 
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useInventory } from '@/contexts/InventoryContext';
 import { Button } from '@/components/ui/button';
@@ -7,12 +7,13 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
-import { Camera } from 'lucide-react';
+import { Camera, X, Upload } from 'lucide-react';
 
 const AddProduct = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const { addProduct } = useInventory();
+  const fileInputRef = useRef<HTMLInputElement>(null);
   
   const [name, setName] = useState('');
   const [sku, setSku] = useState('');
@@ -23,6 +24,27 @@ const AddProduct = () => {
   const [sellingPrice, setSellingPrice] = useState('');
   const [description, setDescription] = useState('');
   const [supplier, setSupplier] = useState('');
+  const [image, setImage] = useState<string | null>(null);
+  
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        if (event.target?.result) {
+          setImage(event.target.result as string);
+        }
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+  
+  const removeImage = () => {
+    setImage(null);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
+  };
   
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -36,38 +58,76 @@ const AddProduct = () => {
       return;
     }
     
-    const newProduct = {
-      id: crypto.randomUUID(),
-      name,
-      sku,
-      category,
-      quantity: parseInt(quantity, 10),
-      lowStockThreshold: parseInt(lowStockThreshold, 10),
-      purchaseCost: parseFloat(purchaseCost),
-      sellingPrice: parseFloat(sellingPrice),
-      description,
-      supplier,
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-    };
-    
-    addProduct(newProduct);
-    
-    toast({
-      title: "Product added",
-      description: `${name} has been added to your inventory`,
-    });
-    
-    navigate('/inventory');
+    try {
+      addProduct({
+        name,
+        sku,
+        category,
+        quantity: parseInt(quantity, 10),
+        lowStockThreshold: parseInt(lowStockThreshold, 10),
+        purchaseCost: parseFloat(purchaseCost),
+        sellingPrice: parseFloat(sellingPrice),
+        description,
+        supplier,
+        image,
+        variants: [],
+        taxRate: 0,
+        taxInclusive: false,
+      });
+      
+      toast({
+        title: "Product added",
+        description: `${name} has been added to your inventory`,
+      });
+      
+      navigate('/inventory');
+    } catch (error) {
+      toast({
+        title: "Error adding product",
+        description: error instanceof Error ? error.message : "An unknown error occurred",
+        variant: "destructive",
+      });
+    }
   };
 
   return (
     <div className="space-y-8">
-      <div className="border border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-6 text-center">
-        <div className="flex flex-col items-center justify-center">
-          <Camera className="h-6 w-6 text-gray-400 mb-2" />
-          <p className="text-sm text-gray-500 dark:text-gray-400">Add Product image</p>
-        </div>
+      <div 
+        className="border border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-6 text-center"
+        onClick={() => fileInputRef.current?.click()}
+      >
+        {image ? (
+          <div className="relative">
+            <img 
+              src={image} 
+              alt="Product preview" 
+              className="h-64 max-w-full mx-auto object-contain rounded"
+            />
+            <button 
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                removeImage();
+              }}
+              className="absolute top-2 right-2 bg-red-500 text-white p-1 rounded-full"
+            >
+              <X className="h-4 w-4" />
+            </button>
+          </div>
+        ) : (
+          <div className="flex flex-col items-center justify-center h-32">
+            <Camera className="h-10 w-10 text-gray-400 mb-2" />
+            <p className="text-sm text-gray-500 dark:text-gray-400">Click to add product image</p>
+            <p className="text-xs text-gray-400 mt-1">Supports JPG, PNG, GIF</p>
+          </div>
+        )}
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept="image/*"
+          className="hidden"
+          onChange={handleImageUpload}
+        />
       </div>
       
       <div>

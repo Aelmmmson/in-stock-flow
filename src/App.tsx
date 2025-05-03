@@ -25,6 +25,12 @@ import FinancialReports from "./pages/FinancialReports";
 import LowStockItems from "./pages/LowStockItems";
 import ExpensesPage from "./pages/ExpensesPage";
 import Index from "./pages/Index";
+import Login from "./pages/Login";
+import ProductDetail from "./pages/ProductDetail";
+import TransactionDetail from "./pages/TransactionDetail";
+import Profile from "./pages/Profile";
+import ReportsInventory from "./pages/ReportsInventory";
+import ReportsSales from "./pages/ReportsSales";
 
 // Create a new QueryClient instance outside the component
 const queryClient = new QueryClient();
@@ -45,12 +51,13 @@ const App = () => {
         <TooltipProvider>
           <Toaster />
           <Sonner />
-          <InventoryProvider currency="GH₵">
+          <InventoryProvider>
             {loading ? (
               <LoadingScreen />
             ) : (
               <BrowserRouter>
                 <Routes>
+                  <Route path="/login" element={<Login />} />
                   <Route path="/" element={<AppLayout />}>
                     <Route index element={<Index />} />
                     <Route path="dashboard" element={<Dashboard />} />
@@ -58,13 +65,18 @@ const App = () => {
                     <Route path="inventory/add" element={<AddProduct />} />
                     <Route path="inventory/:id/edit" element={<EditProduct />} />
                     <Route path="inventory/:id/barcode" element={<ProductBarcode />} />
+                    <Route path="inventory/:id" element={<ProductDetail />} />
                     <Route path="inventory/low-stock" element={<LowStockItems />} />
                     <Route path="transactions" element={<Transactions />} />
                     <Route path="transactions/add" element={<AddTransaction />} />
+                    <Route path="transactions/:id" element={<TransactionDetail />} />
                     <Route path="reports" element={<Reports />} />
+                    <Route path="reports/inventory" element={<ReportsInventory />} />
+                    <Route path="reports/sales" element={<ReportsSales />} />
                     <Route path="reports/financial" element={<FinancialReports />} />
                     <Route path="expenses" element={<ExpensesPage />} />
                     <Route path="settings" element={<Settings />} />
+                    <Route path="profile" element={<Profile />} />
                   </Route>
                   <Route path="*" element={<NotFound />} />
                 </Routes>

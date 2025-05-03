@@ -1,19 +1,31 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useInventory } from '@/contexts/InventoryContext';
-import { Package, AlertTriangle, TrendingUp, FileText } from 'lucide-react';
+import { FileText, AlertTriangle, TrendingUp, Package, ShoppingBag } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 const Dashboard = () => {
   const { products, transactions, getLowStockProducts, currencySymbol } = useInventory();
   const lowStockProducts = getLowStockProducts();
+  
+  // Get sales transactions
+  const salesTransactions = transactions.filter(t => t.type === 'sale');
 
   // Calculate total inventory value
-  const totalInventoryValue = products.reduce(
-    (acc, product) => acc + product.quantity * product.sellingPrice, 
+  const inventoryValue = products.reduce(
+    (acc, product) => acc + product.quantity * product.purchaseCost, 
     0
   );
 
+  // Calculate total inventory value at retail price
+  const retailValue = products.reduce(
+    (acc, product) => acc + product.quantity * product.sellingPrice, 
+    0
+  );
+  
+  // Calculate potential profit
+  const potentialProfit = retailValue - inventoryValue;
+  
   // Calculate recent sales (last 7 days)
   const lastWeek = new Date();
   lastWeek.setDate(lastWeek.getDate() - 7);
@@ -33,7 +45,7 @@ const Dashboard = () => {
             <CardTitle className="text-sm font-medium">
               Total Products
             </CardTitle>
-            <div className="rounded-full bg-primary/20 p-2 text-primary">
+            <div className="rounded-full bg-blue-100 dark:bg-blue-900/30 p-2 text-blue-500">
               <Package className="h-4 w-4" />
             </div>
           </CardHeader>
@@ -44,6 +56,26 @@ const Dashboard = () => {
               className="text-xs text-blue-600 hover:underline"
             >
               View all products
+            </Link>
+          </CardContent>
+        </Card>
+
+        <Card className="card-gradient border-none shadow-md">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 p-4 pb-2">
+            <CardTitle className="text-sm font-medium">
+              Sales
+            </CardTitle>
+            <div className="rounded-full bg-purple-100 dark:bg-purple-900/30 p-2 text-purple-500">
+              <ShoppingBag className="h-4 w-4" />
+            </div>
+          </CardHeader>
+          <CardContent className="p-4 pt-0">
+            <div className="text-2xl font-bold">{salesTransactions.length}</div>
+            <Link 
+              to="/transactions" 
+              className="text-xs text-purple-600 hover:underline"
+            >
+              View all sales
             </Link>
           </CardContent>
         </Card>
@@ -68,29 +100,10 @@ const Dashboard = () => {
         <Card className="card-gradient border-none shadow-md">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 p-4 pb-2">
             <CardTitle className="text-sm font-medium">
-              Inventory Value
+              Revenue
             </CardTitle>
             <div className="rounded-full bg-green-500/20 p-2 text-green-500">
               <TrendingUp className="h-4 w-4" />
-            </div>
-          </CardHeader>
-          <CardContent className="p-4 pt-0">
-            <div className="text-2xl font-bold">
-              {currencySymbol}{totalInventoryValue.toFixed(2)}
-            </div>
-            <p className="text-xs text-muted-foreground">
-              At selling price
-            </p>
-          </CardContent>
-        </Card>
-
-        <Card className="card-gradient border-none shadow-md">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 p-4 pb-2">
-            <CardTitle className="text-sm font-medium">
-              Recent Sales
-            </CardTitle>
-            <div className="rounded-full bg-blue-500/20 p-2 text-blue-500">
-              <FileText className="h-4 w-4" />
             </div>
           </CardHeader>
           <CardContent className="p-4 pt-0">
@@ -128,7 +141,7 @@ const Dashboard = () => {
                         {product.quantity} left
                       </span>
                       <Link 
-                        to={`/inventory/${product.id}/edit`}
+                        to={`/inventory/${product.id}`}
                         className="ml-4 text-xs text-blue-600 hover:underline"
                       >
                         View
