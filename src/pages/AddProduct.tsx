@@ -1,5 +1,5 @@
 
-import { useState, useRef } from 'react';
+import { useState, useRef, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useInventory } from '@/contexts/InventoryContext';
 import { Button } from '@/components/ui/button';
@@ -7,16 +7,16 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
-import { Camera, X, Upload } from 'lucide-react';
+import { Camera, X, Plus, Trash2 } from 'lucide-react';
+import { ProductVariant } from '@/types';
 
 const AddProduct = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
-  const { addProduct } = useInventory();
+  const { addProduct, products } = useInventory();
   const fileInputRef = useRef<HTMLInputElement>(null);
   
   const [name, setName] = useState('');
-  const [sku, setSku] = useState('');
   const [category, setCategory] = useState('');
   const [quantity, setQuantity] = useState('');
   const [lowStockThreshold, setLowStockThreshold] = useState('5');
@@ -25,6 +25,27 @@ const AddProduct = () => {
   const [description, setDescription] = useState('');
   const [supplier, setSupplier] = useState('');
   const [image, setImage] = useState<string | null>(null);
+  const [variants, setVariants] = useState<ProductVariant[]>([]);
+  
+  // Generate SKU based on product name and category
+  const generateSKU = useCallback(() => {
+    if (!name || !category) return '';
+    
+    // Get category prefix (first 3 chars)
+    const catPrefix = category.slice(0, 3).toUpperCase();
+    
+    // Get name parts and take first 3 chars
+    const nameParts = name.split(' ');
+    const namePrefix = nameParts[0].slice(0, 3).toUpperCase();
+    
+    // Get sequential number
+    const existingProducts = products.filter(p => 
+      p.sku.startsWith(`${catPrefix}-${namePrefix}`)
+    );
+    const sequentialNum = (existingProducts.length + 1).toString().padStart(3, '0');
+    
+    return `${catPrefix}-${namePrefix}-${sequentialNum}`;
+  }, [name, category, products]);
   
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -46,10 +67,27 @@ const AddProduct = () => {
     }
   };
   
+  const addVariant = () => {
+    setVariants([
+      ...variants,
+      { id: `variant-${Date.now()}`, name: '', value: '' }
+    ]);
+  };
+  
+  const removeVariant = (id: string) => {
+    setVariants(variants.filter(v => v.id !== id));
+  };
+  
+  const updateVariant = (id: string, field: 'name' | 'value', value: string) => {
+    setVariants(variants.map(v => 
+      v.id === id ? { ...v, [field]: value } : v
+    ));
+  };
+  
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!name || !sku || !category || !quantity || !purchaseCost || !sellingPrice) {
+    if (!name || !category || !quantity || !purchaseCost || !sellingPrice) {
       toast({
         title: "Missing information",
         description: "Please fill in all required fields",
@@ -61,7 +99,7 @@ const AddProduct = () => {
     try {
       addProduct({
         name,
-        sku,
+        sku: generateSKU(),
         category,
         quantity: parseInt(quantity, 10),
         lowStockThreshold: parseInt(lowStockThreshold, 10),
@@ -70,7 +108,7 @@ const AddProduct = () => {
         description,
         supplier,
         image,
-        variants: [],
+        variants: variants.filter(v => v.name && v.value),
         taxRate: 0,
         taxInclusive: false,
       });
@@ -145,17 +183,6 @@ const AddProduct = () => {
           </div>
           
           <div>
-            <Label htmlFor="sku">SKU *</Label>
-            <Input
-              id="sku"
-              placeholder="Enter SKU"
-              value={sku}
-              onChange={(e) => setSku(e.target.value)}
-              required
-            />
-          </div>
-          
-          <div>
             <Label htmlFor="category">Category *</Label>
             <Input
               id="category"
@@ -174,6 +201,53 @@ const AddProduct = () => {
               value={supplier}
               onChange={(e) => setSupplier(e.target.value)}
             />
+          </div>
+          
+          <div>
+            <div className="flex justify-between items-center mb-2">
+              <Label>Product Variants</Label>
+              <Button 
+                variant="outline" 
+                size="sm" 
+                onClick={addVariant}
+                className="text-xs"
+              >
+                <Plus className="h-3 w-3 mr-1" /> Add Variant
+              </Button>
+            </div>
+            
+            {variants.length > 0 ? (
+              <div className="space-y-3">
+                {variants.map(variant => (
+                  <div key={variant.id} className="flex gap-2 items-center">
+                    <Input
+                      placeholder="Name (e.g. Size)"
+                      value={variant.name}
+                      onChange={(e) => updateVariant(variant.id, 'name', e.target.value)}
+                      className="flex-1"
+                    />
+                    <Input
+                      placeholder="Value (e.g. Large)"
+                      value={variant.value}
+                      onChange={(e) => updateVariant(variant.id, 'value', e.target.value)}
+                      className="flex-1"
+                    />
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => removeVariant(variant.id)}
+                      className="text-red-500 h-8 w-8"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="text-center p-4 border border-dashed rounded-md text-sm text-gray-500">
+                No variants added. Add variants like Size, Color, etc.
+              </div>
+            )}
           </div>
         </div>
       </div>

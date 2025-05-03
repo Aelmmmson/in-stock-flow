@@ -36,22 +36,8 @@ export interface Transaction {
   notes: string;
   createdAt: string;
   createdBy: string;
-}
-
-export interface User {
-  id: string;
-  name: string;
-  role: 'admin' | 'manager' | 'cashier';
-}
-
-export interface Expense {
-  id: string;
-  category: string;
-  amount: number;
-  description: string;
-  date: string;
-  recurring: boolean;
-  frequency?: 'daily' | 'weekly' | 'monthly' | 'yearly';
+  customer?: string;
+  paymentMethod?: string;
 }
 
 export type TabsType = 'dashboard' | 'inventory' | 'transactions' | 'reports' | 'settings';
@@ -60,4 +46,22 @@ export interface FinancialPeriod {
   startDate: string;
   endDate: string;
   label: string;
+}
+
+export interface User {
+  id: string;
+  name: string;
+  role: 'admin' | 'manager' | 'cashier';
+  email: string;
+  avatar?: string;
+}
+
+export interface Notification {
+  id: string;
+  title: string;
+  description: string;
+  date: string;
+  read: boolean;
+  type: 'lowStock' | 'sale' | 'system' | 'other';
+  linkTo?: string;
 }

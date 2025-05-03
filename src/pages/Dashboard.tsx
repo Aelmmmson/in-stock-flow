@@ -1,8 +1,9 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useInventory } from '@/contexts/InventoryContext';
-import { FileText, AlertTriangle, TrendingUp, Package, ShoppingBag } from 'lucide-react';
+import { Package2, AlertTriangle, TrendingUp, ShoppingBag } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { ScrollArea } from '@/components/ui/scroll-area';
 
 const Dashboard = () => {
   const { products, transactions, getLowStockProducts, currencySymbol } = useInventory();
@@ -26,27 +27,43 @@ const Dashboard = () => {
   // Calculate potential profit
   const potentialProfit = retailValue - inventoryValue;
   
-  // Calculate recent sales (last 7 days)
-  const lastWeek = new Date();
-  lastWeek.setDate(lastWeek.getDate() - 7);
+  // Calculate recent sales (last month)
+  const lastMonth = new Date();
+  lastMonth.setMonth(lastMonth.getMonth() - 1);
   
   const recentSales = transactions
     .filter(t => 
       t.type === 'sale' && 
-      new Date(t.createdAt) >= lastWeek
+      new Date(t.createdAt) >= lastMonth
     )
     .reduce((acc, t) => acc + t.totalAmount, 0);
 
+  // Format date function
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString);
+    return date.toLocaleDateString('en-GB', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric'
+    });
+  };
+
+  // Get product name
+  const getProductName = (productId: string) => {
+    const product = products.find(p => p.id === productId);
+    return product?.name || 'Unknown Product';
+  };
+
   return (
     <div className="space-y-6">
-      <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
+      <div className="grid grid-cols-3 gap-4">
         <Card className="card-gradient border-none shadow-md">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 p-4 pb-2">
             <CardTitle className="text-sm font-medium">
               Total Products
             </CardTitle>
             <div className="rounded-full bg-blue-100 dark:bg-blue-900/30 p-2 text-blue-500">
-              <Package className="h-4 w-4" />
+              <Package2 className="h-4 w-4" />
             </div>
           </CardHeader>
           <CardContent className="p-4 pt-0">
@@ -83,24 +100,7 @@ const Dashboard = () => {
         <Card className="card-gradient border-none shadow-md">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 p-4 pb-2">
             <CardTitle className="text-sm font-medium">
-              Low Stock
-            </CardTitle>
-            <div className="rounded-full bg-amber-500/20 p-2 text-amber-500">
-              <AlertTriangle className="h-4 w-4" />
-            </div>
-          </CardHeader>
-          <CardContent className="p-4 pt-0">
-            <div className="text-2xl font-bold">{lowStockProducts.length}</div>
-            <p className="text-xs text-muted-foreground">
-              Items below threshold
-            </p>
-          </CardContent>
-        </Card>
-
-        <Card className="card-gradient border-none shadow-md">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 p-4 pb-2">
-            <CardTitle className="text-sm font-medium">
-              Revenue
+              Potential Profit
             </CardTitle>
             <div className="rounded-full bg-green-500/20 p-2 text-green-500">
               <TrendingUp className="h-4 w-4" />
@@ -108,10 +108,10 @@ const Dashboard = () => {
           </CardHeader>
           <CardContent className="p-4 pt-0">
             <div className="text-2xl font-bold">
-              {currencySymbol}{recentSales.toFixed(2)}
+              {currencySymbol}{potentialProfit.toFixed(2)}
             </div>
             <p className="text-xs text-muted-foreground">
-              Last 7 days
+              At current prices
             </p>
           </CardContent>
         </Card>
@@ -120,95 +120,92 @@ const Dashboard = () => {
       <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
         <Card className="border-none shadow-md">
           <CardHeader className="p-4">
-            <CardTitle className="text-lg">Low Stock Alerts</CardTitle>
+            <CardTitle className="text-lg flex items-center">
+              <AlertTriangle className="h-5 w-5 mr-2 text-amber-500" />
+              Low Stock Alerts
+            </CardTitle>
           </CardHeader>
           <CardContent className="p-4 pt-0">
-            {lowStockProducts.length > 0 ? (
-              <div className="space-y-4">
-                {lowStockProducts.map(product => (
-                  <div 
-                    key={product.id}
-                    className="flex items-center justify-between border-b pb-2"
-                  >
-                    <div>
-                      <p className="font-medium">{product.name}</p>
-                      <p className="text-sm text-muted-foreground">
-                        SKU: {product.sku}
-                      </p>
-                    </div>
-                    <div className="flex items-center">
-                      <span className="text-destructive font-semibold">
-                        {product.quantity} left
-                      </span>
-                      <Link 
-                        to={`/inventory/${product.id}`}
-                        className="ml-4 text-xs text-blue-600 hover:underline"
-                      >
-                        View
-                      </Link>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <p className="text-muted-foreground">
-                No low stock items at the moment.
-              </p>
-            )}
+            <ScrollArea className="max-h-48 overflow-y-auto scrollbar-none">
+              {lowStockProducts.length > 0 ? (
+                <div className="space-y-4">
+                  {lowStockProducts.map(product => (
+                    <Link 
+                      key={product.id}
+                      to={`/inventory/${product.id}`}
+                      className="flex items-center justify-between border-b pb-2 hover:bg-gray-50 dark:hover:bg-gray-800 p-2 rounded-md"
+                    >
+                      <div>
+                        <p className="font-medium">{product.name}</p>
+                        <p className="text-sm text-muted-foreground">
+                          SKU: {product.sku}
+                        </p>
+                      </div>
+                      <div className="flex items-center">
+                        <span className="text-destructive font-semibold">
+                          {product.quantity} left
+                        </span>
+                      </div>
+                    </Link>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-muted-foreground p-2">
+                  No low stock items at the moment.
+                </p>
+              )}
+            </ScrollArea>
           </CardContent>
         </Card>
 
         <Card className="border-none shadow-md">
           <CardHeader className="p-4">
-            <CardTitle className="text-lg">Recent Transactions</CardTitle>
+            <CardTitle className="text-lg flex items-center">
+              <ShoppingBag className="h-5 w-5 mr-2 text-purple-500" />
+              Recent Transactions
+            </CardTitle>
           </CardHeader>
           <CardContent className="p-4 pt-0">
-            {transactions.length > 0 ? (
-              <div className="space-y-4">
-                {transactions.slice(0, 5).map(transaction => {
-                  const product = products.find(p => p.id === transaction.productId);
-                  
-                  return (
-                    <div 
-                      key={transaction.id}
-                      className="flex items-center justify-between border-b pb-2"
-                    >
-                      <div>
-                        <p className="font-medium">
-                          {product?.name || 'Unknown Product'}
-                        </p>
-                        <p className="text-sm text-muted-foreground">
-                          {transaction.type === 'sale' ? 'Sold' : 
-                           transaction.type === 'purchase' ? 'Purchased' : 
-                           'Adjusted'} {transaction.quantity} units
-                        </p>
-                      </div>
-                      <div className="text-right">
-                        <p className="font-semibold">
-                          {currencySymbol}{transaction.totalAmount.toFixed(2)}
-                        </p>
-                        <p className="text-xs text-muted-foreground">
-                          {new Date(transaction.createdAt).toLocaleDateString()}
-                        </p>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            ) : (
-              <p className="text-muted-foreground">
-                No recent transactions.
-              </p>
-            )}
-            
-            <div className="mt-4">
-              <Link 
-                to="/transactions"
-                className="text-sm text-blue-600 hover:underline"
-              >
-                View all transactions
-              </Link>
-            </div>
+            <ScrollArea className="max-h-48 overflow-y-auto scrollbar-none">
+              {transactions.length > 0 ? (
+                <div className="space-y-4">
+                  {transactions.slice(0, 5).map(transaction => {
+                    const product = products.find(p => p.id === transaction.productId);
+                    
+                    return (
+                      <Link 
+                        key={transaction.id}
+                        to={`/transactions/${transaction.id}`}
+                        className="flex items-center justify-between border-b pb-2 hover:bg-gray-50 dark:hover:bg-gray-800 p-2 rounded-md"
+                      >
+                        <div>
+                          <p className="font-medium">
+                            {getProductName(transaction.productId)}
+                          </p>
+                          <p className="text-sm text-muted-foreground">
+                            {transaction.type === 'sale' ? 'Sold' : 
+                             transaction.type === 'purchase' ? 'Purchased' : 
+                             'Adjusted'} {transaction.quantity} units
+                          </p>
+                        </div>
+                        <div className="text-right">
+                          <p className="font-semibold">
+                            {currencySymbol}{transaction.totalAmount.toFixed(2)}
+                          </p>
+                          <p className="text-xs text-muted-foreground">
+                            {formatDate(transaction.createdAt)}
+                          </p>
+                        </div>
+                      </Link>
+                    );
+                  })}
+                </div>
+              ) : (
+                <p className="text-muted-foreground p-2">
+                  No recent transactions.
+                </p>
+              )}
+            </ScrollArea>
           </CardContent>
         </Card>
       </div>
