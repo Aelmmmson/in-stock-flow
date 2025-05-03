@@ -20,21 +20,27 @@ const MobileNavbar = ({ activeTab, setActiveTab }: MobileNavbarProps) => {
   return (
     <div className="fixed bottom-0 left-0 right-0 border-t border-border bg-background py-2 px-4 z-10">
       <div className="flex justify-between items-center">
-        {tabs.map((tab) => (
-          <Link
-            to={tab.path}
-            key={tab.name}
-            className={`flex flex-col items-center px-3 py-2 rounded-md ${
-              activeTab === tab.name
-                ? 'text-primary'
-                : 'text-muted-foreground hover:text-primary'
-            }`}
-            onClick={() => setActiveTab(tab.name as TabsType)}
-          >
-            <tab.icon className="h-5 w-5" />
-            <span className="text-xs mt-1">{tab.label}</span>
-          </Link>
-        ))}
+        {tabs.map((tab) => {
+          const isActive = activeTab === tab.name;
+          return (
+            <Link
+              to={tab.path}
+              key={tab.name}
+              className={`flex flex-col items-center px-3 py-2 rounded-md relative ${
+                isActive
+                  ? 'text-primary'
+                  : 'text-muted-foreground hover:text-primary'
+              }`}
+              onClick={() => setActiveTab(tab.name as TabsType)}
+            >
+              {isActive && (
+                <span className="absolute -top-2 left-1/2 transform -translate-x-1/2 w-1 h-1 rounded-full bg-primary"></span>
+              )}
+              <tab.icon className="h-5 w-5" />
+              <span className="text-xs mt-1">{tab.label}</span>
+            </Link>
+          );
+        })}
       </div>
     </div>
   );

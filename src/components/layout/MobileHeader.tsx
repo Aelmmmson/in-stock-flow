@@ -1,5 +1,7 @@
 
 import { TabsType } from '@/types';
+import { Bell } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 
 interface MobileHeaderProps {
   activeTab: TabsType;
@@ -19,18 +21,21 @@ const MobileHeader = ({ activeTab }: MobileHeaderProps) => {
       case 'settings':
         return 'Settings';
       default:
-        return 'In-Stock Flow';
+        return 'InventoryPro';
     }
   };
 
   return (
-    <header className="sticky top-0 z-10 bg-background border-b border-border shadow-sm">
+    <header className="sticky top-0 z-10 bg-background/80 backdrop-blur-md border-b border-border">
       <div className="flex items-center justify-between h-16 px-4">
         <h1 className="text-xl font-semibold text-foreground">
           {getTitle()}
         </h1>
-        <div className="flex items-center space-x-4">
-          {/* Additional header elements like search or user profile can go here */}
+        <div className="flex items-center space-x-2">
+          <Button size="icon" variant="ghost" className="relative">
+            <Bell className="h-5 w-5" />
+            <span className="absolute top-1 right-1 w-2 h-2 bg-primary rounded-full"></span>
+          </Button>
         </div>
       </div>
     </header>

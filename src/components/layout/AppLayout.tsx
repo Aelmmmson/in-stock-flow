@@ -18,7 +18,7 @@ const AppLayout = ({ children }: AppLayoutProps) => {
     <div className="min-h-screen bg-background flex flex-col">
       <MobileHeader activeTab={activeTab} />
       
-      <main className="flex-1 container mx-auto px-2 sm:px-4 py-4 sm:py-6 pb-20">
+      <main className="flex-1 container mx-auto px-2 sm:px-4 py-4 sm:py-6 pb-20 bg-dashboard-pattern">
         {children || <Outlet />}
       </main>
       

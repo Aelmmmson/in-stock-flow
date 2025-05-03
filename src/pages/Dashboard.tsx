@@ -5,7 +5,7 @@ import { Package, AlertTriangle, TrendingUp, FileText } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 const Dashboard = () => {
-  const { products, transactions, getLowStockProducts } = useInventory();
+  const { products, transactions, getLowStockProducts, currencySymbol } = useInventory();
   const lowStockProducts = getLowStockProducts();
 
   // Calculate total inventory value
@@ -27,15 +27,17 @@ const Dashboard = () => {
 
   return (
     <div className="space-y-6">
-      <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+      <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
+        <Card className="card-gradient border-none shadow-md">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 p-4 pb-2">
             <CardTitle className="text-sm font-medium">
               Total Products
             </CardTitle>
-            <Package className="h-4 w-4 text-muted-foreground" />
+            <div className="rounded-full bg-primary/20 p-2 text-primary">
+              <Package className="h-4 w-4" />
+            </div>
           </CardHeader>
-          <CardContent>
+          <CardContent className="p-4 pt-0">
             <div className="text-2xl font-bold">{products.length}</div>
             <Link 
               to="/inventory" 
@@ -46,14 +48,16 @@ const Dashboard = () => {
           </CardContent>
         </Card>
 
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+        <Card className="card-gradient border-none shadow-md">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 p-4 pb-2">
             <CardTitle className="text-sm font-medium">
-              Low Stock Items
+              Low Stock
             </CardTitle>
-            <AlertTriangle className="h-4 w-4 text-muted-foreground" />
+            <div className="rounded-full bg-amber-500/20 p-2 text-amber-500">
+              <AlertTriangle className="h-4 w-4" />
+            </div>
           </CardHeader>
-          <CardContent>
+          <CardContent className="p-4 pt-0">
             <div className="text-2xl font-bold">{lowStockProducts.length}</div>
             <p className="text-xs text-muted-foreground">
               Items below threshold
@@ -61,16 +65,18 @@ const Dashboard = () => {
           </CardContent>
         </Card>
 
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+        <Card className="card-gradient border-none shadow-md">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 p-4 pb-2">
             <CardTitle className="text-sm font-medium">
               Inventory Value
             </CardTitle>
-            <TrendingUp className="h-4 w-4 text-muted-foreground" />
+            <div className="rounded-full bg-green-500/20 p-2 text-green-500">
+              <TrendingUp className="h-4 w-4" />
+            </div>
           </CardHeader>
-          <CardContent>
+          <CardContent className="p-4 pt-0">
             <div className="text-2xl font-bold">
-              ${totalInventoryValue.toFixed(2)}
+              {currencySymbol}{totalInventoryValue.toFixed(2)}
             </div>
             <p className="text-xs text-muted-foreground">
               At selling price
@@ -78,16 +84,18 @@ const Dashboard = () => {
           </CardContent>
         </Card>
 
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+        <Card className="card-gradient border-none shadow-md">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 p-4 pb-2">
             <CardTitle className="text-sm font-medium">
               Recent Sales
             </CardTitle>
-            <FileText className="h-4 w-4 text-muted-foreground" />
+            <div className="rounded-full bg-blue-500/20 p-2 text-blue-500">
+              <FileText className="h-4 w-4" />
+            </div>
           </CardHeader>
-          <CardContent>
+          <CardContent className="p-4 pt-0">
             <div className="text-2xl font-bold">
-              ${recentSales.toFixed(2)}
+              {currencySymbol}{recentSales.toFixed(2)}
             </div>
             <p className="text-xs text-muted-foreground">
               Last 7 days
@@ -97,11 +105,11 @@ const Dashboard = () => {
       </div>
 
       <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-        <Card>
-          <CardHeader>
-            <CardTitle>Low Stock Alerts</CardTitle>
+        <Card className="border-none shadow-md">
+          <CardHeader className="p-4">
+            <CardTitle className="text-lg">Low Stock Alerts</CardTitle>
           </CardHeader>
-          <CardContent>
+          <CardContent className="p-4 pt-0">
             {lowStockProducts.length > 0 ? (
               <div className="space-y-4">
                 {lowStockProducts.map(product => (
@@ -120,7 +128,7 @@ const Dashboard = () => {
                         {product.quantity} left
                       </span>
                       <Link 
-                        to={`/inventory/${product.id}`}
+                        to={`/inventory/${product.id}/edit`}
                         className="ml-4 text-xs text-blue-600 hover:underline"
                       >
                         View
@@ -137,11 +145,11 @@ const Dashboard = () => {
           </CardContent>
         </Card>
 
-        <Card>
-          <CardHeader>
-            <CardTitle>Recent Transactions</CardTitle>
+        <Card className="border-none shadow-md">
+          <CardHeader className="p-4">
+            <CardTitle className="text-lg">Recent Transactions</CardTitle>
           </CardHeader>
-          <CardContent>
+          <CardContent className="p-4 pt-0">
             {transactions.length > 0 ? (
               <div className="space-y-4">
                 {transactions.slice(0, 5).map(transaction => {
@@ -164,7 +172,7 @@ const Dashboard = () => {
                       </div>
                       <div className="text-right">
                         <p className="font-semibold">
-                          ${transaction.totalAmount.toFixed(2)}
+                          {currencySymbol}{transaction.totalAmount.toFixed(2)}
                         </p>
                         <p className="text-xs text-muted-foreground">
                           {new Date(transaction.createdAt).toLocaleDateString()}
