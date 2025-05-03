@@ -64,6 +64,9 @@
     --border: 217.2 32.6% 17.5%;
     --input: 217.2 32.6% 17.5%;
     --ring: 212.7 26.8% 83.9%;
+
+    --sidebar: 222.2 47.4% 11.2%;
+    --sidebar-foreground: 210 40% 98%;
   }
 }
 
@@ -100,4 +103,37 @@
 
 .animate-pulse {
   animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+/* Improve mobile responsiveness */
+@media (max-width: 768px) {
+  .container {
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+}
+
+/* Fix dark mode background for components */
+.dark .bg-white {
+  @apply bg-gray-900;
+}
+
+.dark .border-gray-200 {
+  @apply border-gray-800;
+}
+
+.dark .text-gray-500 {
+  @apply text-gray-400;
+}
+
+.dark .bg-gray-50 {
+  @apply bg-gray-900;
+}
+
+/* Ensure sidebar fits properly on mobile */
+@media (max-width: 768px) {
+  [data-sidebar="sidebar"][data-mobile="true"] {
+    width: 85vw !important;
+    max-width: 300px !important;
+  }
 }

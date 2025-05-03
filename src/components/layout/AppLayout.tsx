@@ -4,6 +4,7 @@ import { Outlet } from 'react-router-dom';
 import { TabsType } from '@/types';
 import MobileNavbar from './MobileNavbar';
 import MobileHeader from './MobileHeader';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 interface AppLayoutProps {
   children?: React.ReactNode;
@@ -11,16 +12,17 @@ interface AppLayoutProps {
 
 const AppLayout = ({ children }: AppLayoutProps) => {
   const [activeTab, setActiveTab] = useState<TabsType>('dashboard');
+  const isMobile = useIsMobile();
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col">
+    <div className="min-h-screen bg-background flex flex-col">
       <MobileHeader activeTab={activeTab} />
       
-      <main className="flex-1 container mx-auto px-4 py-6 pb-20">
+      <main className="flex-1 container mx-auto px-2 sm:px-4 py-4 sm:py-6 pb-20">
         {children || <Outlet />}
       </main>
       
-      <MobileNavbar activeTab={activeTab} setActiveTab={setActiveTab} />
+      {isMobile && <MobileNavbar activeTab={activeTab} setActiveTab={setActiveTab} />}
     </div>
   );
 };

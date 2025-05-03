@@ -19,7 +19,7 @@ const BarcodeGenerator = ({ productName, productSku, productPrice }: BarcodeGene
   const handlePrint = useReactToPrint({
     documentTitle: `Barcode-${productSku}`,
     onPrintError: () => toast.error("Printing failed"),
-    content: () => barcodeRef.current,
+    contentRef: barcodeRef,
   });
 
   const handleSaveAsImage = () => {
@@ -63,7 +63,7 @@ const BarcodeGenerator = ({ productName, productSku, productPrice }: BarcodeGene
         />
         <p className="text-sm font-medium mt-2">{productSku}</p>
         <p className="text-sm text-gray-500 mt-1">{productName}</p>
-        <p className="text-sm font-bold mt-1">₵{productPrice.toFixed(2)}</p>
+        <p className="text-sm font-bold mt-1">GH₵{productPrice.toFixed(2)}</p>
       </div>
       
       <div className="flex gap-2">
