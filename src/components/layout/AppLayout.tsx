@@ -15,10 +15,10 @@ const AppLayout = ({ children }: AppLayoutProps) => {
   const isMobile = useIsMobile();
 
   return (
-    <div className="min-h-screen bg-background flex flex-col">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex flex-col">
       <MobileHeader activeTab={activeTab} />
       
-      <main className="flex-1 container mx-auto px-2 sm:px-4 py-4 sm:py-6 pb-20 bg-dashboard-pattern">
+      <main className="flex-1 container mx-auto px-4 py-4 pb-20 bg-gray-50 dark:bg-gray-900">
         {children || <Outlet />}
       </main>
       

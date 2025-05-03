@@ -14,7 +14,7 @@
     --popover: 0 0% 100%;
     --popover-foreground: 222.2 84% 4.9%;
 
-    --primary: 221 83% 53%;
+    --primary: 339 90% 51%;
     --primary-foreground: 210 40% 98%;
 
     --secondary: 210 40% 96.1%;
@@ -31,7 +31,7 @@
 
     --border: 214.3 31.8% 91.4%;
     --input: 214.3 31.8% 91.4%;
-    --ring: 221 83% 53%;
+    --ring: 339 90% 51%;
 
     --radius: 0.5rem;
   }
@@ -46,7 +46,7 @@
     --popover: 222.2 84% 4.9%;
     --popover-foreground: 210 40% 98%;
 
-    --primary: 217 91% 60%;
+    --primary: 339 90% 51%;
     --primary-foreground: 222.2 47.4% 11.2%;
 
     --secondary: 217.2 32.6% 17.5%;
@@ -63,7 +63,7 @@
 
     --border: 217.2 32.6% 17.5%;
     --input: 217.2 32.6% 17.5%;
-    --ring: 224.3 76.3% 48%;
+    --ring: 339 90% 51%;
 
     --sidebar: 222.2 84% 4.9%;
     --sidebar-foreground: 210 40% 98%;
@@ -115,11 +115,11 @@
 
 /* Fix dark mode background for components */
 .dark .bg-white {
-  @apply bg-gray-900;
+  @apply bg-gray-800;
 }
 
 .dark .border-gray-200 {
-  @apply border-gray-800;
+  @apply border-gray-700;
 }
 
 .dark .text-gray-500 {
@@ -130,19 +130,30 @@
   @apply bg-gray-900;
 }
 
-/* Ensure sidebar fits properly on mobile */
-@media (max-width: 768px) {
-  [data-sidebar="sidebar"][data-mobile="true"] {
-    width: 85vw !important;
-    max-width: 300px !important;
-  }
+/* Payment method buttons */
+.payment-method-button {
+  @apply rounded-full px-4 py-2 text-sm border border-gray-200 dark:border-gray-700;
 }
 
-/* New styles for InventoryPro Mobile design */
+.payment-method-button.active {
+  @apply bg-pink-500 text-white border-pink-500;
+}
+
+/* Card styles for Didiz Closet */
 .card-gradient {
-  @apply bg-gradient-to-br from-blue-500/10 to-blue-600/5 backdrop-blur-sm;
+  @apply bg-white dark:bg-gray-800 shadow-md;
 }
 
-.bg-dashboard-pattern {
-  background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%232563eb' fill-opacity='0.05'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+/* Add item button */
+.add-item-button {
+  @apply w-full mt-4 border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-4 flex flex-col items-center justify-center text-gray-500 dark:text-gray-400 hover:text-pink-500 dark:hover:text-pink-400 hover:border-pink-500 dark:hover:border-pink-400;
+}
+
+/* Price adjustment text */
+.price-adjustment-negative {
+  @apply text-red-500 dark:text-red-400;
+}
+
+.price-adjustment-positive {
+  @apply text-green-500 dark:text-green-400;
 }

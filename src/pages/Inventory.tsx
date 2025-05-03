@@ -3,138 +3,58 @@ import { useState } from 'react';
 import { useInventory } from '@/contexts/InventoryContext';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import ProductCard from '@/components/inventory/ProductCard';
-import { Plus, Search } from 'lucide-react';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
+import { Search, Filter } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from '@/components/ui/alert-dialog';
 
 const Inventory = () => {
-  const { products, deleteProduct } = useInventory();
+  const { products, currencySymbol } = useInventory();
   const [search, setSearch] = useState('');
-  const [sortBy, setSortBy] = useState('name');
-  const [categoryFilter, setCategoryFilter] = useState('all');
-  const [deleteId, setDeleteId] = useState<string | null>(null);
-  const [isAlertOpen, setIsAlertOpen] = useState(false);
 
-  // Get unique categories
-  const categories = ['all', ...new Set(products.map((product) => product.category))];
-
-  // Filter and sort products
-  const filteredProducts = products
-    .filter(
-      (product) =>
-        (categoryFilter === 'all' || product.category === categoryFilter) &&
-        (product.name.toLowerCase().includes(search.toLowerCase()) ||
-          product.sku.toLowerCase().includes(search.toLowerCase()))
-    )
-    .sort((a, b) => {
-      if (sortBy === 'name') {
-        return a.name.localeCompare(b.name);
-      } else if (sortBy === 'price-low') {
-        return a.sellingPrice - b.sellingPrice;
-      } else if (sortBy === 'price-high') {
-        return b.sellingPrice - a.sellingPrice;
-      } else if (sortBy === 'stock-low') {
-        return a.quantity - b.quantity;
-      } else {
-        return b.quantity - a.quantity;
-      }
-    });
-
-  const handleDeleteClick = (id: string) => {
-    setDeleteId(id);
-    setIsAlertOpen(true);
-  };
-
-  const confirmDelete = () => {
-    if (deleteId) {
-      deleteProduct(deleteId);
-      setDeleteId(null);
-    }
-    setIsAlertOpen(false);
-  };
+  // Filter products based on search
+  const filteredProducts = products.filter(
+    (product) =>
+      product.name.toLowerCase().includes(search.toLowerCase()) ||
+      product.sku.toLowerCase().includes(search.toLowerCase()) ||
+      product.category.toLowerCase().includes(search.toLowerCase())
+  );
 
   return (
     <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <h1 className="text-2xl font-bold">Inventory</h1>
-        <Button asChild>
-          <Link to="/inventory/add">
-            <Plus className="mr-2 h-4 w-4" />
-            Add Product
-          </Link>
-        </Button>
-      </div>
-
-      <div className="flex flex-col gap-4 md:flex-row">
+      <div className="flex items-center gap-2">
         <div className="relative flex-1">
-          <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-gray-500" />
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-500" />
           <Input
             type="search"
-            placeholder="Search products..."
-            className="pl-9"
+            placeholder="Search inventory..."
+            className="pl-10"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
           />
         </div>
-
-        <Select
-          value={categoryFilter}
-          onValueChange={setCategoryFilter}
-        >
-          <SelectTrigger className="w-full md:w-[180px]">
-            <SelectValue placeholder="Category" />
-          </SelectTrigger>
-          <SelectContent>
-            {categories.map((category) => (
-              <SelectItem key={category} value={category}>
-                {category === 'all' ? 'All Categories' : category}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-
-        <Select
-          value={sortBy}
-          onValueChange={setSortBy}
-        >
-          <SelectTrigger className="w-full md:w-[180px]">
-            <SelectValue placeholder="Sort by" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="name">Name (A-Z)</SelectItem>
-            <SelectItem value="price-low">Price (Low to High)</SelectItem>
-            <SelectItem value="price-high">Price (High to Low)</SelectItem>
-            <SelectItem value="stock-low">Stock (Low to High)</SelectItem>
-            <SelectItem value="stock-high">Stock (High to Low)</SelectItem>
-          </SelectContent>
-        </Select>
+        <Button size="icon" variant="outline">
+          <Filter className="h-4 w-4" />
+        </Button>
       </div>
 
       {filteredProducts.length > 0 ? (
-        <div className="inventory-grid">
+        <div className="space-y-4">
           {filteredProducts.map((product) => (
-            <ProductCard
+            <div
               key={product.id}
-              product={product}
-              onDelete={handleDeleteClick}
-            />
+              className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-sm border border-gray-100 dark:border-gray-700"
+            >
+              <div className="font-medium">{product.name}</div>
+              <div className="grid grid-cols-2 gap-2 mt-1">
+                <div className="text-xs text-gray-500 dark:text-gray-400">SKU</div>
+                <div className="text-xs text-right">{product.sku}</div>
+                <div className="text-xs text-gray-500 dark:text-gray-400">Category</div>
+                <div className="text-xs text-right">{product.category}</div>
+                <div className="text-xs text-gray-500 dark:text-gray-400">Quantity</div>
+                <div className="text-xs text-right">{product.quantity}</div>
+                <div className="text-xs text-gray-500 dark:text-gray-400">Price</div>
+                <div className="text-xs text-right font-medium">GH₵{product.sellingPrice.toFixed(2)}</div>
+              </div>
+            </div>
           ))}
         </div>
       ) : (
@@ -143,22 +63,13 @@ const Inventory = () => {
         </div>
       )}
 
-      <AlertDialog open={isAlertOpen} onOpenChange={setIsAlertOpen}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
-            <AlertDialogDescription>
-              This action cannot be undone. This will permanently delete this product from your inventory.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={confirmDelete}>
-              Delete
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+      <Button
+        className="fixed bottom-20 right-4 rounded-full h-14 w-14 shadow-lg bg-pink-500 hover:bg-pink-600"
+        size="icon"
+        asChild
+      >
+        <Link to="/inventory/add">+</Link>
+      </Button>
     </div>
   );
 };

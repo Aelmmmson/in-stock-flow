@@ -24,6 +24,7 @@ import NotFound from "./pages/NotFound";
 import FinancialReports from "./pages/FinancialReports";
 import LowStockItems from "./pages/LowStockItems";
 import ExpensesPage from "./pages/ExpensesPage";
+import Index from "./pages/Index";
 
 // Create a new QueryClient instance outside the component
 const queryClient = new QueryClient();
@@ -35,7 +36,7 @@ const App = () => {
     // Simulate initial loading
     setTimeout(() => {
       setLoading(false);
-    }, 1500);
+    }, 1000);
   }, []);
 
   return (
@@ -44,14 +45,15 @@ const App = () => {
         <TooltipProvider>
           <Toaster />
           <Sonner />
-          <InventoryProvider>
+          <InventoryProvider currency="GH₵">
             {loading ? (
               <LoadingScreen />
             ) : (
               <BrowserRouter>
                 <Routes>
                   <Route path="/" element={<AppLayout />}>
-                    <Route index element={<Dashboard />} />
+                    <Route index element={<Index />} />
+                    <Route path="dashboard" element={<Dashboard />} />
                     <Route path="inventory" element={<Inventory />} />
                     <Route path="inventory/add" element={<AddProduct />} />
                     <Route path="inventory/:id/edit" element={<EditProduct />} />
