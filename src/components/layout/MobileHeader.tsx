@@ -23,6 +23,16 @@ const MobileHeader = ({ activeTab, toggleNotificationsPanel }: MobileHeaderProps
                        location.pathname !== '/reports' && 
                        location.pathname !== '/settings';
 
+  const getPageTitle = () => {
+    // Get the last part of the pathname
+    const path = location.pathname.split('/').filter(Boolean);
+    if (path.length === 0) return 'Dashboard';
+    
+    const lastPath = path[0];
+    // Capitalize the first letter
+    return lastPath.charAt(0).toUpperCase() + lastPath.slice(1);
+  };
+
   const toggleNotifications = () => {
     setNotificationsOpen(!notificationsOpen);
   };
@@ -43,14 +53,14 @@ const MobileHeader = ({ activeTab, toggleNotificationsPanel }: MobileHeaderProps
           ) : null}
           
           <h1 className="text-xl font-semibold text-foreground">
-            Didiz Closet
+            {getPageTitle()}
           </h1>
         </div>
         
         <div className="flex items-center space-x-3">
           <div className="h-8 w-8 relative">
             <img 
-              src="/lovable-uploads/453620d9-01b8-4040-aec4-9f948e52aae1.png" 
+              src="/lovable-uploads/2a3413ad-6596-43b9-9a24-eaa892ea1627.png" 
               alt="Didiz Closet Logo" 
               className="h-full w-full object-contain rounded-full"
             />

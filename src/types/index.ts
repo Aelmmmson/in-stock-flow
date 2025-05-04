@@ -65,3 +65,12 @@ export interface Notification {
   type: 'lowStock' | 'sale' | 'system' | 'other';
   linkTo?: string;
 }
+
+export interface Expense {
+  id: string;
+  category: string;
+  amount: number;
+  date: string;
+  notes: string;
+  paymentMethod: string;
+}

@@ -20,64 +20,40 @@ const LowStockItems = () => {
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
-        <h1 className="text-2xl font-bold">Low Stock Alerts</h1>
+        <h1 className="text-xl font-bold">Low Stock Alerts</h1>
         <Link to="/inventory">
           <Button variant="outline">Back to Inventory</Button>
         </Link>
       </div>
 
       {lowStockProducts.length > 0 ? (
-        <Card>
-          <CardHeader className="bg-red-50 dark:bg-red-900/20">
-            <CardTitle className="flex items-center gap-2 text-red-600 dark:text-red-400">
-              <AlertTriangle className="h-5 w-5" />
-              <span>{lowStockProducts.length} items require attention</span>
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="p-0">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Item</TableHead>
-                  <TableHead>SKU</TableHead>
-                  <TableHead>Category</TableHead>
-                  <TableHead className="text-center">Current Stock</TableHead>
-                  <TableHead className="text-center">Threshold</TableHead>
-                  <TableHead className="text-right">Price</TableHead>
-                  <TableHead className="text-right">Actions</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {lowStockProducts.map((product) => (
-                  <TableRow key={product.id}>
-                    <TableCell className="font-medium">{product.name}</TableCell>
-                    <TableCell className="text-muted-foreground">{product.sku}</TableCell>
-                    <TableCell>{product.category}</TableCell>
-                    <TableCell className="text-center font-medium text-red-600 dark:text-red-400">
-                      {product.quantity}
-                    </TableCell>
-                    <TableCell className="text-center text-muted-foreground">
-                      {product.lowStockThreshold}
-                    </TableCell>
-                    <TableCell className="text-right">
-                      {currencySymbol}{product.sellingPrice.toFixed(2)}
-                    </TableCell>
-                    <TableCell className="text-right">
-                      <div className="flex justify-end gap-2">
-                        <Button variant="ghost" size="sm" asChild>
-                          <Link to={`/inventory/${product.id}/barcode`}>Barcode</Link>
-                        </Button>
-                        <Button variant="ghost" size="sm" asChild>
-                          <Link to={`/inventory/${product.id}/edit`}>Edit</Link>
-                        </Button>
+        <div className="space-y-3">
+          {lowStockProducts.map((product) => (
+            <Link
+              key={product.id}
+              to={`/inventory/${product.id}`}
+            >
+              <Card className="border-none shadow-sm hover:shadow-md transition-shadow">
+                <CardContent className="p-4">
+                  <div className="flex items-center justify-between">
+                    <div className="space-y-1">
+                      <div className="font-medium">{product.name}</div>
+                      <div className="text-sm text-muted-foreground">SKU: {product.sku}</div>
+                    </div>
+                    <div className="text-center">
+                      <div className="text-destructive font-semibold text-lg">
+                        {product.quantity} left
                       </div>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </CardContent>
-        </Card>
+                      <div className="text-xs text-muted-foreground">
+                        Threshold: {product.lowStockThreshold}
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </Link>
+          ))}
+        </div>
       ) : (
         <Card className="py-16">
           <CardContent className="text-center">

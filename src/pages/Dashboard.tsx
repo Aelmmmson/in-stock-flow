@@ -1,9 +1,9 @@
 
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { useInventory } from '@/contexts/InventoryContext';
-import { Package2, AlertTriangle, TrendingUp, ShoppingBag } from 'lucide-react';
+import { Box, ShoppingCart, TrendingUp } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import { ScrollArea } from '@/components/ui/scroll-area';
+import { useInventory } from '@/contexts/InventoryContext';
+import { Button } from '@/components/ui/button';
+import { AlertTriangle } from 'lucide-react';
 
 const Dashboard = () => {
   const { products, transactions, getLowStockProducts, currencySymbol } = useInventory();
@@ -27,17 +27,6 @@ const Dashboard = () => {
   // Calculate potential profit
   const potentialProfit = retailValue - inventoryValue;
   
-  // Calculate recent sales (last month)
-  const lastMonth = new Date();
-  lastMonth.setMonth(lastMonth.getMonth() - 1);
-  
-  const recentSales = transactions
-    .filter(t => 
-      t.type === 'sale' && 
-      new Date(t.createdAt) >= lastMonth
-    )
-    .reduce((acc, t) => acc + t.totalAmount, 0);
-
   // Format date function
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
@@ -48,166 +37,124 @@ const Dashboard = () => {
     });
   };
 
-  // Get product name
-  const getProductName = (productId: string) => {
-    const product = products.find(p => p.id === productId);
-    return product?.name || 'Unknown Product';
-  };
-
   return (
     <div className="space-y-6">
+      <div className="grid grid-cols-2 gap-4">
+        <Button 
+          onClick={() => window.location.href = '/inventory/add'} 
+          className="bg-pink-500 hover:bg-pink-600 flex items-center justify-center py-3"
+        >
+          <span className="mr-1">+</span> Add Item
+        </Button>
+        
+        <Button 
+          onClick={() => window.location.href = '/transactions/add'} 
+          className="bg-purple-500 hover:bg-purple-600 flex items-center justify-center py-3"
+        >
+          <span className="mr-1">+</span> New Sale
+        </Button>
+      </div>
+      
       <div className="grid grid-cols-3 gap-4">
-        <Card className="card-gradient border-none shadow-md">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 p-4 pb-2">
-            <CardTitle className="text-sm font-medium">
-              Total Products
-            </CardTitle>
-            <div className="rounded-full bg-blue-100 dark:bg-blue-900/30 p-2 text-blue-500">
-              <Package2 className="h-4 w-4" />
+        <Link to="/inventory" className="block">
+          <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-sm text-center">
+            <div className="rounded-full bg-gray-100 dark:bg-gray-700 p-3 w-12 h-12 flex items-center justify-center mx-auto">
+              <Box className="h-6 w-6 text-pink-500" />
             </div>
-          </CardHeader>
-          <CardContent className="p-4 pt-0">
+            <div className="mt-3 text-gray-500 dark:text-gray-400">Total Items</div>
             <div className="text-2xl font-bold">{products.length}</div>
-            <Link 
-              to="/inventory" 
-              className="text-xs text-blue-600 hover:underline"
-            >
-              View all products
-            </Link>
-          </CardContent>
-        </Card>
-
-        <Card className="card-gradient border-none shadow-md">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 p-4 pb-2">
-            <CardTitle className="text-sm font-medium">
-              Sales
-            </CardTitle>
-            <div className="rounded-full bg-purple-100 dark:bg-purple-900/30 p-2 text-purple-500">
-              <ShoppingBag className="h-4 w-4" />
+          </div>
+        </Link>
+        
+        <Link to="/reports/financial" className="block">
+          <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-sm text-center">
+            <div className="rounded-full bg-gray-100 dark:bg-gray-700 p-3 w-12 h-12 flex items-center justify-center mx-auto">
+              <TrendingUp className="h-6 w-6 text-green-500" />
             </div>
-          </CardHeader>
-          <CardContent className="p-4 pt-0">
+            <div className="mt-3 text-gray-500 dark:text-gray-400">Potential Profit</div>
+            <div className="text-2xl font-bold">{currencySymbol}{potentialProfit.toFixed(2)}</div>
+          </div>
+        </Link>
+        
+        <Link to="/transactions" className="block">
+          <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-sm text-center">
+            <div className="rounded-full bg-gray-100 dark:bg-gray-700 p-3 w-12 h-12 flex items-center justify-center mx-auto">
+              <ShoppingCart className="h-6 w-6 text-purple-500" />
+            </div>
+            <div className="mt-3 text-gray-500 dark:text-gray-400">Sales</div>
             <div className="text-2xl font-bold">{salesTransactions.length}</div>
-            <Link 
-              to="/transactions" 
-              className="text-xs text-purple-600 hover:underline"
-            >
-              View all sales
-            </Link>
-          </CardContent>
-        </Card>
-
-        <Card className="card-gradient border-none shadow-md">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 p-4 pb-2">
-            <CardTitle className="text-sm font-medium">
-              Potential Profit
-            </CardTitle>
-            <div className="rounded-full bg-green-500/20 p-2 text-green-500">
-              <TrendingUp className="h-4 w-4" />
-            </div>
-          </CardHeader>
-          <CardContent className="p-4 pt-0">
-            <div className="text-2xl font-bold">
-              {currencySymbol}{potentialProfit.toFixed(2)}
-            </div>
-            <p className="text-xs text-muted-foreground">
-              At current prices
-            </p>
-          </CardContent>
-        </Card>
+          </div>
+        </Link>
       </div>
 
-      <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-        <Card className="border-none shadow-md">
-          <CardHeader className="p-4">
-            <CardTitle className="text-lg flex items-center">
-              <AlertTriangle className="h-5 w-5 mr-2 text-amber-500" />
-              Low Stock Alerts
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="p-4 pt-0">
-            <ScrollArea className="max-h-48 overflow-y-auto scrollbar-none">
-              {lowStockProducts.length > 0 ? (
-                <div className="space-y-4">
-                  {lowStockProducts.map(product => (
-                    <Link 
-                      key={product.id}
-                      to={`/inventory/${product.id}`}
-                      className="flex items-center justify-between border-b pb-2 hover:bg-gray-50 dark:hover:bg-gray-800 p-2 rounded-md"
-                    >
-                      <div>
-                        <p className="font-medium">{product.name}</p>
-                        <p className="text-sm text-muted-foreground">
-                          SKU: {product.sku}
-                        </p>
-                      </div>
-                      <div className="flex items-center">
-                        <span className="text-destructive font-semibold">
-                          {product.quantity} left
-                        </span>
-                      </div>
-                    </Link>
-                  ))}
+      <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-sm">
+        <div className="flex items-center gap-2 mb-3">
+          <AlertTriangle className="h-5 w-5 text-amber-500" />
+          <h3 className="font-bold">Low Stock Alerts</h3>
+        </div>
+        
+        <div className="divide-y">
+          {lowStockProducts.length > 0 ? (
+            lowStockProducts.map((product) => (
+              <Link 
+                key={product.id}
+                to={`/inventory/${product.id}`}
+                className="flex items-center justify-between py-3"
+              >
+                <div className="text-gray-800 dark:text-gray-200">{product.name}</div>
+                <div className="text-amber-600 dark:text-amber-400 font-semibold">
+                  {product.quantity} left
                 </div>
-              ) : (
-                <p className="text-muted-foreground p-2">
-                  No low stock items at the moment.
-                </p>
-              )}
-            </ScrollArea>
-          </CardContent>
-        </Card>
+              </Link>
+            ))
+          ) : (
+            <div className="py-3 text-gray-500 dark:text-gray-400">
+              No low stock items
+            </div>
+          )}
+        </div>
+      </div>
 
-        <Card className="border-none shadow-md">
-          <CardHeader className="p-4">
-            <CardTitle className="text-lg flex items-center">
-              <ShoppingBag className="h-5 w-5 mr-2 text-purple-500" />
-              Recent Transactions
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="p-4 pt-0">
-            <ScrollArea className="max-h-48 overflow-y-auto scrollbar-none">
-              {transactions.length > 0 ? (
-                <div className="space-y-4">
-                  {transactions.slice(0, 5).map(transaction => {
-                    const product = products.find(p => p.id === transaction.productId);
-                    
-                    return (
-                      <Link 
-                        key={transaction.id}
-                        to={`/transactions/${transaction.id}`}
-                        className="flex items-center justify-between border-b pb-2 hover:bg-gray-50 dark:hover:bg-gray-800 p-2 rounded-md"
-                      >
-                        <div>
-                          <p className="font-medium">
-                            {getProductName(transaction.productId)}
-                          </p>
-                          <p className="text-sm text-muted-foreground">
-                            {transaction.type === 'sale' ? 'Sold' : 
-                             transaction.type === 'purchase' ? 'Purchased' : 
-                             'Adjusted'} {transaction.quantity} units
-                          </p>
-                        </div>
-                        <div className="text-right">
-                          <p className="font-semibold">
-                            {currencySymbol}{transaction.totalAmount.toFixed(2)}
-                          </p>
-                          <p className="text-xs text-muted-foreground">
-                            {formatDate(transaction.createdAt)}
-                          </p>
-                        </div>
-                      </Link>
-                    );
-                  })}
-                </div>
-              ) : (
-                <p className="text-muted-foreground p-2">
-                  No recent transactions.
-                </p>
-              )}
-            </ScrollArea>
-          </CardContent>
-        </Card>
+      <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-sm">
+        <div className="flex items-center gap-2 mb-3">
+          <ShoppingCart className="h-5 w-5 text-purple-500" />
+          <h3 className="font-bold">Recent Sales</h3>
+        </div>
+        
+        <div className="divide-y">
+          {transactions.length > 0 ? (
+            transactions
+              .filter(t => t.type === 'sale')
+              .slice(0, 3)
+              .map((transaction) => {
+                const product = products.find(p => p.id === transaction.productId);
+                
+                return (
+                  <Link
+                    key={transaction.id}
+                    to={`/transactions/${transaction.id}`}
+                    className="flex items-center justify-between py-3"
+                  >
+                    <div>
+                      <div className="text-gray-600 dark:text-gray-400">
+                        {formatDate(transaction.createdAt)}
+                      </div>
+                      <div className="text-gray-800 dark:text-gray-200">
+                        #{transaction.id.substring(0, 7)}
+                      </div>
+                    </div>
+                    <div className="font-semibold">
+                      {currencySymbol}{transaction.totalAmount.toFixed(2)}
+                    </div>
+                  </Link>
+                );
+              })
+          ) : (
+            <div className="py-3 text-gray-500 dark:text-gray-400">
+              No recent sales
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );
