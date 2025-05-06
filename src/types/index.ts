@@ -1,4 +1,3 @@
-
 export interface Product {
   id: string;
   name: string;
@@ -73,6 +72,8 @@ export interface Expense {
   date: string;
   notes: string;
   paymentMethod: string;
+  recurring?: boolean;
+  frequency?: 'daily' | 'weekly' | 'monthly' | 'yearly';
 }
 
 export interface ProductCategory {

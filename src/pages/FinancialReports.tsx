@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { useInventory } from '@/contexts/InventoryContext';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -319,7 +318,7 @@ const FinancialReports = () => {
                   <span className="font-medium">
                     {currencySymbol}
                     {expenses
-                      .filter((e) => e.recurring)
+                      .filter((e) => e.recurring === true)
                       .reduce((sum, e) => sum + e.amount, 0)
                       .toFixed(2)}
                   </span>
@@ -329,7 +328,7 @@ const FinancialReports = () => {
                   <span>
                     {currencySymbol}
                     {expenses
-                      .filter((e) => e.recurring)
+                      .filter((e) => e.recurring === true)
                       .reduce((sum, e) => sum + e.amount, 0)
                       .toFixed(2)}
                   </span>

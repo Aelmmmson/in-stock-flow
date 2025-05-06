@@ -1,4 +1,3 @@
-
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { Product, Transaction, User, Expense } from '../types';
 import { useToast } from '@/components/ui/use-toast';
@@ -105,8 +104,9 @@ const sampleExpenses: Expense[] = [
     id: '1',
     category: 'Rent',
     amount: 1200,
-    description: 'Monthly store rent',
+    notes: 'Monthly store rent',
     date: new Date().toISOString(),
+    paymentMethod: 'Bank Transfer',
     recurring: true,
     frequency: 'monthly'
   },
@@ -114,8 +114,9 @@ const sampleExpenses: Expense[] = [
     id: '2',
     category: 'Utilities',
     amount: 250,
-    description: 'Electricity and water bill',
+    notes: 'Electricity and water bill',
     date: new Date().toISOString(),
+    paymentMethod: 'Cash',
     recurring: true,
     frequency: 'monthly'
   },
@@ -123,8 +124,9 @@ const sampleExpenses: Expense[] = [
     id: '3',
     category: 'Salaries',
     amount: 1800,
-    description: 'Staff salaries',
+    notes: 'Staff salaries',
     date: new Date().toISOString(),
+    paymentMethod: 'Bank Transfer',
     recurring: true,
     frequency: 'monthly'
   }
@@ -179,6 +181,7 @@ export const InventoryProvider = ({ children }: InventoryProviderProps) => {
     id: '1',
     name: 'Admin User',
     role: 'admin',
+    email: 'admin@didizcloset.com'
   };
 
   useEffect(() => {
@@ -306,7 +309,7 @@ export const InventoryProvider = ({ children }: InventoryProviderProps) => {
     setExpenses([...expenses, newExpense]);
     toast({
       title: "Expense Recorded",
-      description: `${newExpense.description} has been added to expenses`,
+      description: `${newExpense.notes} has been added to expenses`,
     });
   };
 
@@ -318,7 +321,7 @@ export const InventoryProvider = ({ children }: InventoryProviderProps) => {
     );
     toast({
       title: "Expense Updated",
-      description: `${updatedExpense.description} has been updated`,
+      description: `${updatedExpense.notes} has been updated`,
     });
   };
 
@@ -328,7 +331,7 @@ export const InventoryProvider = ({ children }: InventoryProviderProps) => {
       setExpenses(expenses.filter((expense) => expense.id !== id));
       toast({
         title: "Expense Deleted",
-        description: `${expenseToDelete.description} has been removed`,
+        description: `${expenseToDelete.notes} has been removed`,
         variant: "destructive",
       });
     }
