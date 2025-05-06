@@ -4,7 +4,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { InventoryProvider } from "@/contexts/InventoryContext";
 import { ThemeProvider } from "@/contexts/ThemeContext";
 import { AuthProvider } from "@/contexts/AuthContext";
@@ -64,8 +64,9 @@ function App() {
                 <BrowserRouter>
                   <Routes>
                     <Route path="/login" element={<Login />} />
+                    {/* Redirect from root to dashboard */}
+                    <Route path="/" element={<Navigate to="/dashboard" replace />} />
                     <Route path="/" element={<AppLayout />}>
-                      <Route index element={<Index />} />
                       <Route path="dashboard" element={<Dashboard />} />
                       <Route path="inventory" element={<Inventory />} />
                       <Route path="inventory/:id" element={<ProductDetail />} />
