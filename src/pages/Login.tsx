@@ -4,12 +4,13 @@ import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { useToast } from '@/hooks/use-toast';
+import { toast } from 'sonner';
 import { Eye, EyeOff, LogIn } from 'lucide-react';
+import { useAuth } from '@/contexts/AuthContext';
 
 const Login = () => {
   const navigate = useNavigate();
-  const { toast } = useToast();
+  const { login } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -18,35 +19,26 @@ const Login = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!email || !password) {
-      toast({
-        title: "Missing information",
-        description: "Please enter both email and password",
-        variant: "destructive",
-      });
-      return;
-    }
-    
     setIsLoading(true);
     
-    // Mock authentication - in a real app this would communicate with a backend
-    setTimeout(() => {
-      setIsLoading(false);
-      // Log the user in
-      localStorage.setItem('user', JSON.stringify({
-        id: 'user-1',
-        name: 'Shop Owner',
-        email: email,
-        role: 'admin',
-      }));
-      
+    // Use the AuthContext login method
+    const success = await login(email, password);
+    
+    if (success) {
       toast({
         title: "Login successful",
-        description: "Welcome back!",
+        description: "Welcome to Didiz Closet!",
       });
-      
       navigate('/');
-    }, 1500);
+    } else {
+      toast({
+        title: "Login failed",
+        description: "Please try again",
+        variant: "destructive",
+      });
+    }
+    
+    setIsLoading(false);
   };
   
   const toggleShowPassword = () => {
@@ -54,16 +46,17 @@ const Login = () => {
   };
 
   return (
-    <div className="min-h-screen flex flex-col justify-center p-4 bg-gray-900">
-      <div className="mx-auto mb-6 w-24 h-24">
+    <div className="min-h-screen flex flex-col justify-center p-4 bg-red-900">
+      <div className="mx-auto mb-6 w-32 h-32">
         <img 
-          src="/lovable-uploads/453620d9-01b8-4040-aec4-9f948e52aae1.png" 
+          src="/lovable-uploads/fec89699-babe-414d-af83-8750fe9dcf54.png" 
           alt="Didiz Closet Logo" 
           className="w-full h-full object-contain"
         />
       </div>
       
-      <h1 className="text-center text-2xl font-bold mb-6 text-white">Sign in to Didiz Closet</h1>
+      <h1 className="text-center text-2xl font-bold mb-2 text-white">Sign in to Didiz Closet</h1>
+      <p className="text-center text-white mb-6">Be you, be classy!</p>
       
       <div className="max-w-md w-full mx-auto bg-gray-800 p-6 rounded-lg shadow-lg">
         <form onSubmit={handleSubmit} className="space-y-4">
@@ -76,7 +69,6 @@ const Login = () => {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               className="bg-gray-700 border-gray-600 text-white"
-              required
             />
           </div>
           
@@ -90,7 +82,6 @@ const Login = () => {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 className="bg-gray-700 border-gray-600 text-white pr-10"
-                required
               />
               <button
                 type="button"
@@ -101,7 +92,7 @@ const Login = () => {
               </button>
             </div>
             <div className="text-right">
-              <a href="#" className="text-xs text-pink-400 hover:underline">
+              <a href="#" className="text-xs text-red-300 hover:underline">
                 Forgot password?
               </a>
             </div>
@@ -109,7 +100,7 @@ const Login = () => {
           
           <Button 
             type="submit" 
-            className="w-full bg-pink-500 hover:bg-pink-600"
+            className="w-full bg-red-700 hover:bg-red-800"
             disabled={isLoading}
           >
             {isLoading ? (
@@ -131,7 +122,7 @@ const Login = () => {
         
         <div className="mt-6 text-center text-sm">
           <span className="text-gray-400">Don't have an account? </span>
-          <a href="#" className="text-pink-400 hover:underline">Sign up</a>
+          <a href="#" className="text-red-300 hover:underline">Sign up</a>
         </div>
       </div>
     </div>

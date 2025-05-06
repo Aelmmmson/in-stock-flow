@@ -53,32 +53,26 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   const login = async (email: string, password: string): Promise<boolean> => {
     setIsLoading(true);
     
-    // This would typically be an API call
-    // For demo purposes, we'll just simulate a successful login with any credentials
+    // Static authentication - always succeeds
     try {
       // Simulate API delay
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      await new Promise(resolve => setTimeout(resolve, 800));
       
-      if (email && password) {
-        // Demo user
-        const demoUser = {
-          id: '1',
-          name: 'Demo User',
-          email: email,
-          role: 'admin',
-        };
-        
-        localStorage.setItem('auth_token', 'demo-token');
-        localStorage.setItem('user_data', JSON.stringify(demoUser));
-        
-        setUser(demoUser);
-        setIsAuthenticated(true);
-        setIsLoading(false);
-        return true;
-      }
+      // Demo user - will always log in regardless of credentials
+      const demoUser = {
+        id: '1',
+        name: 'Didiz Closet Admin',
+        email: email || 'admin@didizcloset.com',
+        role: 'admin',
+      };
       
+      localStorage.setItem('auth_token', 'demo-token');
+      localStorage.setItem('user_data', JSON.stringify(demoUser));
+      
+      setUser(demoUser);
+      setIsAuthenticated(true);
       setIsLoading(false);
-      return false;
+      return true;
     } catch (error) {
       setIsLoading(false);
       return false;

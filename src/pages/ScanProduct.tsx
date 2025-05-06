@@ -38,7 +38,7 @@ const ScanProduct = () => {
   };
   
   const handlePrint = useReactToPrint({
-    contentRef: () => printRef.current,
+    contentRef: printRef,
     documentTitle: `Barcode-${product?.sku || 'product'}`,
     onPrintError: () => toast.error("Printing failed"),
   });
