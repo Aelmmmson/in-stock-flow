@@ -25,17 +25,10 @@ const Login = () => {
     const success = await login(email, password);
     
     if (success) {
-      toast({
-        title: "Login successful",
-        description: "Welcome to Didiz Closet!",
-      });
+      toast.success("Login successful! Welcome to Didiz Closet!");
       navigate('/');
     } else {
-      toast({
-        title: "Login failed",
-        description: "Please try again",
-        variant: "destructive",
-      });
+      toast.error("Login failed. Please try again.");
     }
     
     setIsLoading(false);

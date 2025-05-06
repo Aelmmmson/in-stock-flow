@@ -1,8 +1,8 @@
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { Outlet, Navigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
-import { SidebarProvider } from '@/contexts/SidebarContext';
+import { SidebarProvider } from '@/components/ui/sidebar';
 import LoadingScreen from '@/components/common/LoadingScreen';
 import MobileHeader from './MobileHeader';
 import MobileNavbar from './MobileNavbar';
