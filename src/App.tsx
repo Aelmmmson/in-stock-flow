@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
@@ -31,11 +30,14 @@ import TransactionDetail from "./pages/TransactionDetail";
 import Profile from "./pages/Profile";
 import ReportsInventory from "./pages/ReportsInventory";
 import ReportsSales from "./pages/ReportsSales";
+import ScanProduct from "./pages/ScanProduct";
+import Categories from "./pages/Categories";
+import Discounts from "./pages/Discounts";
 
 // Create a new QueryClient instance outside the component
 const queryClient = new QueryClient();
 
-const App = () => {
+function App() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -62,11 +64,12 @@ const App = () => {
                     <Route index element={<Index />} />
                     <Route path="dashboard" element={<Dashboard />} />
                     <Route path="inventory" element={<Inventory />} />
-                    <Route path="inventory/add" element={<AddProduct />} />
+                    <Route path="inventory/:id" element={<ProductDetail />} />
                     <Route path="inventory/:id/edit" element={<EditProduct />} />
                     <Route path="inventory/:id/barcode" element={<ProductBarcode />} />
-                    <Route path="inventory/:id" element={<ProductDetail />} />
-                    <Route path="inventory/low-stock" element={<LowStockItems />} />
+                    <Route path="inventory/scan/:sku" element={<ScanProduct />} />
+                    <Route path="inventory/add" element={<AddProduct />} />
+                    <Route path="inventory/categories" element={<Categories />} />
                     <Route path="transactions" element={<Transactions />} />
                     <Route path="transactions/add" element={<AddTransaction />} />
                     <Route path="transactions/:id" element={<TransactionDetail />} />
@@ -74,11 +77,12 @@ const App = () => {
                     <Route path="reports/inventory" element={<ReportsInventory />} />
                     <Route path="reports/sales" element={<ReportsSales />} />
                     <Route path="reports/financial" element={<FinancialReports />} />
-                    <Route path="expenses" element={<ExpensesPage />} />
                     <Route path="settings" element={<Settings />} />
-                    <Route path="profile" element={<Profile />} />
+                    <Route path="settings/profile" element={<Profile />} />
+                    <Route path="discounts" element={<Discounts />} />
+                    <Route path="low-stock" element={<LowStockItems />} />
+                    <Route path="*" element={<NotFound />} />
                   </Route>
-                  <Route path="*" element={<NotFound />} />
                 </Routes>
               </BrowserRouter>
             )}
@@ -87,6 +91,6 @@ const App = () => {
       </ThemeProvider>
     </QueryClientProvider>
   );
-};
+}
 
 export default App;

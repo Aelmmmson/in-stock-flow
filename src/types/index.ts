@@ -74,3 +74,26 @@ export interface Expense {
   notes: string;
   paymentMethod: string;
 }
+
+export interface ProductCategory {
+  id: string;
+  name: string;
+  description?: string;
+  createdAt: string;
+}
+
+export interface Discount {
+  id: string;
+  name: string;
+  type: 'percentage' | 'fixed';
+  value: number;
+  applyToAll: boolean;
+  appliedCategories?: string[];
+  appliedProducts?: string[];
+  startDate?: string;
+  endDate?: string;
+  active: boolean;
+  createdAt: string;
+}
+
+export type DateFilterType = 'week' | 'month' | 'year' | 'custom' | 'quarter';

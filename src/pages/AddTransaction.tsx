@@ -1,16 +1,17 @@
 
-import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { useInventory } from '@/contexts/InventoryContext';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
-import { Plus, User, Wallet, Trash2, Edit, ShoppingCart, Minus, X } from 'lucide-react';
+import { Plus, User, Wallet, Trash2, Edit, ShoppingCart, Minus, X, ScanLine } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { ProductVariant } from '@/types';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Label } from '@/components/ui/label';
+import { BarcodeScannerDialog } from '@/components/inventory/BarcodeScanner';
 
 interface CartItem {
   productId: string;
@@ -22,6 +23,7 @@ interface CartItem {
 
 const AddTransaction = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const { toast } = useToast();
   const { products, addTransaction, currencySymbol } = useInventory();
   
@@ -35,18 +37,40 @@ const AddTransaction = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [addToCartDialogOpen, setAddToCartDialogOpen] = useState(false);
+  const [scannerOpen, setScannerOpen] = useState(false);
   
   // Selected product for add to cart
   const [selectedProduct, setSelectedProduct] = useState<any>(null);
   const [addQuantity, setAddQuantity] = useState('1');
   const [addPrice, setAddPrice] = useState('0');
+  const [addDiscount, setAddDiscount] = useState('0');
   const [selectedVariants, setSelectedVariants] = useState<Record<string, string>>({});
   
   // Editing item
   const [editingItem, setEditingItem] = useState<CartItem | null>(null);
   const [editQuantity, setEditQuantity] = useState('1');
   const [editPrice, setEditPrice] = useState('0');
-  const [editPriceDelta, setEditPriceDelta] = useState('0');
+  const [editDiscount, setEditDiscount] = useState('0');
+  
+  useEffect(() => {
+    // Check if there's a product to add from the location state
+    if (location.state?.productToAdd) {
+      const productId = location.state.productToAdd;
+      const product = products.find(p => p.id === productId);
+      
+      if (product) {
+        setSelectedProduct(product);
+        setAddQuantity('1');
+        setAddPrice(product.sellingPrice.toString());
+        setAddDiscount('0');
+        setSelectedVariants({});
+        setAddToCartDialogOpen(true);
+      }
+      
+      // Clear the state to prevent re-adding on navigation
+      navigate(location.pathname, { replace: true });
+    }
+  }, [location, products, navigate]);
   
   const filteredProducts = products.filter(p => 
     p.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -54,7 +78,7 @@ const AddTransaction = () => {
   );
 
   const totalAmount = cartItems.reduce(
-    (sum, item) => sum + item.quantity * (item.price + item.priceDelta),
+    (sum, item) => sum + item.quantity * (item.price - parseFloat(item.priceDelta.toString())),
     0
   );
 
@@ -65,6 +89,7 @@ const AddTransaction = () => {
     setSelectedProduct(product);
     setAddQuantity('1');
     setAddPrice(product.sellingPrice.toString());
+    setAddDiscount('0');
     setSelectedVariants({});
     setAddToCartDialogOpen(true);
     setProductDialogOpen(false);
@@ -86,6 +111,9 @@ const AddTransaction = () => {
       return sameProduct && variantsMatch;
     });
     
+    const discountAmount = parseFloat(addDiscount) || 0;
+    const finalPrice = Math.max(0, parseFloat(addPrice) - discountAmount);
+    
     if (existingItemIndex >= 0) {
       // If item already exists in cart, increase quantity
       const updatedItems = [...cartItems];
@@ -99,7 +127,7 @@ const AddTransaction = () => {
           productId: selectedProduct.id,
           quantity: parseInt(addQuantity, 10),
           price: parseFloat(addPrice),
-          priceDelta: 0,
+          priceDelta: parseFloat(addDiscount),
           selectedVariants: Object.keys(selectedVariants).length > 0 ? selectedVariants : undefined
         }
       ]);
@@ -123,7 +151,7 @@ const AddTransaction = () => {
     setEditingItem(item);
     setEditQuantity(item.quantity.toString());
     setEditPrice(item.price.toString());
-    setEditPriceDelta(item.priceDelta.toString());
+    setEditDiscount(item.priceDelta.toString());
     setEditDialogOpen(true);
   };
 
@@ -137,7 +165,7 @@ const AddTransaction = () => {
             ...item,
             quantity: parseInt(editQuantity || '1', 10),
             price: parseFloat(editPrice || '0'),
-            priceDelta: parseFloat(editPriceDelta || '0')
+            priceDelta: parseFloat(editDiscount || '0')
           }
         : item
     );
@@ -182,13 +210,13 @@ const AddTransaction = () => {
           productId: item.productId,
           quantity: item.quantity,
           originalPrice: item.price,
-          actualPrice: item.price + item.priceDelta,
-          priceDelta: item.priceDelta,
-          totalAmount: item.quantity * (item.price + item.priceDelta),
+          actualPrice: item.price - item.priceDelta,
+          priceDelta: -item.priceDelta, // Negative because discounts are stored as positive values in the cart
+          totalAmount: item.quantity * (item.price - item.priceDelta),
           notes,
           customer,
           paymentMethod,
-        } as any); // Using 'as any' to bypass TypeScript error temporarily
+        } as any);
       });
       
       toast({
@@ -231,6 +259,32 @@ const AddTransaction = () => {
       [name]: value
     });
   };
+  
+  const handleBarcodeScan = (result: string) => {
+    // Extract SKU from the scanned result
+    const skuMatch = result.match(/SKU:([^,]+)/);
+    if (skuMatch) {
+      const sku = skuMatch[1];
+      const product = products.find(p => p.sku === sku);
+      
+      if (product) {
+        setSelectedProduct(product);
+        setAddQuantity('1');
+        setAddPrice(product.sellingPrice.toString());
+        setAddDiscount('0');
+        setSelectedVariants({});
+        setAddToCartDialogOpen(true);
+      } else {
+        toast({
+          title: "Product not found",
+          description: `No product found with SKU: ${sku}`,
+          variant: "destructive",
+        });
+      }
+    }
+    
+    setScannerOpen(false);
+  };
 
   return (
     <div className="space-y-6">
@@ -243,28 +297,36 @@ const AddTransaction = () => {
               <ShoppingCart className="h-6 w-6 text-gray-400" />
             </div>
             <div className="mt-2 text-gray-300">No items added yet</div>
-            <Button 
-              className="mt-4 bg-pink-500 hover:bg-pink-600"
-              onClick={() => setProductDialogOpen(true)}
-            >
-              <Plus className="h-4 w-4 mr-1" /> Add Item
-            </Button>
+            <div className="mt-4 flex gap-2 justify-center">
+              <Button 
+                className="bg-pink-500 hover:bg-pink-600"
+                onClick={() => setProductDialogOpen(true)}
+              >
+                <Plus className="h-4 w-4 mr-1" /> Add Item
+              </Button>
+              <Button 
+                variant="outline"
+                onClick={() => setScannerOpen(true)}
+              >
+                <ScanLine className="h-4 w-4 mr-1" /> Scan
+              </Button>
+            </div>
           </div>
         ) : (
           <div className="space-y-4">
             {cartItems.map((item, index) => {
               const product = products.find(p => p.id === item.productId);
-              const itemTotal = item.quantity * (item.price + item.priceDelta);
+              const itemTotal = item.quantity * (item.price - item.priceDelta);
               
               return (
                 <div key={`${item.productId}-${index}`} className="bg-gray-800 p-4 rounded-lg shadow-sm flex justify-between items-center">
                   <div className="space-y-1">
                     <div className="font-medium text-white">{getProductName(item.productId)}</div>
                     <div className="text-sm text-gray-300">
-                      Qty: {item.quantity} × {currencySymbol}{(item.price + item.priceDelta).toFixed(2)}
-                      {item.priceDelta !== 0 && (
-                        <span className={`ml-2 ${item.priceDelta < 0 ? 'text-red-400' : 'text-green-400'}`}>
-                          ({item.priceDelta > 0 ? '+' : ''}{currencySymbol}{item.priceDelta.toFixed(2)})
+                      Qty: {item.quantity} × {currencySymbol}{(item.price - item.priceDelta).toFixed(2)}
+                      {item.priceDelta > 0 && (
+                        <span className="ml-2 text-green-400">
+                          (Discount: {currencySymbol}{item.priceDelta.toFixed(2)})
                         </span>
                       )}
                     </div>
@@ -293,13 +355,22 @@ const AddTransaction = () => {
               );
             })}
             
-            <Button 
-              className="w-full justify-center border-dashed bg-transparent text-pink-500 border-gray-700"
-              variant="outline" 
-              onClick={() => setProductDialogOpen(true)}
-            >
-              <Plus className="h-4 w-4 mr-1" /> Add Item
-            </Button>
+            <div className="flex gap-2">
+              <Button 
+                className="flex-1 justify-center border-dashed bg-transparent text-pink-500 border-gray-700"
+                variant="outline" 
+                onClick={() => setProductDialogOpen(true)}
+              >
+                <Plus className="h-4 w-4 mr-1" /> Add Item
+              </Button>
+              <Button 
+                variant="outline" 
+                onClick={() => setScannerOpen(true)}
+                className="border-dashed border-gray-700"
+              >
+                <ScanLine className="h-4 w-4" />
+              </Button>
+            </div>
           </div>
         )}
       </div>
@@ -482,21 +553,39 @@ const AddTransaction = () => {
               </div>
               
               <div>
-                <Label className="text-white">Price (GH₵)</Label>
+                <Label className="text-white">Price ({currencySymbol})</Label>
                 <Input
+                  readOnly
                   type="number"
                   min="0"
                   step="0.01"
                   value={addPrice}
-                  onChange={(e) => setAddPrice(e.target.value)}
+                  className="bg-gray-800 border-gray-700 text-white opacity-75"
+                />
+              </div>
+              
+              <div>
+                <Label className="text-white">Discount ({currencySymbol})</Label>
+                <Input
+                  type="number"
+                  min="0"
+                  max={addPrice}
+                  step="0.01"
+                  value={addDiscount}
+                  onChange={(e) => setAddDiscount(e.target.value)}
                   className="bg-gray-800 border-gray-700 text-white"
                 />
+                <p className="text-xs text-gray-400 mt-1">
+                  Enter amount to discount
+                </p>
               </div>
               
               <div className="text-white">
                 <div className="font-semibold">Total</div>
                 <div className="text-xl font-bold">
-                  {currencySymbol}{(parseFloat(addPrice) * parseInt(addQuantity)).toFixed(2)}
+                  {currencySymbol}{(
+                    parseFloat(addQuantity) * (parseFloat(addPrice) - parseFloat(addDiscount || '0'))
+                  ).toFixed(2)}
                 </div>
               </div>
               
@@ -554,28 +643,30 @@ const AddTransaction = () => {
                   Base Price ({currencySymbol})
                 </Label>
                 <Input
+                  readOnly
                   type="number"
                   min="0"
                   step="0.01"
                   value={editPrice}
-                  onChange={(e) => setEditPrice(e.target.value)}
-                  className="bg-gray-800 border-gray-700 text-white"
+                  className="bg-gray-800 border-gray-700 text-white opacity-75"
                 />
               </div>
               
               <div>
                 <Label className="block text-sm font-medium mb-1 text-white">
-                  Price Adjustment ({currencySymbol})
+                  Discount ({currencySymbol})
                 </Label>
                 <Input
                   type="number"
+                  min="0"
+                  max={editPrice}
                   step="0.01"
-                  value={editPriceDelta}
-                  onChange={(e) => setEditPriceDelta(e.target.value)}
+                  value={editDiscount}
+                  onChange={(e) => setEditDiscount(e.target.value)}
                   className="bg-gray-800 border-gray-700 text-white"
                 />
                 <p className="text-xs text-gray-400 mt-1">
-                  Use negative values for discounts
+                  Enter amount to discount
                 </p>
               </div>
               
@@ -587,7 +678,7 @@ const AddTransaction = () => {
                   {currencySymbol}
                   {(
                     parseInt(editQuantity || '0', 10) * 
-                    (parseFloat(editPrice || '0') + parseFloat(editPriceDelta || '0'))
+                    (parseFloat(editPrice || '0') - parseFloat(editDiscount || '0'))
                   ).toFixed(2)}
                 </div>
               </div>
@@ -602,6 +693,13 @@ const AddTransaction = () => {
           )}
         </DialogContent>
       </Dialog>
+      
+      {/* Barcode Scanner */}
+      <BarcodeScannerDialog 
+        open={scannerOpen} 
+        onClose={() => setScannerOpen(false)}
+        onScanSuccess={handleBarcodeScan}
+      />
     </div>
   );
 };

@@ -1,406 +1,424 @@
 
-import { useState } from 'react';
-import { useInventory } from '@/contexts/InventoryContext';
+import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Card } from '@/components/ui/card';
+import { Plus, Calendar, Search, Edit, Trash2, Filter } from 'lucide-react';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
-import { Switch } from '@/components/ui/switch';
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from '@/components/ui/dialog';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table';
-import { Plus, Calendar, TrendingUp } from 'lucide-react';
-import { toast } from "sonner";
+import { useToast } from '@/hooks/use-toast';
+import { format } from 'date-fns';
+import { Expense } from '@/types';
+import { useInventory } from '@/contexts/InventoryContext';
+import { ScrollArea } from '@/components/ui/scroll-area';
 
 const ExpensesPage = () => {
-  const { expenses, addExpense, deleteExpense, updateExpense, currencySymbol } = useInventory();
-  const [openDialog, setOpenDialog] = useState(false);
-  const [expenseFilter, setExpenseFilter] = useState("all");
-  const [currentPeriod, setCurrentPeriod] = useState("currentMonth");
-
-  const [newExpense, setNewExpense] = useState({
-    category: '',
-    amount: 0,
-    description: '',
-    date: new Date().toISOString().split('T')[0],
-    recurring: false,
-    frequency: 'monthly' as 'daily' | 'weekly' | 'monthly' | 'yearly',
+  const { toast } = useToast();
+  const { expenses, addExpense, updateExpense, deleteExpense, currencySymbol } = useInventory();
+  const [filteredExpenses, setFilteredExpenses] = useState<Expense[]>([]);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [filterOpen, setFilterOpen] = useState(false);
+  const [dialogOpen, setDialogOpen] = useState(false);
+  
+  // Form states
+  const [currentExpense, setCurrentExpense] = useState<Expense | null>(null);
+  const [category, setCategory] = useState('');
+  const [amount, setAmount] = useState('');
+  const [date, setDate] = useState(format(new Date(), 'yyyy-MM-dd'));
+  const [notes, setNotes] = useState('');
+  const [paymentMethod, setPaymentMethod] = useState('Cash');
+  
+  // Filters
+  const [categoryFilter, setCategoryFilter] = useState<string>('');
+  const [dateRangeFilter, setDateRangeFilter] = useState({
+    start: '',
+    end: ''
   });
-
-  // Filter expenses based on period
-  const getFilteredExpenses = () => {
-    const now = new Date();
-    const firstDayOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
-    const firstDayOfYear = new Date(now.getFullYear(), 0, 1);
+  
+  useEffect(() => {
+    // Initialize with latest expenses
+    filterExpenses();
+  }, [expenses, searchQuery, categoryFilter, dateRangeFilter]);
+  
+  const filterExpenses = () => {
+    let filtered = [...expenses];
     
-    let startDate;
-    
-    switch (currentPeriod) {
-      case "currentMonth":
-        startDate = firstDayOfMonth;
-        break;
-      case "currentYear":
-        startDate = firstDayOfYear;
-        break;
-      case "allTime":
-        return expenses;
-      default:
-        startDate = firstDayOfMonth;
+    // Apply search filter
+    if (searchQuery) {
+      filtered = filtered.filter(expense => 
+        expense.category.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        expense.notes.toLowerCase().includes(searchQuery.toLowerCase())
+      );
     }
     
-    return expenses.filter(expense => new Date(expense.date) >= startDate);
+    // Apply category filter
+    if (categoryFilter) {
+      filtered = filtered.filter(expense => expense.category === categoryFilter);
+    }
+    
+    // Apply date range filter
+    if (dateRangeFilter.start && dateRangeFilter.end) {
+      filtered = filtered.filter(expense => {
+        const expenseDate = new Date(expense.date);
+        const startDate = new Date(dateRangeFilter.start);
+        const endDate = new Date(dateRangeFilter.end);
+        
+        return expenseDate >= startDate && expenseDate <= endDate;
+      });
+    }
+    
+    // Sort by date (newest first)
+    filtered.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+    
+    setFilteredExpenses(filtered);
   };
   
-  const filteredExpenses = getFilteredExpenses().filter(expense => {
-    if (expenseFilter === "all") return true;
-    if (expenseFilter === "recurring" && expense.recurring) return true;
-    if (expenseFilter === "one-time" && !expense.recurring) return true;
-    return false;
-  });
-
-  // Calculate total expenses for the current filter
-  const totalExpenses = filteredExpenses.reduce((total, expense) => total + expense.amount, 0);
-
-  // Calculate expenses by category
-  const expensesByCategory = filteredExpenses.reduce((acc, expense) => {
-    if (!acc[expense.category]) {
-      acc[expense.category] = 0;
-    }
-    acc[expense.category] += expense.amount;
-    return acc;
-  }, {} as Record<string, number>);
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    if (!newExpense.category || newExpense.amount <= 0) {
-      toast.error("Please fill in all required fields");
+  const openCreateDialog = () => {
+    setCurrentExpense(null);
+    setCategory('');
+    setAmount('');
+    setDate(format(new Date(), 'yyyy-MM-dd'));
+    setNotes('');
+    setPaymentMethod('Cash');
+    setDialogOpen(true);
+  };
+  
+  const openEditDialog = (expense: Expense) => {
+    setCurrentExpense(expense);
+    setCategory(expense.category);
+    setAmount(expense.amount.toString());
+    setDate(format(new Date(expense.date), 'yyyy-MM-dd'));
+    setNotes(expense.notes);
+    setPaymentMethod(expense.paymentMethod);
+    setDialogOpen(true);
+  };
+  
+  const handleSubmit = () => {
+    if (!category || !amount || !date) {
+      toast({
+        title: "Missing information",
+        description: "Please fill in all required fields",
+        variant: "destructive",
+      });
       return;
     }
     
-    addExpense(newExpense);
-    setNewExpense({
-      category: '',
-      amount: 0,
-      description: '',
-      date: new Date().toISOString().split('T')[0],
-      recurring: false,
-      frequency: 'monthly',
+    try {
+      const expenseData: Partial<Expense> = {
+        category,
+        amount: parseFloat(amount),
+        date: new Date(date).toISOString(),
+        notes,
+        paymentMethod,
+      };
+      
+      if (currentExpense) {
+        // Update existing expense
+        updateExpense({
+          ...expenseData,
+          id: currentExpense.id
+        } as Expense);
+        
+        toast({
+          title: "Expense updated",
+          description: "Expense has been updated successfully"
+        });
+      } else {
+        // Create new expense
+        addExpense(expenseData as Omit<Expense, 'id'>);
+        
+        toast({
+          title: "Expense added",
+          description: "Expense has been added successfully"
+        });
+      }
+      
+      setDialogOpen(false);
+      filterExpenses();
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: error instanceof Error ? error.message : "An unknown error occurred",
+        variant: "destructive",
+      });
+    }
+  };
+  
+  const handleDeleteExpense = (expense: Expense) => {
+    deleteExpense(expense.id);
+    toast({
+      title: "Expense deleted",
+      description: "Expense has been deleted successfully"
     });
-    setOpenDialog(false);
-    toast.success("Expense added successfully");
+    filterExpenses();
   };
-
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString();
+  
+  const applyFilter = () => {
+    filterExpenses();
+    setFilterOpen(false);
   };
-
-  const expenseCategories = [
-    "Rent",
-    "Utilities",
-    "Salaries",
-    "Inventory",
-    "Marketing",
-    "Transportation",
-    "Equipment",
-    "Office Supplies",
-    "Insurance",
-    "Taxes",
-    "Maintenance",
-    "Other"
-  ];
-
+  
+  const clearFilters = () => {
+    setCategoryFilter('');
+    setDateRangeFilter({ start: '', end: '' });
+    setFilterOpen(false);
+  };
+  
+  // Get unique categories for filter dropdown
+  const uniqueCategories = [...new Set(expenses.map(expense => expense.category))];
+  
   return (
-    <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <h1 className="text-2xl font-bold">Expenses</h1>
-        <Dialog open={openDialog} onOpenChange={setOpenDialog}>
-          <DialogTrigger asChild>
-            <Button>
-              <Plus className="mr-2 h-4 w-4" />
-              Add Expense
-            </Button>
-          </DialogTrigger>
-          <DialogContent className="sm:max-w-[500px]">
-            <form onSubmit={handleSubmit}>
-              <DialogHeader>
-                <DialogTitle>Add New Expense</DialogTitle>
-                <DialogDescription>
-                  Record a new expense for your business
-                </DialogDescription>
-              </DialogHeader>
-              <div className="grid gap-4 py-4">
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="category">Category *</Label>
-                    <Select
-                      value={newExpense.category}
-                      onValueChange={(value) => setNewExpense(prev => ({ ...prev, category: value }))}
-                      required
-                    >
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select category" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {expenseCategories.map((category) => (
-                          <SelectItem key={category} value={category}>
-                            {category}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="amount">Amount (₵) *</Label>
-                    <Input
-                      id="amount"
-                      type="number"
-                      min="0"
-                      step="0.01"
-                      value={newExpense.amount || ''}
-                      onChange={(e) => setNewExpense(prev => ({ ...prev, amount: parseFloat(e.target.value) || 0 }))}
-                      required
-                    />
-                  </div>
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="date">Date *</Label>
-                  <Input
-                    id="date"
-                    type="date"
-                    value={newExpense.date}
-                    onChange={(e) => setNewExpense(prev => ({ ...prev, date: e.target.value }))}
-                    required
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="description">Description</Label>
-                  <Textarea
-                    id="description"
-                    value={newExpense.description}
-                    onChange={(e) => setNewExpense(prev => ({ ...prev, description: e.target.value }))}
-                    placeholder="Add details about this expense"
-                  />
-                </div>
-                <div className="flex items-center space-x-2">
-                  <Switch
-                    id="recurring"
-                    checked={newExpense.recurring}
-                    onCheckedChange={(checked) => setNewExpense(prev => ({ ...prev, recurring: checked }))}
-                  />
-                  <Label htmlFor="recurring">Recurring Expense</Label>
-                </div>
-                {newExpense.recurring && (
-                  <div className="space-y-2">
-                    <Label htmlFor="frequency">Frequency</Label>
-                    <Select
-                      value={newExpense.frequency}
-                      onValueChange={(value: 'daily' | 'weekly' | 'monthly' | 'yearly') => 
-                        setNewExpense(prev => ({ ...prev, frequency: value }))
-                      }
-                    >
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select frequency" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="daily">Daily</SelectItem>
-                        <SelectItem value="weekly">Weekly</SelectItem>
-                        <SelectItem value="monthly">Monthly</SelectItem>
-                        <SelectItem value="yearly">Yearly</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                )}
-              </div>
-              <DialogFooter>
-                <Button type="button" variant="outline" onClick={() => setOpenDialog(false)}>
-                  Cancel
-                </Button>
-                <Button type="submit">Add Expense</Button>
-              </DialogFooter>
-            </form>
-          </DialogContent>
-        </Dialog>
-      </div>
-
-      <div className="flex flex-col md:flex-row gap-4">
-        <div className="md:w-2/3 space-y-4">
-          <Card>
-            <CardHeader className="pb-2">
-              <div className="flex justify-between items-center">
-                <CardTitle>Expense List</CardTitle>
-                <div className="flex gap-2">
-                  <Select 
-                    value={currentPeriod}
-                    onValueChange={setCurrentPeriod}
-                  >
-                    <SelectTrigger className="w-[150px]">
-                      <Calendar className="h-4 w-4 mr-2" />
-                      <SelectValue placeholder="Period" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="currentMonth">This Month</SelectItem>
-                      <SelectItem value="currentYear">This Year</SelectItem>
-                      <SelectItem value="allTime">All Time</SelectItem>
-                    </SelectContent>
-                  </Select>
-                  
-                  <Select 
-                    value={expenseFilter}
-                    onValueChange={setExpenseFilter}
-                  >
-                    <SelectTrigger className="w-[150px]">
-                      <SelectValue placeholder="Filter" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">All Expenses</SelectItem>
-                      <SelectItem value="recurring">Recurring</SelectItem>
-                      <SelectItem value="one-time">One-time</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
-            </CardHeader>
-            <CardContent>
-              {filteredExpenses.length > 0 ? (
-                <div className="border rounded-md overflow-hidden">
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead>Date</TableHead>
-                        <TableHead>Category</TableHead>
-                        <TableHead>Description</TableHead>
-                        <TableHead>Recurring</TableHead>
-                        <TableHead className="text-right">Amount</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {filteredExpenses.map((expense) => (
-                        <TableRow key={expense.id}>
-                          <TableCell>{formatDate(expense.date)}</TableCell>
-                          <TableCell>{expense.category}</TableCell>
-                          <TableCell className="max-w-[200px] truncate">{expense.description}</TableCell>
-                          <TableCell>
-                            {expense.recurring ? 
-                              `Yes (${expense.frequency})` : 'No'}
-                          </TableCell>
-                          <TableCell className="text-right font-medium">
-                            {currencySymbol}{expense.amount.toFixed(2)}
-                          </TableCell>
-                        </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
-                </div>
-              ) : (
-                <div className="text-center py-10">
-                  <p className="text-muted-foreground">No expenses found for the selected period.</p>
-                </div>
-              )}
-            </CardContent>
-          </Card>
+    <ScrollArea className="h-full scrollbar-none">
+      <div className="space-y-6 pb-20">
+        <div className="flex justify-between items-center">
+          <h1 className="text-xl font-bold">Expenses</h1>
+          <Button
+            className="bg-pink-500 hover:bg-pink-600"
+            onClick={openCreateDialog}
+          >
+            <Plus className="h-4 w-4 mr-2" /> Add Expense
+          </Button>
         </div>
         
-        <div className="md:w-1/3 space-y-4">
-          <Card>
-            <CardHeader>
-              <CardTitle>Summary</CardTitle>
-              <CardDescription>
-                Expense summary for the selected period
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              <div>
-                <p className="text-sm text-muted-foreground">Total Expenses</p>
-                <p className="text-2xl font-bold">{currencySymbol}{totalExpenses.toFixed(2)}</p>
-              </div>
-              
-              <div>
-                <p className="text-sm text-muted-foreground mb-2">Expenses by Category</p>
-                <div className="space-y-2">
-                  {Object.entries(expensesByCategory)
-                    .sort(([, a], [, b]) => b - a)
-                    .map(([category, amount]) => (
-                      <div key={category} className="space-y-1">
-                        <div className="flex justify-between">
-                          <span className="text-sm">{category}</span>
-                          <span className="text-sm font-medium">
-                            {currencySymbol}{amount.toFixed(2)}
-                          </span>
-                        </div>
-                        <div className="w-full bg-gray-200 rounded-full h-1.5">
-                          <div 
-                            className="bg-primary h-1.5 rounded-full" 
-                            style={{ width: `${(amount / totalExpenses) * 100}%` }}
-                          ></div>
-                        </div>
-                      </div>
-                    ))}
+        <div className="flex gap-2">
+          <div className="relative flex-1">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-500" />
+            <Input
+              type="search"
+              placeholder="Search expenses..."
+              className="pl-10"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+            />
+          </div>
+          <Button
+            size="icon"
+            variant="outline"
+            onClick={() => setFilterOpen(true)}
+          >
+            <Filter className="h-4 w-4" />
+          </Button>
+        </div>
+        
+        <div className="space-y-4">
+          {filteredExpenses.length > 0 ? (
+            filteredExpenses.map((expense) => (
+              <Card key={expense.id} className="p-4">
+                <div className="flex justify-between items-start">
+                  <div>
+                    <div className="flex items-center">
+                      <h3 className="font-medium">{expense.category}</h3>
+                      <span className="ml-2 text-xs text-gray-500">
+                        {format(new Date(expense.date), 'PP')}
+                      </span>
+                    </div>
+                    <p className="text-xl font-semibold mt-1">{currencySymbol}{expense.amount.toFixed(2)}</p>
+                    {expense.notes && (
+                      <p className="text-sm text-gray-500 mt-1">{expense.notes}</p>
+                    )}
+                    <p className="text-xs text-gray-400 mt-2">Payment: {expense.paymentMethod}</p>
+                  </div>
+                  <div className="flex gap-2">
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => openEditDialog(expense)}
+                    >
+                      <Edit className="h-4 w-4" />
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="text-red-500"
+                      onClick={() => handleDeleteExpense(expense)}
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </div>
                 </div>
-              </div>
-            </CardContent>
-          </Card>
-          
-          <Card>
-            <CardHeader>
-              <CardTitle>Recurring Expenses</CardTitle>
-            </CardHeader>
-            <CardContent>
-              {filteredExpenses.filter(e => e.recurring).length > 0 ? (
-                <div className="space-y-2">
-                  {filteredExpenses
-                    .filter(e => e.recurring)
-                    .map((expense) => (
-                      <div key={expense.id} className="flex justify-between items-center border-b pb-2">
-                        <div>
-                          <p className="font-medium">{expense.category}</p>
-                          <p className="text-xs text-muted-foreground">
-                            {expense.frequency.charAt(0).toUpperCase() + expense.frequency.slice(1)}
-                          </p>
-                        </div>
-                        <p className="font-medium">
-                          {currencySymbol}{expense.amount.toFixed(2)}
-                        </p>
-                      </div>
-                    ))}
-                </div>
-              ) : (
-                <p className="text-sm text-muted-foreground">No recurring expenses found.</p>
-              )}
-            </CardContent>
-          </Card>
+              </Card>
+            ))
+          ) : (
+            <div className="text-center py-10">
+              <p className="text-muted-foreground">No expenses found</p>
+              <Button
+                className="mt-4 bg-pink-500 hover:bg-pink-600"
+                onClick={openCreateDialog}
+              >
+                Add your first expense
+              </Button>
+            </div>
+          )}
         </div>
       </div>
-    </div>
+      
+      {/* Add/Edit Expense Dialog */}
+      <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>
+              {currentExpense ? 'Edit Expense' : 'Add Expense'}
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <Label htmlFor="category">Category *</Label>
+              <Input
+                id="category"
+                value={category}
+                onChange={(e) => setCategory(e.target.value)}
+                placeholder="e.g. Rent, Utilities, Supplies"
+                required
+              />
+            </div>
+            
+            <div>
+              <Label htmlFor="amount">Amount *</Label>
+              <div className="relative">
+                <span className="absolute left-3 top-1/2 transform -translate-y-1/2">{currencySymbol}</span>
+                <Input
+                  id="amount"
+                  type="number"
+                  step="0.01"
+                  min="0"
+                  value={amount}
+                  onChange={(e) => setAmount(e.target.value)}
+                  className="pl-8"
+                  placeholder="0.00"
+                  required
+                />
+              </div>
+            </div>
+            
+            <div>
+              <Label htmlFor="date">Date *</Label>
+              <div className="relative">
+                <Calendar className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-500" />
+                <Input
+                  id="date"
+                  type="date"
+                  value={date}
+                  onChange={(e) => setDate(e.target.value)}
+                  className="pl-10"
+                  required
+                />
+              </div>
+            </div>
+            
+            <div>
+              <Label htmlFor="payment-method">Payment Method *</Label>
+              <div className="flex flex-wrap gap-2 mt-2">
+                {['Cash', 'Mobile Money', 'Card', 'Bank Transfer'].map(method => (
+                  <button
+                    key={method}
+                    type="button"
+                    className={`px-3 py-1 text-sm rounded-md ${
+                      paymentMethod === method 
+                        ? 'bg-pink-500 text-white' 
+                        : 'bg-gray-100 dark:bg-gray-800 border border-gray-300 dark:border-gray-700'
+                    }`}
+                    onClick={() => setPaymentMethod(method)}
+                  >
+                    {method}
+                  </button>
+                ))}
+              </div>
+            </div>
+            
+            <div>
+              <Label htmlFor="notes">Notes</Label>
+              <Input
+                id="notes"
+                value={notes}
+                onChange={(e) => setNotes(e.target.value)}
+                placeholder="Additional details (optional)"
+              />
+            </div>
+            
+            <div className="flex justify-end gap-2 pt-2">
+              <Button
+                variant="outline"
+                onClick={() => setDialogOpen(false)}
+              >
+                Cancel
+              </Button>
+              <Button
+                className="bg-pink-500 hover:bg-pink-600"
+                onClick={handleSubmit}
+              >
+                {currentExpense ? 'Update' : 'Save'}
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+      
+      {/* Filter Dialog */}
+      <Dialog open={filterOpen} onOpenChange={setFilterOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Filter Expenses</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <Label htmlFor="category-filter">Category</Label>
+              <select
+                id="category-filter"
+                value={categoryFilter}
+                onChange={(e) => setCategoryFilter(e.target.value)}
+                className="w-full p-2 border border-gray-300 dark:border-gray-700 rounded-md bg-transparent"
+              >
+                <option value="">All Categories</option>
+                {uniqueCategories.map(cat => (
+                  <option key={cat} value={cat}>
+                    {cat}
+                  </option>
+                ))}
+              </select>
+            </div>
+            
+            <div>
+              <Label>Date Range</Label>
+              <div className="grid grid-cols-2 gap-2 mt-1">
+                <div>
+                  <Label htmlFor="date-start" className="text-xs">From</Label>
+                  <Input
+                    id="date-start"
+                    type="date"
+                    value={dateRangeFilter.start}
+                    onChange={(e) => setDateRangeFilter({ ...dateRangeFilter, start: e.target.value })}
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="date-end" className="text-xs">To</Label>
+                  <Input
+                    id="date-end"
+                    type="date"
+                    value={dateRangeFilter.end}
+                    onChange={(e) => setDateRangeFilter({ ...dateRangeFilter, end: e.target.value })}
+                  />
+                </div>
+              </div>
+            </div>
+            
+            <div className="flex justify-end gap-2 pt-2">
+              <Button
+                variant="outline"
+                onClick={clearFilters}
+              >
+                Clear Filters
+              </Button>
+              <Button
+                className="bg-pink-500 hover:bg-pink-600"
+                onClick={applyFilter}
+              >
+                Apply
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+    </ScrollArea>
   );
 };
 

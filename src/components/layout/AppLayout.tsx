@@ -1,44 +1,49 @@
-
-import React, { useState } from 'react';
-import { Outlet } from 'react-router-dom';
-import { TabsType } from '@/types';
-import MobileNavbar from './MobileNavbar';
+import { useState, useEffect } from 'react';
+import { Outlet, Navigate } from 'react-router-dom';
+import { useAuth } from '@/contexts/AuthContext';
+import { SidebarProvider } from '@/contexts/SidebarContext';
+import LoadingScreen from '@/components/common/LoadingScreen';
 import MobileHeader from './MobileHeader';
-import { useIsMobile } from '@/hooks/use-mobile';
-import Breadcrumb from '../navigation/Breadcrumb';
-import NotificationsPanel from '../notifications/NotificationsPanel';
+import MobileNavbar from './MobileNavbar';
+import NotificationsPanel from './NotificationsPanel';
+import DesktopSidebar from '@/components/layout/DesktopSidebar';
 
-interface AppLayoutProps {
-  children?: React.ReactNode;
-}
-
-const AppLayout = ({ children }: AppLayoutProps) => {
-  const [activeTab, setActiveTab] = useState<TabsType>('dashboard');
+const AppLayout = () => {
+  const { isAuthenticated, isLoading } = useAuth();
+  const [activeTab, setActiveTab] = useState<string>('dashboard');
   const [notificationsPanelOpen, setNotificationsPanelOpen] = useState(false);
-  const isMobile = useIsMobile();
 
   const toggleNotificationsPanel = () => {
     setNotificationsPanelOpen(!notificationsPanelOpen);
   };
-
+  
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex flex-col overflow-x-hidden">
-      <MobileHeader 
-        activeTab={activeTab} 
-        toggleNotificationsPanel={toggleNotificationsPanel} 
-      />
-      
-      <main className="flex-1 container mx-auto px-4 py-4 pb-20 bg-gray-50 dark:bg-gray-900 overflow-y-auto scrollbar-none">
-        <Breadcrumb />
-        {children || <Outlet />}
-      </main>
-      
-      {notificationsPanelOpen && (
-        <NotificationsPanel onClose={() => setNotificationsPanelOpen(false)} />
+    <>
+      {isLoading ? (
+        <LoadingScreen />
+      ) : !isAuthenticated ? (
+        <Navigate to="/login" replace />
+      ) : (
+        <SidebarProvider>
+          <div className="min-h-screen flex w-full">
+            <DesktopSidebar />
+            <div className="flex-1 flex flex-col">
+              <MobileHeader
+                activeTab={activeTab}
+                toggleNotificationsPanel={toggleNotificationsPanel}
+              />
+              <div className="flex-grow p-4 pb-20">
+                <Outlet />
+              </div>
+              <MobileNavbar activeTab={activeTab} setActiveTab={setActiveTab} />
+              {notificationsPanelOpen && (
+                <NotificationsPanel onClose={toggleNotificationsPanel} />
+              )}
+            </div>
+          </div>
+        </SidebarProvider>
       )}
-      
-      {isMobile && <MobileNavbar activeTab={activeTab} setActiveTab={setActiveTab} />}
-    </div>
+    </>
   );
 };
 

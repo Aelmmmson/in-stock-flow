@@ -1,5 +1,5 @@
 
-import { useState, useRef, useCallback } from 'react';
+import { useState, useRef, useCallback, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useInventory } from '@/contexts/InventoryContext';
 import { Button } from '@/components/ui/button';
@@ -8,7 +8,9 @@ import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
 import { Camera, X, Plus, Trash2 } from 'lucide-react';
-import { ProductVariant } from '@/types';
+import { ProductVariant, ProductCategory } from '@/types';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Link } from 'react-router-dom';
 
 const AddProduct = () => {
   const navigate = useNavigate();
@@ -26,6 +28,15 @@ const AddProduct = () => {
   const [supplier, setSupplier] = useState('');
   const [image, setImage] = useState<string | null>(null);
   const [variants, setVariants] = useState<ProductVariant[]>([]);
+  const [categories, setCategories] = useState<ProductCategory[]>([]);
+  
+  useEffect(() => {
+    // Load categories from localStorage
+    const storedCategories = localStorage.getItem('didiz-closet-categories');
+    if (storedCategories) {
+      setCategories(JSON.parse(storedCategories));
+    }
+  }, []);
   
   // Generate SKU based on product name and category
   const generateSKU = useCallback(() => {
@@ -97,9 +108,10 @@ const AddProduct = () => {
     }
     
     try {
+      const sku = generateSKU();
       addProduct({
         name,
-        sku: generateSKU(),
+        sku,
         category,
         quantity: parseInt(quantity, 10),
         lowStockThreshold: parseInt(lowStockThreshold, 10),
@@ -115,7 +127,7 @@ const AddProduct = () => {
       
       toast({
         title: "Product added",
-        description: `${name} has been added to your inventory`,
+        description: `${name} has been added to your inventory with SKU: ${sku}`,
       });
       
       navigate('/inventory');
@@ -183,14 +195,22 @@ const AddProduct = () => {
           </div>
           
           <div>
-            <Label htmlFor="category">Category *</Label>
-            <Input
-              id="category"
-              placeholder="Enter category"
-              value={category}
-              onChange={(e) => setCategory(e.target.value)}
-              required
-            />
+            <div className="flex justify-between items-center mb-1">
+              <Label htmlFor="category">Category *</Label>
+              <Button asChild variant="link" size="sm" className="text-xs h-auto p-0">
+                <Link to="/inventory/categories">Manage Categories</Link>
+              </Button>
+            </div>
+            <Select value={category} onValueChange={setCategory}>
+              <SelectTrigger>
+                <SelectValue placeholder="Select category" />
+              </SelectTrigger>
+              <SelectContent>
+                {categories.map(cat => (
+                  <SelectItem key={cat.id} value={cat.name}>{cat.name}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
           
           <div>
