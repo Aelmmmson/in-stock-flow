@@ -6,6 +6,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { InventoryProvider } from "@/contexts/InventoryContext";
 import { ThemeProvider } from "@/contexts/ThemeContext";
+import { AuthProvider } from "@/contexts/AuthContext";
 import AppLayout from "@/components/layout/AppLayout";
 import LoadingScreen from "@/components/common/LoadingScreen";
 
@@ -53,40 +54,42 @@ function App() {
         <TooltipProvider>
           <Toaster />
           <Sonner />
-          <InventoryProvider>
-            {loading ? (
-              <LoadingScreen />
-            ) : (
-              <BrowserRouter>
-                <Routes>
-                  <Route path="/login" element={<Login />} />
-                  <Route path="/" element={<AppLayout />}>
-                    <Route index element={<Index />} />
-                    <Route path="dashboard" element={<Dashboard />} />
-                    <Route path="inventory" element={<Inventory />} />
-                    <Route path="inventory/:id" element={<ProductDetail />} />
-                    <Route path="inventory/:id/edit" element={<EditProduct />} />
-                    <Route path="inventory/:id/barcode" element={<ProductBarcode />} />
-                    <Route path="inventory/scan/:sku" element={<ScanProduct />} />
-                    <Route path="inventory/add" element={<AddProduct />} />
-                    <Route path="inventory/categories" element={<Categories />} />
-                    <Route path="transactions" element={<Transactions />} />
-                    <Route path="transactions/add" element={<AddTransaction />} />
-                    <Route path="transactions/:id" element={<TransactionDetail />} />
-                    <Route path="reports" element={<Reports />} />
-                    <Route path="reports/inventory" element={<ReportsInventory />} />
-                    <Route path="reports/sales" element={<ReportsSales />} />
-                    <Route path="reports/financial" element={<FinancialReports />} />
-                    <Route path="settings" element={<Settings />} />
-                    <Route path="settings/profile" element={<Profile />} />
-                    <Route path="discounts" element={<Discounts />} />
-                    <Route path="low-stock" element={<LowStockItems />} />
-                    <Route path="*" element={<NotFound />} />
-                  </Route>
-                </Routes>
-              </BrowserRouter>
-            )}
-          </InventoryProvider>
+          <AuthProvider>
+            <InventoryProvider>
+              {loading ? (
+                <LoadingScreen />
+              ) : (
+                <BrowserRouter>
+                  <Routes>
+                    <Route path="/login" element={<Login />} />
+                    <Route path="/" element={<AppLayout />}>
+                      <Route index element={<Index />} />
+                      <Route path="dashboard" element={<Dashboard />} />
+                      <Route path="inventory" element={<Inventory />} />
+                      <Route path="inventory/:id" element={<ProductDetail />} />
+                      <Route path="inventory/:id/edit" element={<EditProduct />} />
+                      <Route path="inventory/:id/barcode" element={<ProductBarcode />} />
+                      <Route path="inventory/scan/:sku" element={<ScanProduct />} />
+                      <Route path="inventory/add" element={<AddProduct />} />
+                      <Route path="inventory/categories" element={<Categories />} />
+                      <Route path="transactions" element={<Transactions />} />
+                      <Route path="transactions/add" element={<AddTransaction />} />
+                      <Route path="transactions/:id" element={<TransactionDetail />} />
+                      <Route path="reports" element={<Reports />} />
+                      <Route path="reports/inventory" element={<ReportsInventory />} />
+                      <Route path="reports/sales" element={<ReportsSales />} />
+                      <Route path="reports/financial" element={<FinancialReports />} />
+                      <Route path="settings" element={<Settings />} />
+                      <Route path="settings/profile" element={<Profile />} />
+                      <Route path="discounts" element={<Discounts />} />
+                      <Route path="low-stock" element={<LowStockItems />} />
+                      <Route path="*" element={<NotFound />} />
+                    </Route>
+                  </Routes>
+                </BrowserRouter>
+              )}
+            </InventoryProvider>
+          </AuthProvider>
         </TooltipProvider>
       </ThemeProvider>
     </QueryClientProvider>

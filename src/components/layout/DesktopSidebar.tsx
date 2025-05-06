@@ -48,9 +48,13 @@ const DesktopSidebar = () => {
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton
                     asChild
-                    active={currentPath === item.path.substring(1)}
                   >
-                    <Link to={item.path} className="flex items-center space-x-3 p-2">
+                    <Link 
+                      to={item.path} 
+                      className={`flex items-center space-x-3 p-2 ${
+                        currentPath === item.path.substring(1) ? 'bg-accent text-accent-foreground' : ''
+                      }`}
+                    >
                       <item.icon className="h-5 w-5" />
                       <span>{item.title}</span>
                     </Link>
