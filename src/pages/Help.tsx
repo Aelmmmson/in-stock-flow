@@ -2,6 +2,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { HelpCircle, Package, ShoppingCart, PieChart, Settings, Tag } from 'lucide-react';
+import { ScrollArea } from '@/components/ui/scroll-area';
 
 const Help = () => {
   return (
@@ -12,13 +13,15 @@ const Help = () => {
       </div>
       
       <Tabs defaultValue="getting-started">
-        <TabsList className="grid grid-cols-2 md:grid-cols-5 mb-4">
-          <TabsTrigger value="getting-started">Getting Started</TabsTrigger>
-          <TabsTrigger value="inventory">Inventory</TabsTrigger>
-          <TabsTrigger value="sales">Sales</TabsTrigger>
-          <TabsTrigger value="discounts">Discounts</TabsTrigger>
-          <TabsTrigger value="reports">Reports</TabsTrigger>
-        </TabsList>
+        <ScrollArea className="w-full max-w-[100vw]">
+          <TabsList className="grid grid-cols-5 mb-4 w-max min-w-full">
+            <TabsTrigger value="getting-started">Getting Started</TabsTrigger>
+            <TabsTrigger value="inventory">Inventory</TabsTrigger>
+            <TabsTrigger value="sales">Sales</TabsTrigger>
+            <TabsTrigger value="discounts">Discounts</TabsTrigger>
+            <TabsTrigger value="reports">Reports</TabsTrigger>
+          </TabsList>
+        </ScrollArea>
         
         <TabsContent value="getting-started" className="space-y-4">
           <Card>

@@ -64,15 +64,26 @@ const Profile = () => {
   
   const handleSubmit = async () => {
     try {
+      if (!currentUser) {
+        toast.error("No user data available");
+        return;
+      }
+      
       // Show temporary success indicator
       setSaveSuccess(true);
       
-      // Save user data
-      await updateUserProfile({
+      // Create updated user object with all required properties
+      const updatedUser = {
         ...currentUser,
-        ...formData,
-        avatar
-      });
+        name: formData.name,
+        email: formData.email,
+        phone: formData.phone,
+        address: formData.address,
+        avatar: avatar
+      };
+      
+      // Save user data
+      await updateUserProfile(updatedUser);
       
       setIsEditing(false);
       
@@ -83,6 +94,7 @@ const Profile = () => {
         setSaveSuccess(false);
       }, 2000);
     } catch (error) {
+      console.error("Profile update error:", error);
       toast.error("Failed to update profile");
       setSaveSuccess(false);
     }
@@ -91,13 +103,15 @@ const Profile = () => {
   const toggleEdit = () => {
     if (isEditing) {
       // Cancel edit
-      setFormData({
-        name: currentUser?.name || '',
-        email: currentUser?.email || '',
-        phone: currentUser?.phone || '',
-        address: currentUser?.address || ''
-      });
-      setAvatar(currentUser?.avatar || null);
+      if (currentUser) {
+        setFormData({
+          name: currentUser.name || '',
+          email: currentUser.email || '',
+          phone: currentUser.phone || '',
+          address: currentUser.address || ''
+        });
+        setAvatar(currentUser.avatar || null);
+      }
     }
     setIsEditing(!isEditing);
   };
@@ -144,7 +158,7 @@ const Profile = () => {
           
           <div className="flex-1 text-center sm:text-left">
             <div className="flex justify-between items-center mb-4">
-              <h2 className="text-2xl font-bold text-white">{currentUser?.name}</h2>
+              <h2 className="text-2xl font-bold text-white">{currentUser?.name || 'User'}</h2>
               <Button 
                 variant={isEditing ? "destructive" : "outline"} 
                 size="sm"
@@ -172,15 +186,15 @@ const Profile = () => {
             <div className="space-y-2">
               <div className="flex items-center text-gray-300">
                 <Mail className="h-4 w-4 mr-2 text-gray-400" />
-                <span>{currentUser?.email}</span>
+                <span>{currentUser?.email || 'user@example.com'}</span>
               </div>
               <div className="flex items-center text-gray-300">
                 <Phone className="h-4 w-4 mr-2 text-gray-400" />
-                <span>{currentUser?.phone}</span>
+                <span>{currentUser?.phone || 'Not specified'}</span>
               </div>
               <div className="flex items-center text-gray-300">
                 <MapPin className="h-4 w-4 mr-2 text-gray-400" />
-                <span>{currentUser?.address}</span>
+                <span>{currentUser?.address || 'Not specified'}</span>
               </div>
             </div>
           </div>

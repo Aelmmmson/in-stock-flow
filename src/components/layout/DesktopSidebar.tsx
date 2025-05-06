@@ -13,7 +13,7 @@ import {
   SidebarMenuItem,
   SidebarMenuButton,
 } from '@/components/ui/sidebar';
-import { LayoutDashboard, Package, CircleDollarSign, BarChart2, Settings, ShoppingCart, Tag, HelpCircle } from 'lucide-react';
+import { LayoutDashboard, Package, CircleDollarSign, BarChart2, Settings, ShoppingCart, Tag } from 'lucide-react';
 
 const DesktopSidebar = () => {
   const location = useLocation();
@@ -26,7 +26,6 @@ const DesktopSidebar = () => {
     { title: 'Discounts', icon: Tag, path: '/discounts' },
     { title: 'Reports', icon: BarChart2, path: '/reports' },
     { title: 'Settings', icon: Settings, path: '/settings' },
-    { title: 'Help', icon: HelpCircle, path: '/help' },
   ];
   
   return (

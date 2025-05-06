@@ -87,8 +87,6 @@ const NotificationsDropdown = ({ onClose }: NotificationsDropdownProps) => {
     setNotifications(notifications.map(n => ({ ...n, read: true })));
   };
 
-  // Click outside handler is managed by parent component
-
   return (
     <Card className="absolute right-0 top-12 w-80 z-50 shadow-lg border-gray-200 dark:border-gray-700 overflow-hidden">
       <div className="flex justify-between items-center p-4 border-b border-gray-100 dark:border-gray-800">
@@ -134,6 +132,13 @@ const NotificationsDropdown = ({ onClose }: NotificationsDropdownProps) => {
           )}
         </div>
       </ScrollArea>
+      <div className="p-3 border-t border-gray-100 dark:border-gray-800">
+        <Link to="/notifications" onClick={onClose}>
+          <Button variant="outline" className="w-full">
+            View All Notifications
+          </Button>
+        </Link>
+      </div>
     </Card>
   );
 };

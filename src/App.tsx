@@ -25,7 +25,6 @@ import NotFound from "./pages/NotFound";
 import FinancialReports from "./pages/FinancialReports";
 import LowStockItems from "./pages/LowStockItems";
 import ExpensesPage from "./pages/ExpensesPage";
-import Index from "./pages/Index";
 import Login from "./pages/Login";
 import ProductDetail from "./pages/ProductDetail";
 import TransactionDetail from "./pages/TransactionDetail";
@@ -36,6 +35,7 @@ import ScanProduct from "./pages/ScanProduct";
 import Categories from "./pages/Categories";
 import Discounts from "./pages/Discounts";
 import Help from "./pages/Help";
+import Notifications from "./pages/Notifications";
 
 // Create a new QueryClient instance outside the component
 const queryClient = new QueryClient();
@@ -86,6 +86,7 @@ function App() {
                       <Route path="settings/profile" element={<Profile />} />
                       <Route path="discounts" element={<Discounts />} />
                       <Route path="help" element={<Help />} />
+                      <Route path="notifications" element={<Notifications />} />
                       <Route path="low-stock" element={<LowStockItems />} />
                       <Route path="*" element={<NotFound />} />
                     </Route>
