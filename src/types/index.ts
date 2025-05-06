@@ -1,3 +1,4 @@
+
 export interface Product {
   id: string;
   name: string;
@@ -13,6 +14,7 @@ export interface Product {
   lowStockThreshold: number;
   taxRate: number;
   taxInclusive: boolean;
+  discount?: number; // Added discount property as optional
   createdAt: string;
   updatedAt: string;
 }

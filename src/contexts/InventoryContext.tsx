@@ -22,6 +22,7 @@ const sampleProducts: Product[] = [
     lowStockThreshold: 5,
     taxRate: 10,
     taxInclusive: false,
+    discount: 10, // Adding a 10% discount to this product for demonstration
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
   },
@@ -63,6 +64,7 @@ const sampleProducts: Product[] = [
     lowStockThreshold: 5,
     taxRate: 10,
     taxInclusive: false,
+    discount: 15, // Adding a 15% discount to this product for demonstration
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
   }
