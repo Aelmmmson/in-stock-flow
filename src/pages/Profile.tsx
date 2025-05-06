@@ -1,35 +1,39 @@
 
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { useToast } from '@/hooks/use-toast';
-import { Camera, User, Mail, Phone, MapPin, Pencil, Save, X } from 'lucide-react';
-
-// Mock user data
-const mockUser = {
-  id: 'user-1',
-  name: 'Shop Owner',
-  email: 'owner@didizcloset.com',
-  role: 'admin',
-  phone: '+233 50 123 4567',
-  address: 'Accra, Ghana',
-  avatar: null
-};
+import { toast } from 'sonner';
+import { Camera, User, Mail, Phone, MapPin, Pencil, Save, X, CheckCircle } from 'lucide-react';
+import { useAuth } from '@/contexts/AuthContext';
 
 const Profile = () => {
-  const { toast } = useToast();
+  const { currentUser, updateUserProfile } = useAuth();
   const fileInputRef = useRef<HTMLInputElement>(null);
   
-  const [user, setUser] = useState(mockUser);
   const [isEditing, setIsEditing] = useState(false);
   const [formData, setFormData] = useState({
-    name: user.name,
-    email: user.email,
-    phone: user.phone,
-    address: user.address
+    name: currentUser?.name || '',
+    email: currentUser?.email || '',
+    phone: currentUser?.phone || '',
+    address: currentUser?.address || ''
   });
-  const [avatar, setAvatar] = useState<string | null>(user.avatar);
+  const [avatar, setAvatar] = useState<string | null>(currentUser?.avatar || null);
+  const [uploadingAvatar, setUploadingAvatar] = useState(false);
+  const [saveSuccess, setSaveSuccess] = useState(false);
+  
+  useEffect(() => {
+    // Reset form data when user changes
+    if (currentUser) {
+      setFormData({
+        name: currentUser.name || '',
+        email: currentUser.email || '',
+        phone: currentUser.phone || '',
+        address: currentUser.address || ''
+      });
+      setAvatar(currentUser.avatar || null);
+    }
+  }, [currentUser]);
   
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({
@@ -41,42 +45,59 @@ const Profile = () => {
   const handleAvatarUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
+      setUploadingAvatar(true);
+      
       const reader = new FileReader();
       reader.onload = (event) => {
         if (event.target?.result) {
           setAvatar(event.target.result as string);
+          setUploadingAvatar(false);
         }
+      };
+      reader.onerror = () => {
+        toast.error("Failed to read file");
+        setUploadingAvatar(false);
       };
       reader.readAsDataURL(file);
     }
   };
   
-  const handleSubmit = () => {
-    // Save user data
-    setUser({
-      ...user,
-      ...formData,
-      avatar
-    });
-    
-    setIsEditing(false);
-    
-    toast({
-      title: "Profile updated",
-      description: "Your profile has been updated successfully",
-    });
+  const handleSubmit = async () => {
+    try {
+      // Show temporary success indicator
+      setSaveSuccess(true);
+      
+      // Save user data
+      await updateUserProfile({
+        ...currentUser,
+        ...formData,
+        avatar
+      });
+      
+      setIsEditing(false);
+      
+      toast.success("Profile updated successfully");
+      
+      // Hide success indicator after a delay
+      setTimeout(() => {
+        setSaveSuccess(false);
+      }, 2000);
+    } catch (error) {
+      toast.error("Failed to update profile");
+      setSaveSuccess(false);
+    }
   };
   
   const toggleEdit = () => {
     if (isEditing) {
       // Cancel edit
       setFormData({
-        name: user.name,
-        email: user.email,
-        phone: user.phone,
-        address: user.address
+        name: currentUser?.name || '',
+        email: currentUser?.email || '',
+        phone: currentUser?.phone || '',
+        address: currentUser?.address || ''
       });
-      setAvatar(user.avatar);
+      setAvatar(currentUser?.avatar || null);
     }
     setIsEditing(!isEditing);
   };
@@ -93,7 +114,7 @@ const Profile = () => {
               {avatar ? (
                 <img 
                   src={avatar} 
-                  alt={user.name} 
+                  alt={currentUser?.name} 
                   className="w-full h-full object-cover"
                 />
               ) : (
@@ -103,7 +124,11 @@ const Profile = () => {
               )}
               {isEditing && (
                 <div className="absolute inset-0 bg-black bg-opacity-40 flex items-center justify-center cursor-pointer">
-                  <Camera className="h-8 w-8 text-white" />
+                  {uploadingAvatar ? (
+                    <div className="animate-pulse">Uploading...</div>
+                  ) : (
+                    <Camera className="h-8 w-8 text-white" />
+                  )}
                 </div>
               )}
             </div>
@@ -113,18 +138,19 @@ const Profile = () => {
               accept="image/*"
               className="hidden"
               onChange={handleAvatarUpload}
-              disabled={!isEditing}
+              disabled={!isEditing || uploadingAvatar}
             />
           </div>
           
           <div className="flex-1 text-center sm:text-left">
             <div className="flex justify-between items-center mb-4">
-              <h2 className="text-2xl font-bold text-white">{user.name}</h2>
+              <h2 className="text-2xl font-bold text-white">{currentUser?.name}</h2>
               <Button 
                 variant={isEditing ? "destructive" : "outline"} 
                 size="sm"
                 onClick={toggleEdit}
                 className="flex gap-1 items-center"
+                disabled={uploadingAvatar}
               >
                 {isEditing ? (
                   <>
@@ -139,21 +165,22 @@ const Profile = () => {
             </div>
             
             <div className="text-sm text-pink-400 font-medium mb-4">
-              {user.role === 'admin' ? 'Administrator' : user.role === 'manager' ? 'Manager' : 'Cashier'}
+              {currentUser?.role === 'admin' ? 'Administrator' : 
+               currentUser?.role === 'manager' ? 'Manager' : 'Cashier'}
             </div>
             
             <div className="space-y-2">
               <div className="flex items-center text-gray-300">
                 <Mail className="h-4 w-4 mr-2 text-gray-400" />
-                <span>{user.email}</span>
+                <span>{currentUser?.email}</span>
               </div>
               <div className="flex items-center text-gray-300">
                 <Phone className="h-4 w-4 mr-2 text-gray-400" />
-                <span>{user.phone}</span>
+                <span>{currentUser?.phone}</span>
               </div>
               <div className="flex items-center text-gray-300">
                 <MapPin className="h-4 w-4 mr-2 text-gray-400" />
-                <span>{user.address}</span>
+                <span>{currentUser?.address}</span>
               </div>
             </div>
           </div>
@@ -211,10 +238,20 @@ const Profile = () => {
           
           <Button 
             onClick={handleSubmit} 
-            className="w-full mt-4 bg-pink-500 hover:bg-pink-600"
+            className="w-full mt-4 bg-pink-500 hover:bg-pink-600 relative"
+            disabled={uploadingAvatar || saveSuccess}
           >
-            <Save className="mr-2 h-4 w-4" />
-            Save Changes
+            {saveSuccess ? (
+              <>
+                <CheckCircle className="mr-2 h-4 w-4" />
+                Saved Successfully
+              </>
+            ) : (
+              <>
+                <Save className="mr-2 h-4 w-4" />
+                Save Changes
+              </>
+            )}
           </Button>
         </div>
       )}

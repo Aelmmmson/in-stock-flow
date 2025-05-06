@@ -72,7 +72,7 @@ const Dashboard = () => {
               <TrendingUp className="h-6 w-6 text-green-500" />
             </div>
             <div className="mt-3 text-gray-500 dark:text-gray-400">Potential Profit</div>
-            <div className="text-2xl font-bold">{currencySymbol}{potentialProfit.toFixed(2)}</div>
+            <div className="text-2xl md:text-2xl text-sm font-bold">{currencySymbol}{potentialProfit.toFixed(2)}</div>
           </div>
         </Link>
         

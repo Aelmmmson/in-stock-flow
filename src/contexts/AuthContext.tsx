@@ -1,101 +1,127 @@
 
 import { createContext, useState, useContext, useEffect, ReactNode } from 'react';
 
+interface User {
+  id: string;
+  name: string;
+  email: string;
+  role: string;
+  phone?: string;
+  address?: string;
+  avatar?: string | null;
+}
+
 interface AuthContextProps {
   isAuthenticated: boolean;
   isLoading: boolean;
-  user: {
-    id: string;
-    name: string;
-    email: string;
-    role: string;
-  } | null;
+  currentUser: User | null;
   login: (email: string, password: string) => Promise<boolean>;
   logout: () => void;
+  updateUserProfile: (userData: Partial<User>) => Promise<void>;
 }
 
-const AuthContext = createContext<AuthContextProps>({
-  isAuthenticated: false,
-  isLoading: true,
-  user: null,
-  login: async () => false,
-  logout: () => {},
-});
+// Mock user
+const mockUser: User = {
+  id: 'user-1',
+  name: 'Shop Owner',
+  email: 'owner@didizcloset.com',
+  role: 'admin',
+  phone: '+233 50 123 4567',
+  address: 'Accra, Ghana',
+  avatar: null
+};
 
-export const useAuth = () => useContext(AuthContext);
+const AuthContext = createContext<AuthContextProps | undefined>(undefined);
+
+export const useAuth = () => {
+  const context = useContext(AuthContext);
+  if (!context) {
+    throw new Error('useAuth must be used within an AuthProvider');
+  }
+  return context;
+};
 
 interface AuthProviderProps {
   children: ReactNode;
 }
 
 export const AuthProvider = ({ children }: AuthProviderProps) => {
-  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
-  const [isLoading, setIsLoading] = useState<boolean>(true);
-  const [user, setUser] = useState<AuthContextProps['user']>(null);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const [currentUser, setCurrentUser] = useState<User | null>(null);
 
   useEffect(() => {
-    // Check if user is already logged in
-    const checkAuth = () => {
-      const token = localStorage.getItem('auth_token');
-      const userData = localStorage.getItem('user_data');
+    // Check for existing session on component mount
+    const checkSession = () => {
+      const sessionExists = localStorage.getItem('isAuthenticated') === 'true';
+      const userData = localStorage.getItem('currentUser');
       
-      if (token && userData) {
+      if (sessionExists && userData) {
         setIsAuthenticated(true);
-        setUser(JSON.parse(userData));
+        setCurrentUser(JSON.parse(userData));
+      } else {
+        setIsAuthenticated(false);
+        setCurrentUser(null);
       }
       
       setIsLoading(false);
     };
     
-    checkAuth();
+    checkSession();
   }, []);
 
-  const login = async (email: string, password: string): Promise<boolean> => {
-    setIsLoading(true);
-    
-    // Static authentication - always succeeds
-    try {
-      // Simulate API delay
-      await new Promise(resolve => setTimeout(resolve, 800));
-      
-      // Demo user - will always log in regardless of credentials
-      const demoUser = {
-        id: '1',
-        name: 'Didiz Closet Admin',
-        email: email || 'admin@didizcloset.com',
-        role: 'admin',
-      };
-      
-      localStorage.setItem('auth_token', 'demo-token');
-      localStorage.setItem('user_data', JSON.stringify(demoUser));
-      
-      setUser(demoUser);
+  const login = async (email: string, password: string) => {
+    // Use static credentials for demo
+    if ((email === 'admin@didizcloset.com' && password === 'admin123') || 
+        (email === 'owner@didizcloset.com' && password === 'admin123')) {
       setIsAuthenticated(true);
-      setIsLoading(false);
+      setCurrentUser(mockUser);
+      
+      // Store session data
+      localStorage.setItem('isAuthenticated', 'true');
+      localStorage.setItem('currentUser', JSON.stringify(mockUser));
+      
       return true;
-    } catch (error) {
-      setIsLoading(false);
-      return false;
     }
+    
+    return false;
   };
 
   const logout = () => {
-    localStorage.removeItem('auth_token');
-    localStorage.removeItem('user_data');
     setIsAuthenticated(false);
-    setUser(null);
+    setCurrentUser(null);
+    
+    // Clear session data
+    localStorage.removeItem('isAuthenticated');
+    localStorage.removeItem('currentUser');
+  };
+  
+  const updateUserProfile = async (userData: Partial<User>) => {
+    if (!currentUser) {
+      throw new Error('No user is logged in');
+    }
+    
+    // Update user data
+    const updatedUser = {
+      ...currentUser,
+      ...userData
+    };
+    
+    setCurrentUser(updatedUser);
+    
+    // Update stored user data
+    localStorage.setItem('currentUser', JSON.stringify(updatedUser));
   };
 
   return (
-    <AuthContext.Provider
-      value={{
-        isAuthenticated,
-        isLoading,
-        user,
-        login,
-        logout,
-      }}
-    >
+    <AuthContext.Provider value={{ 
+      isAuthenticated, 
+      isLoading, 
+      currentUser,
+      login, 
+      logout,
+      updateUserProfile 
+    }}>
       {children}
     </AuthContext.Provider>
   );

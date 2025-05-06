@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
@@ -34,6 +35,7 @@ import ReportsSales from "./pages/ReportsSales";
 import ScanProduct from "./pages/ScanProduct";
 import Categories from "./pages/Categories";
 import Discounts from "./pages/Discounts";
+import Help from "./pages/Help";
 
 // Create a new QueryClient instance outside the component
 const queryClient = new QueryClient();
@@ -82,6 +84,7 @@ function App() {
                       <Route path="settings" element={<Settings />} />
                       <Route path="settings/profile" element={<Profile />} />
                       <Route path="discounts" element={<Discounts />} />
+                      <Route path="help" element={<Help />} />
                       <Route path="low-stock" element={<LowStockItems />} />
                       <Route path="*" element={<NotFound />} />
                     </Route>

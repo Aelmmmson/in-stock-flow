@@ -1,6 +1,6 @@
 
 import { Link } from 'react-router-dom';
-import { BarChart, Package, FileText, Settings, LayoutDashboard } from 'lucide-react';
+import { BarChart, Package, Tag, Settings, LayoutDashboard, ShoppingCart, HelpCircle } from 'lucide-react';
 import { TabsType } from '@/types';
 
 interface MobileNavbarProps {
@@ -12,21 +12,23 @@ const MobileNavbar = ({ activeTab, setActiveTab }: MobileNavbarProps) => {
   const tabs = [
     { name: 'dashboard', path: '/', icon: LayoutDashboard, label: 'Dashboard' },
     { name: 'inventory', path: '/inventory', icon: Package, label: 'Inventory' },
-    { name: 'transactions', path: '/transactions', icon: FileText, label: 'Sales' },
+    { name: 'transactions', path: '/transactions', icon: ShoppingCart, label: 'Sales' },
+    { name: 'discounts', path: '/discounts', icon: Tag, label: 'Discounts' },
     { name: 'reports', path: '/reports', icon: BarChart, label: 'Reports' },
     { name: 'settings', path: '/settings', icon: Settings, label: 'Settings' },
+    { name: 'help', path: '/help', icon: HelpCircle, label: 'Help' },
   ];
 
   return (
     <div className="fixed bottom-0 left-0 right-0 border-t border-border bg-white dark:bg-gray-800 py-2 px-4 z-10">
-      <div className="flex justify-between items-center">
+      <div className="flex justify-between items-center overflow-x-auto">
         {tabs.map((tab) => {
           const isActive = activeTab === tab.name;
           return (
             <Link
               to={tab.path}
               key={tab.name}
-              className={`flex flex-col items-center px-3 py-2 rounded-md relative ${
+              className={`flex flex-col items-center px-2 py-2 rounded-md relative ${
                 isActive
                   ? 'text-pink-500 dark:text-pink-400'
                   : 'text-gray-500 dark:text-gray-400 hover:text-pink-500 dark:hover:text-pink-400'

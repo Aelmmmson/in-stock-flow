@@ -1,9 +1,11 @@
 
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Card, CardContent } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useInventory } from '@/contexts/InventoryContext';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { ArrowUp, ArrowDown } from 'lucide-react';
 
 const Reports = () => {
   const { products, transactions, currencySymbol } = useInventory();
@@ -50,10 +52,11 @@ const Reports = () => {
           }} 
           className="w-full mt-4"
         >
-          <TabsList className="grid grid-cols-3 mb-4 w-full">
+          <TabsList className="grid grid-cols-4 mb-4 w-full">
             <TabsTrigger value="overview" className="w-full">Overview</TabsTrigger>
             <TabsTrigger value="inventory" className="w-full">Inventory</TabsTrigger>
             <TabsTrigger value="sales" className="w-full">Sales</TabsTrigger>
+            <TabsTrigger value="product-analysis" className="w-full">Product Analysis</TabsTrigger>
           </TabsList>
           
           <TabsContent value="overview" className="space-y-4">
@@ -103,6 +106,78 @@ const Reports = () => {
                   </div>
                   <div className="text-xs text-gray-500 dark:text-gray-400 mt-1">
                     Your price adjustments have {totalPriceAdjustments < 0 ? 'decreased' : 'increased'} revenue
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+          
+          <TabsContent value="product-analysis">
+            <Card className="border-none shadow-sm">
+              <CardHeader>
+                <CardTitle>Product Profitability Analysis</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="overflow-x-auto">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Product</TableHead>
+                        <TableHead>Quantity</TableHead>
+                        <TableHead>Unit Cost</TableHead>
+                        <TableHead>Selling Price</TableHead>
+                        <TableHead>Total Cost</TableHead>
+                        <TableHead>Total Value</TableHead>
+                        <TableHead>Profit/Loss</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {products.map(product => {
+                        const totalCost = product.quantity * product.purchaseCost;
+                        const totalValue = product.quantity * product.sellingPrice;
+                        const profit = totalValue - totalCost;
+                        const profitPercentage = (profit / totalCost) * 100;
+                        
+                        return (
+                          <TableRow key={product.id}>
+                            <TableCell className="font-medium">{product.name}</TableCell>
+                            <TableCell>{product.quantity}</TableCell>
+                            <TableCell>{currencySymbol}{product.purchaseCost.toFixed(2)}</TableCell>
+                            <TableCell>{currencySymbol}{product.sellingPrice.toFixed(2)}</TableCell>
+                            <TableCell>{currencySymbol}{totalCost.toFixed(2)}</TableCell>
+                            <TableCell>{currencySymbol}{totalValue.toFixed(2)}</TableCell>
+                            <TableCell className={`${profit >= 0 ? 'text-green-500' : 'text-red-500'}`}>
+                              <div className="flex items-center">
+                                {profit >= 0 ? <ArrowUp className="w-4 h-4 mr-1" /> : <ArrowDown className="w-4 h-4 mr-1" />}
+                                {currencySymbol}{Math.abs(profit).toFixed(2)}
+                                <span className="ml-1 text-xs">
+                                  ({profitPercentage >= 0 ? '+' : ''}{profitPercentage.toFixed(1)}%)
+                                </span>
+                              </div>
+                            </TableCell>
+                          </TableRow>
+                        );
+                      })}
+                    </TableBody>
+                  </Table>
+                </div>
+                
+                <div className="mt-6 p-4 bg-gray-100 dark:bg-gray-800 rounded-lg">
+                  <div className="grid grid-cols-3 gap-4">
+                    <div>
+                      <p className="text-sm text-gray-500">Total Cost</p>
+                      <p className="font-bold">{currencySymbol}{inventoryValue.toFixed(2)}</p>
+                    </div>
+                    <div>
+                      <p className="text-sm text-gray-500">Total Value</p>
+                      <p className="font-bold">{currencySymbol}{retailValue.toFixed(2)}</p>
+                    </div>
+                    <div>
+                      <p className="text-sm text-gray-500">Total Profit</p>
+                      <p className={`font-bold ${potentialProfit >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                        {currencySymbol}{potentialProfit.toFixed(2)}
+                      </p>
+                    </div>
                   </div>
                 </div>
               </CardContent>
