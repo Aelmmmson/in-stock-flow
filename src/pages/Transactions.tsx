@@ -53,7 +53,7 @@ const Transactions = () => {
                   <div className="text-gray-700">{transaction.quantity} × {getProductName(transaction.productId)}</div>
                   
                   <div className="text-gray-400">Customer</div>
-                  <div className="text-gray-200">{transaction.customer || 'Walk-in Customer'}</div>
+                  <div className="text-gray-700">{transaction.customer || 'Walk-in Customer'}</div>
                   
                   <div className="text-gray-400">Price Adjustment</div>
                   <div className={transaction.priceDelta < 0 ? 'text-red-500' : 'text-gray-200'}>
