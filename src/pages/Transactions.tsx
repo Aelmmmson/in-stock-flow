@@ -42,7 +42,7 @@ const Transactions = () => {
               <div className="bg-gray-800 p-4 rounded-lg shadow-sm border border-gray-700">
                 <div className="flex justify-between mb-1">
                   <div className="font-medium text-gray-500">#{`TR${(index + 1001).toString().padStart(3, '0')}`}</div>
-                  <div className="font-medium text-white">{currencySymbol}{transaction.totalAmount.toFixed(2)}</div>
+                  <div className="font-medium text-gray-500">{currencySymbol}{transaction.totalAmount.toFixed(2)}</div>
                 </div>
                 <div className="text-xs text-gray-400 mb-2">
                   {formatDate(transaction.createdAt)}
