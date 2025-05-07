@@ -79,7 +79,7 @@ const Dashboard = () => {
       <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-sm">
         <div className="flex items-center gap-2 mb-3">
           <AlertTriangle className="h-5 w-5 text-amber-500" />
-          <h3 className="font-bold text-blue-300">Low Stock Alert</h3>
+          <h3 className="font-bold">Low Stock Alerts</h3>
         </div>
         
         <div className="divide-y">
