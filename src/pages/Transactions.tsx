@@ -61,7 +61,7 @@ const Transactions = () => {
                   </div>
                   
                   <div className="text-gray-400">Payment</div>
-                  <div className="text-gray-200">{transaction.paymentMethod || 'Cash'}</div>
+                  <div className="text-gray-700">{transaction.paymentMethod || 'Cash'}</div>
                 </div>
               </div>
             </Link>)}
