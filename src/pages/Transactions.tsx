@@ -39,7 +39,7 @@ const Transactions = () => {
 
         <div className="space-y-4">
           {sortedTransactions.map((transaction, index) => <Link key={transaction.id} to={`/transactions/${transaction.id}`} className="block">
-              <div className="bg-gray-800 p-4 rounded-lg shadow-sm border border-gray-700">
+              <div className="p-4 rounded-lg shadow-sm border border-gray-700 bg-white">
                 <div className="flex justify-between mb-1">
                   <div className="font-medium text-gray-500">#{`TR${(index + 1001).toString().padStart(3, '0')}`}</div>
                   <div className="font-medium text-gray-500">{currencySymbol}{transaction.totalAmount.toFixed(2)}</div>
