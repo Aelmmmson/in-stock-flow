@@ -66,7 +66,7 @@ const Dashboard = () => {
         </Link>
         
         <Link to="/transactions" className="block">
-          <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-sm text-center">
+          <div className="bg-white dark:bg-gray-800 p-3 rounded-lg shadow-sm text-center">
             <div className="rounded-full bg-gray-100 dark:bg-gray-700 p-3 w-12 h-12 flex items-center justify-center mx-auto">
               <ShoppingCart className="h-6 w-6 text-purple-500" />
             </div>
