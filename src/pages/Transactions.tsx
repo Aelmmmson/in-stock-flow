@@ -50,7 +50,7 @@ const Transactions = () => {
                 
                 <div className="grid grid-cols-2 gap-1 text-sm">
                   <div className="text-gray-400">Items</div>
-                  <div className="text-gray-200">{transaction.quantity} × {getProductName(transaction.productId)}</div>
+                  <div className="text-gray-700">{transaction.quantity} × {getProductName(transaction.productId)}</div>
                   
                   <div className="text-gray-400">Customer</div>
                   <div className="text-gray-200">{transaction.customer || 'Walk-in Customer'}</div>
