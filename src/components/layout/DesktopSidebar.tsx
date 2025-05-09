@@ -1,7 +1,9 @@
+
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Sidebar, SidebarContent, SidebarFooter, SidebarGroup, SidebarGroupContent, SidebarHeader, SidebarMenu, SidebarMenuItem, SidebarMenuButton } from '@/components/ui/sidebar';
 import { LayoutDashboard, Package, BarChart2, Settings, ShoppingCart } from 'lucide-react';
+
 const DesktopSidebar = () => {
   const location = useLocation();
   const currentPath = location.pathname.split('/')[1] || 'dashboard';
@@ -26,7 +28,8 @@ const DesktopSidebar = () => {
     icon: Settings,
     path: '/settings'
   }];
-  return <Sidebar className="hidden md:flex border-r" defaultCollapsed={true} collapsible={true}>
+  
+  return <Sidebar className="hidden md:flex border-r" defaultCollapsed={true} collapsible={true} variant="icon">
       <SidebarHeader className="p-4 px-[6px]">
         <div className="flex items-center justify-center">
           <img src="/lovable-uploads/2a3413ad-6596-43b9-9a24-eaa892ea1627.png" alt="Didiz Closet" className="h-8 w-8 object-contain" />
@@ -57,4 +60,5 @@ const DesktopSidebar = () => {
       </SidebarFooter>
     </Sidebar>;
 };
+
 export default DesktopSidebar;

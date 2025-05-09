@@ -9,8 +9,9 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Badge } from '@/components/ui/badge';
 
 const Inventory = () => {
-  const { products, currencySymbol } = useInventory();
+  const { products, currencySymbol, getActiveDiscounts, getDiscountedPrice } = useInventory();
   const [search, setSearch] = useState('');
+  const activeDiscounts = getActiveDiscounts();
 
   // Filter products based on search
   const filteredProducts = products.filter(
@@ -20,12 +21,13 @@ const Inventory = () => {
       product.category.toLowerCase().includes(search.toLowerCase())
   );
 
-  // Calculate discounted price
-  const getDiscountedPrice = (product) => {
-    if (product.discount && product.discount > 0) {
-      return product.sellingPrice - (product.sellingPrice * (product.discount / 100));
-    }
-    return product.sellingPrice;
+  // Get applicable discounts for a specific product
+  const getApplicableDiscounts = (product) => {
+    return activeDiscounts.filter(discount => 
+      discount.applyToAll || 
+      (discount.appliedProducts && discount.appliedProducts.includes(product.id)) ||
+      (discount.appliedCategories && discount.appliedCategories.includes(product.category))
+    );
   };
 
   return (
@@ -49,49 +51,65 @@ const Inventory = () => {
 
         {filteredProducts.length > 0 ? (
           <div className="space-y-4">
-            {filteredProducts.map((product) => (
-              <Link key={product.id} to={`/inventory/${product.id}`}>
-                <div className="bg-gray-800 p-4 rounded-lg shadow-sm border border-gray-700 mb-3">
-                  <div className="font-medium text-white">{product.name}</div>
-                  <div className="grid grid-cols-2 gap-2 mt-1">
-                    <div className="text-xs text-gray-500 dark:text-gray-400">SKU</div>
-                    <div className="text-xs text-right text-gray-300">{product.sku}</div>
-                    
-                    <div className="text-xs text-gray-500 dark:text-gray-400">Category</div>
-                    <div className="text-xs text-right text-gray-300">{product.category}</div>
-                    
-                    <div className="text-xs text-gray-500 dark:text-gray-400">Quantity</div>
-                    <div className={`text-xs text-right ${product.quantity <= product.lowStockThreshold ? 'text-amber-500 font-medium' : 'text-gray-300'}`}>
-                      {product.quantity}
-                      {product.quantity <= product.lowStockThreshold && ' ⚠️'}
-                    </div>
-                    
-                    <div className="text-xs text-gray-500 dark:text-gray-400">Price</div>
-                    <div className="text-xs text-right font-medium text-white">
-                      {product.discount && product.discount > 0 ? (
-                        <div className="flex flex-col items-end">
-                          <span className="line-through text-gray-400">{currencySymbol}{product.sellingPrice.toFixed(2)}</span>
-                          <span className="text-green-400">{currencySymbol}{getDiscountedPrice(product).toFixed(2)}</span>
-                        </div>
-                      ) : (
-                        <>{currencySymbol}{product.sellingPrice.toFixed(2)}</>
+            {filteredProducts.map((product) => {
+              const applicableDiscounts = getApplicableDiscounts(product);
+              const finalPrice = getDiscountedPrice(product);
+              const hasDiscount = finalPrice < product.sellingPrice;
+              const totalDiscount = product.sellingPrice - finalPrice;
+              const discountPercentage = Math.round((totalDiscount / product.sellingPrice) * 100);
+              
+              return (
+                <Link key={product.id} to={`/inventory/${product.id}`}>
+                  <div className="bg-gray-800 p-4 rounded-lg shadow-sm border border-gray-700 mb-3">
+                    <div className="font-medium text-white">{product.name}</div>
+                    <div className="grid grid-cols-2 gap-2 mt-1">
+                      <div className="text-xs text-gray-500 dark:text-gray-400">SKU</div>
+                      <div className="text-xs text-right text-gray-300">{product.sku}</div>
+                      
+                      <div className="text-xs text-gray-500 dark:text-gray-400">Category</div>
+                      <div className="text-xs text-right text-gray-300">{product.category}</div>
+                      
+                      <div className="text-xs text-gray-500 dark:text-gray-400">Quantity</div>
+                      <div className={`text-xs text-right ${product.quantity <= product.lowStockThreshold ? 'text-amber-500 font-medium' : 'text-gray-300'}`}>
+                        {product.quantity}
+                        {product.quantity <= product.lowStockThreshold && ' ⚠️'}
+                      </div>
+                      
+                      <div className="text-xs text-gray-500 dark:text-gray-400">Regular Price</div>
+                      <div className={`text-xs text-right ${hasDiscount ? 'line-through text-gray-400' : 'font-medium text-white'}`}>
+                        {currencySymbol}{product.sellingPrice.toFixed(2)}
+                      </div>
+                      
+                      {/* Show active discounts if any */}
+                      {applicableDiscounts.length > 0 && (
+                        <>
+                          <div className="text-xs text-gray-500 dark:text-gray-400">Active Discounts</div>
+                          <div className="text-xs text-right">
+                            {applicableDiscounts.map((discount, idx) => (
+                              <Badge key={idx} variant="outline" className="bg-pink-500/20 text-pink-300 border-pink-500 mb-1 ml-1">
+                                <Tag className="h-3 w-3 mr-1" /> 
+                                {discount.type === 'percentage' ? `${discount.value}% off` : `${currencySymbol}${discount.value} off`}
+                              </Badge>
+                            ))}
+                          </div>
+                        </>
+                      )}
+                      
+                      {/* Show final price after all discounts */}
+                      {hasDiscount && (
+                        <>
+                          <div className="text-xs text-gray-500 dark:text-gray-400">Final Price</div>
+                          <div className="text-xs text-right font-medium text-green-400">
+                            {currencySymbol}{finalPrice.toFixed(2)} 
+                            <span className="ml-1 text-xs">(-{discountPercentage}%)</span>
+                          </div>
+                        </>
                       )}
                     </div>
-                    
-                    {product.discount && product.discount > 0 && (
-                      <>
-                        <div className="text-xs text-gray-500 dark:text-gray-400">Discount</div>
-                        <div className="text-xs text-right">
-                          <Badge variant="outline" className="bg-pink-500/20 text-pink-300 border-pink-500">
-                            <Tag className="h-3 w-3 mr-1" /> {product.discount}% off
-                          </Badge>
-                        </div>
-                      </>
-                    )}
                   </div>
-                </div>
-              </Link>
-            ))}
+                </Link>
+              );
+            })}
           </div>
         ) : (
           <div className="text-center py-10">

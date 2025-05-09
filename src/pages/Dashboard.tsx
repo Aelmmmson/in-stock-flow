@@ -38,7 +38,7 @@ const Dashboard = () => {
   };
   
   return <div className="space-y-6">
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-3 gap-4">
         <Button onClick={() => window.location.href = '/inventory/add'} className="bg-pink-500 hover:bg-pink-600 flex items-center justify-center py-3">
           <span className="mr-1">+</span> Add Item
         </Button>
@@ -46,14 +46,12 @@ const Dashboard = () => {
         <Button onClick={() => window.location.href = '/transactions/add'} className="bg-purple-500 hover:bg-purple-600 flex items-center justify-center py-3">
           <span className="mr-1">+</span> New Sale
         </Button>
-      </div>
-      
-      <div className="flex gap-4">
+        
         <Button 
           onClick={() => window.location.href = '/discounts'} 
-          className="bg-green-500 hover:bg-green-600 flex items-center gap-1"
+          className="bg-green-500 hover:bg-green-600 flex items-center justify-center py-3"
         >
-          <Tag className="h-4 w-4" />
+          <Tag className="h-4 w-4 mr-1" />
           <span>Discounts</span>
         </Button>
       </div>

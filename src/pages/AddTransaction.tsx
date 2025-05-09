@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useInventory } from '@/contexts/InventoryContext';
@@ -6,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
-import { Plus, User, Wallet, Trash2, Edit, ShoppingCart, Minus, X, ScanLine } from 'lucide-react';
+import { Plus, User, Wallet, Trash2, Edit, ShoppingCart, Minus, X, ScanLine, Tag } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { ProductVariant } from '@/types';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -52,6 +51,8 @@ const AddTransaction = () => {
   const [editQuantity, setEditQuantity] = useState('1');
   const [editPrice, setEditPrice] = useState('0');
   const [editDiscount, setEditDiscount] = useState('0');
+
+  const activeDiscounts = getActiveDiscounts();
   
   useEffect(() => {
     // Check if there's a product to add from the location state
@@ -75,6 +76,15 @@ const AddTransaction = () => {
     }
   }, [location, products, navigate, getDiscountedPrice]);
   
+  // Get applicable discounts for a specific product
+  const getApplicableDiscounts = (product) => {
+    return activeDiscounts.filter(discount => 
+      discount.applyToAll || 
+      (discount.appliedProducts && discount.appliedProducts.includes(product.id)) ||
+      (discount.appliedCategories && discount.appliedCategories.includes(product.category))
+    );
+  };
+
   const filteredProducts = products.filter(p => 
     p.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
     p.sku.toLowerCase().includes(searchQuery.toLowerCase())
@@ -462,23 +472,53 @@ const AddTransaction = () => {
             <ScrollArea className="max-h-[350px] scrollbar-none">
               <div className="space-y-2">
                 {filteredProducts.length > 0 ? (
-                  filteredProducts.map(product => (
-                    <div 
-                      key={product.id}
-                      className="flex justify-between items-center p-3 hover:bg-gray-800 rounded-md cursor-pointer"
-                      onClick={() => selectProductForCart(product.id)}
-                    >
-                      <div>
-                        <div className="font-medium text-white">{product.name}</div>
-                        <div className="text-xs text-gray-400">
-                          SKU: {product.sku} | Stock: {product.quantity}
+                  filteredProducts.map(product => {
+                    const discountedPrice = getDiscountedPrice(product);
+                    const hasDiscount = discountedPrice < product.sellingPrice;
+                    
+                    return (
+                      <div 
+                        key={product.id}
+                        className="flex justify-between items-center p-3 hover:bg-gray-800 rounded-md cursor-pointer"
+                        onClick={() => selectProductForCart(product.id)}
+                      >
+                        <div>
+                          <div className="font-medium text-white">{product.name}</div>
+                          <div className="text-xs text-gray-400">
+                            SKU: {product.sku} | Stock: {product.quantity}
+                          </div>
+                          
+                          {/* Show applicable discounts */}
+                          {hasDiscount && (
+                            <div className="flex mt-1">
+                              {getApplicableDiscounts(product).map((discount, idx) => (
+                                <Badge key={idx} variant="outline" className="bg-pink-500/20 text-pink-300 border-pink-500 text-xs mr-1">
+                                  <Tag className="h-3 w-3 mr-1" /> 
+                                  {discount.type === 'percentage' ? `${discount.value}%` : `${currencySymbol}${discount.value}`}
+                                </Badge>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+                        <div>
+                          {hasDiscount ? (
+                            <div className="text-right">
+                              <div className="line-through text-gray-400 text-xs">
+                                {currencySymbol}{product.sellingPrice.toFixed(2)}
+                              </div>
+                              <div className="font-semibold text-green-400">
+                                {currencySymbol}{discountedPrice.toFixed(2)}
+                              </div>
+                            </div>
+                          ) : (
+                            <div className="font-semibold text-white">
+                              {currencySymbol}{product.sellingPrice.toFixed(2)}
+                            </div>
+                          )}
                         </div>
                       </div>
-                      <div className="font-semibold text-white">
-                        {currencySymbol}{product.sellingPrice.toFixed(2)}
-                      </div>
-                    </div>
-                  ))
+                    );
+                  })
                 ) : (
                   <div className="text-center py-3 text-gray-400">
                     No products found
@@ -502,6 +542,30 @@ const AddTransaction = () => {
               <div>
                 <p className="text-xl font-medium text-white">{selectedProduct.name}</p>
                 <p className="text-sm text-gray-400">SKU: {selectedProduct.sku}</p>
+                
+                {/* Show applicable discounts */}
+                {getApplicableDiscounts(selectedProduct).length > 0 && (
+                  <div className="flex flex-wrap gap-1 mt-2">
+                    {getApplicableDiscounts(selectedProduct).map((discount, idx) => (
+                      <Badge key={idx} variant="outline" className="bg-pink-500/20 text-pink-300 border-pink-500">
+                        <Tag className="h-3 w-3 mr-1" /> 
+                        {discount.type === 'percentage' ? `${discount.value}% off` : `${currencySymbol}${discount.value} off`}
+                      </Badge>
+                    ))}
+                  </div>
+                )}
+                
+                {/* Original vs discounted price */}
+                {parseFloat(addPrice) < selectedProduct.sellingPrice && (
+                  <div className="flex items-center mt-1">
+                    <span className="line-through text-gray-400 mr-2">
+                      {currencySymbol}{selectedProduct.sellingPrice.toFixed(2)}
+                    </span>
+                    <span className="text-green-400">
+                      {currencySymbol}{addPrice}
+                    </span>
+                  </div>
+                )}
               </div>
               
               {/* Variants selection */}
@@ -558,7 +622,7 @@ const AddTransaction = () => {
               </div>
               
               <div>
-                <Label className="text-white">Price ({currencySymbol})</Label>
+                <Label className="text-white">Base Price ({currencySymbol})</Label>
                 <Input
                   readOnly
                   type="number"
@@ -570,7 +634,7 @@ const AddTransaction = () => {
               </div>
               
               <div>
-                <Label className="text-white">Discount ({currencySymbol})</Label>
+                <Label className="text-white">Additional Discount ({currencySymbol})</Label>
                 <Input
                   type="number"
                   min="0"
@@ -581,7 +645,7 @@ const AddTransaction = () => {
                   className="bg-gray-800 border-gray-700 text-white"
                 />
                 <p className="text-xs text-gray-400 mt-1">
-                  Enter amount to discount
+                  Enter amount for additional discount at point of sale
                 </p>
               </div>
               
