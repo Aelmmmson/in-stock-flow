@@ -27,7 +27,7 @@ const DesktopSidebar = () => {
     path: '/settings'
   }];
   return <Sidebar className="hidden md:flex border-r" defaultCollapsed={true} collapsible={true}>
-      <SidebarHeader className="p-4">
+      <SidebarHeader className="p-4 px-[6px]">
         <div className="flex items-center justify-center">
           <img src="/lovable-uploads/2a3413ad-6596-43b9-9a24-eaa892ea1627.png" alt="Didiz Closet" className="h-8 w-8 object-contain" />
         </div>
