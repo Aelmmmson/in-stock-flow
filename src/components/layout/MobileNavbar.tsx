@@ -1,6 +1,6 @@
 
 import { Link } from 'react-router-dom';
-import { BarChart, Package, Tag, Settings, LayoutDashboard, ShoppingCart, HelpCircle } from 'lucide-react';
+import { BarChart, Package, Tag, Settings, LayoutDashboard, ShoppingCart } from 'lucide-react';
 import { TabsType } from '@/types';
 
 interface MobileNavbarProps {
@@ -13,14 +13,12 @@ const MobileNavbar = ({ activeTab, setActiveTab }: MobileNavbarProps) => {
     { name: 'dashboard', path: '/', icon: LayoutDashboard, label: 'Dashboard' },
     { name: 'inventory', path: '/inventory', icon: Package, label: 'Inventory' },
     { name: 'transactions', path: '/transactions', icon: ShoppingCart, label: 'Sales' },
-    { name: 'discounts', path: '/discounts', icon: Tag, label: 'Discounts' },
     { name: 'reports', path: '/reports', icon: BarChart, label: 'Reports' },
     { name: 'settings', path: '/settings', icon: Settings, label: 'Settings' },
-    { name: 'help', path: '/help', icon: HelpCircle, label: 'Help' },
   ];
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 border-t border-border bg-white dark:bg-gray-800 py-2 px-4 z-10">
+    <div className="md:hidden fixed bottom-0 left-0 right-0 border-t border-border bg-white dark:bg-gray-800 py-2 px-4 z-10">
       <div className="flex justify-between items-center overflow-x-auto">
         {tabs.map((tab) => {
           const isActive = activeTab === tab.name;

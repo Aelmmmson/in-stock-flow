@@ -12,6 +12,7 @@ import { ProductVariant } from '@/types';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Label } from '@/components/ui/label';
 import { BarcodeScannerDialog } from '@/components/inventory/BarcodeScanner';
+import { Badge } from '@/components/ui/badge';
 
 interface CartItem {
   productId: string;
@@ -25,7 +26,7 @@ const AddTransaction = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { toast } = useToast();
-  const { products, addTransaction, currencySymbol } = useInventory();
+  const { products, addTransaction, currencySymbol, getActiveDiscounts, getDiscountedPrice } = useInventory();
   
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
   const [customer, setCustomer] = useState('Walk-in Customer');
@@ -61,7 +62,9 @@ const AddTransaction = () => {
       if (product) {
         setSelectedProduct(product);
         setAddQuantity('1');
-        setAddPrice(product.sellingPrice.toString());
+        // Apply active discounts to the product price
+        const discountedPrice = getDiscountedPrice(product);
+        setAddPrice(discountedPrice.toString());
         setAddDiscount('0');
         setSelectedVariants({});
         setAddToCartDialogOpen(true);
@@ -70,7 +73,7 @@ const AddTransaction = () => {
       // Clear the state to prevent re-adding on navigation
       navigate(location.pathname, { replace: true });
     }
-  }, [location, products, navigate]);
+  }, [location, products, navigate, getDiscountedPrice]);
   
   const filteredProducts = products.filter(p => 
     p.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -88,7 +91,9 @@ const AddTransaction = () => {
     
     setSelectedProduct(product);
     setAddQuantity('1');
-    setAddPrice(product.sellingPrice.toString());
+    // Apply active discounts to the product price
+    const discountedPrice = getDiscountedPrice(product);
+    setAddPrice(discountedPrice.toString());
     setAddDiscount('0');
     setSelectedVariants({});
     setAddToCartDialogOpen(true);

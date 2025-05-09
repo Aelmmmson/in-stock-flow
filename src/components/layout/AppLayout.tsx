@@ -25,7 +25,7 @@ const AppLayout = () => {
             activeTab={activeTab}
             toggleNotificationsPanel={toggleNotificationsPanel}
           />
-          <div className="flex-grow p-4 pb-20">
+          <div className="flex-grow p-4 pb-20 md:pb-4">
             <Outlet />
           </div>
           <MobileNavbar activeTab={activeTab} setActiveTab={setActiveTab} />

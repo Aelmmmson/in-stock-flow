@@ -1,6 +1,7 @@
+
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { Product, Transaction, User, Expense } from '../types';
-import { useToast } from '@/components/ui/use-toast';
+import { Product, Transaction, User, Expense, Discount } from '../types';
+import { useToast } from '@/hooks/use-toast';
 
 // Sample products data
 const sampleProducts: Product[] = [
@@ -155,6 +156,9 @@ interface InventoryContextType {
     profit: number;
     topSellingProducts: { name: string; quantity: number; revenue: number }[];
   };
+  getActiveDiscounts: () => Discount[];
+  getDiscountedPrice: (product: Product) => number;
+  discounts: Discount[];
 }
 
 const InventoryContext = createContext<InventoryContextType | undefined>(undefined);
@@ -175,6 +179,7 @@ export const InventoryProvider = ({ children }: InventoryProviderProps) => {
   const [products, setProducts] = useState<Product[]>([]);
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [expenses, setExpenses] = useState<Expense[]>([]);
+  const [discounts, setDiscounts] = useState<Discount[]>([]);
   const { toast } = useToast();
   const currencySymbol = '₵'; // Ghana Cedi symbol
   
@@ -191,10 +196,12 @@ export const InventoryProvider = ({ children }: InventoryProviderProps) => {
     const storedProducts = localStorage.getItem('didiz-closet-products');
     const storedTransactions = localStorage.getItem('didiz-closet-transactions');
     const storedExpenses = localStorage.getItem('didiz-closet-expenses');
+    const storedDiscounts = localStorage.getItem('didiz-closet-discounts');
     
     setProducts(storedProducts ? JSON.parse(storedProducts) : sampleProducts);
     setTransactions(storedTransactions ? JSON.parse(storedTransactions) : sampleTransactions);
     setExpenses(storedExpenses ? JSON.parse(storedExpenses) : sampleExpenses);
+    setDiscounts(storedDiscounts ? JSON.parse(storedDiscounts) : []);
   }, []);
 
   useEffect(() => {
@@ -203,6 +210,46 @@ export const InventoryProvider = ({ children }: InventoryProviderProps) => {
     localStorage.setItem('didiz-closet-transactions', JSON.stringify(transactions));
     localStorage.setItem('didiz-closet-expenses', JSON.stringify(expenses));
   }, [products, transactions, expenses]);
+
+  // Function to get active discounts
+  const getActiveDiscounts = () => {
+    const now = new Date();
+    return discounts.filter(discount => {
+      // Check if discount is active
+      if (!discount.active) return false;
+      
+      // Check date range if applicable
+      const startValid = !discount.startDate || new Date(discount.startDate) <= now;
+      const endValid = !discount.endDate || new Date(discount.endDate) >= now;
+      
+      return startValid && endValid;
+    });
+  };
+
+  // Function to calculate the discounted price for a product
+  const getDiscountedPrice = (product: Product) => {
+    let finalPrice = product.sellingPrice;
+    const activeDiscounts = getActiveDiscounts();
+    
+    activeDiscounts.forEach(discount => {
+      // Check if discount applies to this product
+      const isApplicable = 
+        discount.applyToAll || 
+        (discount.appliedProducts && discount.appliedProducts.includes(product.id)) ||
+        (discount.appliedCategories && discount.appliedCategories.includes(product.category));
+      
+      if (isApplicable) {
+        if (discount.type === 'percentage') {
+          const discountAmount = finalPrice * (discount.value / 100);
+          finalPrice -= discountAmount;
+        } else if (discount.type === 'fixed') {
+          finalPrice = Math.max(0, finalPrice - discount.value);
+        }
+      }
+    });
+    
+    return finalPrice;
+  };
 
   const addProduct = (product: Omit<Product, 'id' | 'createdAt' | 'updatedAt'>) => {
     const newProduct: Product = {
@@ -413,6 +460,7 @@ export const InventoryProvider = ({ children }: InventoryProviderProps) => {
     products,
     transactions,
     expenses,
+    discounts,
     currentUser,
     currencySymbol,
     addProduct,
@@ -425,6 +473,8 @@ export const InventoryProvider = ({ children }: InventoryProviderProps) => {
     updateExpense,
     deleteExpense,
     getFinancialSummary,
+    getActiveDiscounts,
+    getDiscountedPrice,
   };
 
   return (

@@ -1,18 +1,22 @@
+
 import { useState } from 'react';
 import { useInventory } from '@/contexts/InventoryContext';
 import { Button } from '@/components/ui/button';
 import { Plus } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { ScrollArea } from '@/components/ui/scroll-area';
+
 const Transactions = () => {
   const {
     transactions,
     products,
-    currencySymbol
+    currencySymbol,
+    getDiscountedPrice
   } = useInventory();
 
   // Sort transactions by date (newest first)
   const sortedTransactions = [...transactions].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+  
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
     const day = date.getDate().toString().padStart(2, '0');
@@ -22,10 +26,12 @@ const Transactions = () => {
     const minutes = date.getMinutes().toString().padStart(2, '0');
     return `${day}/${month}/${year} at ${hours}:${minutes}`;
   };
+  
   const getProductName = (id: string) => {
     const product = products.find(p => p.id === id);
     return product?.name || 'Unknown Product';
   };
+  
   return <ScrollArea className="h-full scrollbar-none">
       <div className="space-y-6 pb-20">
         <div className="flex justify-between items-center">
@@ -76,4 +82,5 @@ const Transactions = () => {
       </div>
     </ScrollArea>;
 };
+
 export default Transactions;
