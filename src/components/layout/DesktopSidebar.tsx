@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Sidebar, SidebarContent, SidebarFooter, SidebarGroup, SidebarGroupContent, SidebarHeader, SidebarMenu, SidebarMenuItem, SidebarMenuButton } from '@/components/ui/sidebar';
@@ -29,10 +28,15 @@ const DesktopSidebar = () => {
     path: '/settings'
   }];
   
-  return <Sidebar className="hidden md:flex border-r" defaultCollapsed={true} collapsible={true} variant="icon">
-      <SidebarHeader className="p-4 px-[6px]">
+  return (
+    <Sidebar className="hidden md:flex border-r w-16" defaultCollapsed={true} collapsible={true} variant="icon">
+      <SidebarHeader className="p-4">
         <div className="flex items-center justify-center">
-          <img src="/lovable-uploads/2a3413ad-6596-43b9-9a24-eaa892ea1627.png" alt="Didiz Closet" className="h-8 w-8 object-contain" />
+          <img 
+            src="/lovable-uploads/2a3413ad-6596-43b9-9a24-eaa892ea1627.png" 
+            alt="Didiz Closet" 
+            className="h-8 w-8 object-contain" 
+          />
         </div>
       </SidebarHeader>
       
@@ -40,25 +44,40 @@ const DesktopSidebar = () => {
         <SidebarGroup>
           <SidebarGroupContent>
             <SidebarMenu>
-              {menuItems.map(item => <SidebarMenuItem key={item.title}>
+              {menuItems.map(item => (
+                <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton asChild>
-                    <Link to={item.path} className={`flex flex-col items-center p-2 ${currentPath === item.path.substring(1) ? 'bg-accent text-accent-foreground' : ''}`} title={item.title}>
+                    <Link 
+                      to={item.path} 
+                      className={`
+                        flex flex-col items-center 
+                        p-2 mx-1 my-1 rounded-md
+                        ${currentPath === item.path.substring(1) ? 
+                          'bg-accent text-accent-foreground' : 
+                          'hover:bg-gray-100'}
+                      `}
+                      title={item.title}
+                    >
                       <item.icon className="h-5 w-5" />
-                      <span className="text-xs mt-1">{item.title}</span>
+                      <span className="text-xs mt-1.5 text-center leading-tight">
+                        {item.title}
+                      </span>
                     </Link>
                   </SidebarMenuButton>
-                </SidebarMenuItem>)}
+                </SidebarMenuItem>
+              ))}
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
       </SidebarContent>
       
-      <SidebarFooter className="p-4 border-t px-[6px]">
+      <SidebarFooter className="p-4 border-t">
         <div className="text-xs text-gray-500 text-center">
           © 2025
         </div>
       </SidebarFooter>
-    </Sidebar>;
+    </Sidebar>
+  );
 };
 
 export default DesktopSidebar;
