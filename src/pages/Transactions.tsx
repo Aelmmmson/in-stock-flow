@@ -1,18 +1,30 @@
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useInventory } from '@/contexts/InventoryContext';
 import { Button } from '@/components/ui/button';
 import { Plus } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { ScrollArea } from '@/components/ui/scroll-area';
 
 const Transactions = () => {
+  const navigate = useNavigate();
   const {
     transactions,
     products,
     currencySymbol,
-    getDiscountedPrice
   } = useInventory();
+
+  // Check if there are items in cart from localStorage
+  useEffect(() => {
+    const cartItems = localStorage.getItem('cart-items');
+    if (cartItems && JSON.parse(cartItems).length > 0) {
+      // If there are items in cart, show a button to continue transaction
+      const shouldContinue = window.confirm('You have items in your cart. Would you like to continue with your transaction?');
+      if (shouldContinue) {
+        navigate('/transactions/add');
+      }
+    }
+  }, [navigate]);
 
   // Sort transactions by date (newest first)
   const sortedTransactions = [...transactions].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());

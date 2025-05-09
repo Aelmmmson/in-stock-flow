@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Sidebar, SidebarContent, SidebarFooter, SidebarGroup, SidebarGroupContent, SidebarHeader, SidebarMenu, SidebarMenuItem, SidebarMenuButton } from '@/components/ui/sidebar';
@@ -29,7 +30,7 @@ const DesktopSidebar = () => {
   }];
   
   return (
-    <Sidebar className="hidden md:flex border-r w-16" defaultCollapsed={true} collapsible={true} variant="icon">
+    <Sidebar className="hidden md:flex border-r w-[50px]" defaultCollapsed={true} collapsible="icon" variant="sidebar">
       <SidebarHeader className="p-4">
         <div className="flex items-center justify-center">
           <img 

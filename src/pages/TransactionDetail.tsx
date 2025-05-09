@@ -25,6 +25,18 @@ const TransactionDetail = () => {
     }
   }, [transaction, navigate, toast]);
   
+  // Also check for cart items
+  useEffect(() => {
+    const cartItems = localStorage.getItem('cart-items');
+    if (cartItems && JSON.parse(cartItems).length > 0) {
+      // If there are items in cart, show a button to continue transaction
+      const shouldContinue = window.confirm('You have items in your cart. Would you like to continue with your transaction?');
+      if (shouldContinue) {
+        navigate('/transactions/add');
+      }
+    }
+  }, [navigate]);
+  
   if (!transaction) return null;
 
   const product = products.find(p => p.id === transaction.productId);

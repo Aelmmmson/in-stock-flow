@@ -1,6 +1,14 @@
 
 import { Link, useLocation } from 'react-router-dom';
 import { ChevronRight, Home } from 'lucide-react';
+import { 
+  Breadcrumb as UIBreadcrumb,
+  BreadcrumbList, 
+  BreadcrumbItem,
+  BreadcrumbLink, 
+  BreadcrumbPage, 
+  BreadcrumbSeparator 
+} from '@/components/ui/breadcrumb';
 
 interface BreadcrumbProps {
   currentPageTitle?: string;
@@ -28,30 +36,38 @@ const Breadcrumb = ({ currentPageTitle }: BreadcrumbProps) => {
   };
 
   return (
-    <div className="flex items-center text-sm text-gray-500 dark:text-gray-400 py-2 overflow-x-auto">
-      <Link to="/" className="flex items-center hover:text-pink-500 transition-colors">
-        <Home className="h-4 w-4 mr-1" />
-        <span className="sr-only">Home</span>
-      </Link>
-      
-      {pathSegments.map((segment, index) => (
-        <div key={index} className="flex items-center">
-          <ChevronRight className="h-4 w-4 mx-1" />
-          {index === pathSegments.length - 1 ? (
-            <span className="text-foreground font-medium truncate">
-              {currentPageTitle || formatTitle(segment)}
-            </span>
-          ) : (
-            <Link 
-              to={getPathForSegment(index)}
-              className="hover:text-pink-500 truncate transition-colors"
-            >
-              {formatTitle(segment)}
+    <UIBreadcrumb className="mb-4">
+      <BreadcrumbList>
+        <BreadcrumbItem>
+          <BreadcrumbLink asChild>
+            <Link to="/" className="flex items-center hover:text-pink-500 transition-colors">
+              <Home className="h-4 w-4 mr-1" />
+              <span className="sr-only md:not-sr-only md:inline">Home</span>
             </Link>
-          )}
-        </div>
-      ))}
-    </div>
+          </BreadcrumbLink>
+        </BreadcrumbItem>
+      
+        {pathSegments.map((segment, index) => (
+          <BreadcrumbItem key={index}>
+            <BreadcrumbSeparator />
+            {index === pathSegments.length - 1 ? (
+              <BreadcrumbPage>
+                {currentPageTitle || formatTitle(segment)}
+              </BreadcrumbPage>
+            ) : (
+              <BreadcrumbLink asChild>
+                <Link 
+                  to={getPathForSegment(index)}
+                  className="hover:text-pink-500 truncate transition-colors"
+                >
+                  {formatTitle(segment)}
+                </Link>
+              </BreadcrumbLink>
+            )}
+          </BreadcrumbItem>
+        ))}
+      </BreadcrumbList>
+    </UIBreadcrumb>
   );
 };
 

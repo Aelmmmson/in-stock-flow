@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { Outlet } from 'react-router-dom';
 import { SidebarProvider } from '@/components/ui/sidebar';
@@ -6,6 +7,7 @@ import MobileNavbar from './MobileNavbar';
 import NotificationsPanel from '@/components/notifications/NotificationsPanel';
 import DesktopSidebar from '@/components/layout/DesktopSidebar';
 import { TabsType } from '@/types';
+import Breadcrumb from '@/components/navigation/Breadcrumb';
 
 const AppLayout = () => {
   const [activeTab, setActiveTab] = useState<TabsType>('dashboard');
@@ -32,6 +34,7 @@ const AppLayout = () => {
           
           {/* Content area with proper spacing */}
           <main className="flex-1 p-4 pb-20 md:pb-4 overflow-auto">
+            <Breadcrumb />
             <Outlet />
           </main>
           
