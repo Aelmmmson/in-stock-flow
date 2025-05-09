@@ -33,10 +33,10 @@ const DesktopSidebar = () => {
       path: '/settings'
     }
   ];
-  
+
   return (
     <Sidebar 
-      className="hidden md:flex border-r w-[100px] mr-0" 
+      className="hidden md:flex border-r w-[90px] mr-0" 
       collapsible="none" 
       variant="sidebar"
     >
@@ -58,7 +58,7 @@ const DesktopSidebar = () => {
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton 
                     asChild
-                    tooltip={item.title} // Re-add tooltip for hover
+                    tooltip={item.title}
                   >
                     <Link 
                       to={item.path} 
@@ -71,8 +71,14 @@ const DesktopSidebar = () => {
                       `}
                       title={item.title}
                     >
-                      <item.icon className="h-5 w-5" />
-                      <span className="text-[12px] mt-1 text-center leading-tight">
+                      <div className="flex items-center justify-center">
+                        {item.icon ? (
+                          <item.icon className="h-5 w-5 inline-block" />
+                        ) : (
+                          <span className="h-5 w-5 text-red-500 inline-block">[Icon Missing]</span>
+                        )}
+                      </div>
+                      <span className="text-[10px] mt-1 text-center leading-tight">
                         {item.title}
                       </span>
                     </Link>
