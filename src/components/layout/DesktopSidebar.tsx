@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Sidebar, SidebarContent, SidebarFooter, SidebarGroup, SidebarGroupContent, SidebarHeader, SidebarMenu, SidebarMenuItem, SidebarMenuButton } from '@/components/ui/sidebar';
@@ -37,7 +36,7 @@ const DesktopSidebar = () => {
 
   return (
     <Sidebar 
-      className="hidden md:flex border-r w-[50px] mr-0" 
+      className="hidden md:flex border-r w-[85px] mr-0" 
       collapsible="none" 
       variant="sidebar"
     >
@@ -79,7 +78,7 @@ const DesktopSidebar = () => {
                           <span className="h-5 w-5 text-red-500 inline-block">[Icon Missing]</span>
                         )}
                       </div>
-                      <span className="text-[10px] mt-1 text-center leading-tight truncate max-w-full block">
+                      <span className="text-[10px] mt-1 text-center leading-tight !truncate-0 block">
                         {item.title}
                       </span>
                     </Link>
