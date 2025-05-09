@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { Outlet } from 'react-router-dom';
 import { SidebarProvider } from '@/components/ui/sidebar';
@@ -18,7 +19,7 @@ const AppLayout = () => {
   
   return (
     <SidebarProvider>
-      <div className="min-h-screen w-full flex flex-col md:flex-row gap-0 m-0">
+      <div className="min-h-screen w-full flex flex-col md:flex-row m-0">
         {/* Desktop Sidebar - fixed width */}
         <div className="hidden md:block m-0">
           <DesktopSidebar />

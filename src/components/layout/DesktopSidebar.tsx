@@ -37,7 +37,7 @@ const DesktopSidebar = () => {
 
   return (
     <Sidebar 
-      className="hidden md:flex border-r w-[50px] mr-0" 
+      className="hidden md:flex border-r w-[60px] mr-0" 
       collapsible="none" 
       variant="sidebar"
     >
@@ -54,7 +54,7 @@ const DesktopSidebar = () => {
       <SidebarContent>
         <SidebarGroup>
           <SidebarGroupContent>
-            <SidebarMenu>
+            <SidebarMenu className="flex flex-col items-center gap-3">
               {menuItems.map(item => (
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton 
@@ -64,22 +64,22 @@ const DesktopSidebar = () => {
                     <Link 
                       to={item.path} 
                       className={`
-                        flex flex-col items-center 
-                        p-2 mx-1 my-1 rounded-md
+                        flex flex-col items-center justify-center 
+                        p-2 rounded-md w-12 h-16
                         ${currentPath === item.path.substring(1) ? 
                           'bg-accent text-accent-foreground' : 
                           'hover:bg-gray-100'}
                       `}
                       title={item.title}
                     >
-                      <div className="flex items-center justify-center">
+                      <div className="flex items-center justify-center mb-1">
                         {item.icon ? (
-                          <item.icon className="h-5 w-5 inline-block" />
+                          <item.icon className="h-5 w-5" />
                         ) : (
-                          <span className="h-5 w-5 text-red-500 inline-block">[Icon Missing]</span>
+                          <span className="h-5 w-5 text-red-500">[Icon Missing]</span>
                         )}
                       </div>
-                      <span className="text-[10px] mt-1 text-center leading-tight truncate max-w-full block">
+                      <span className="text-[9px] text-center leading-tight max-w-full">
                         {item.title}
                       </span>
                     </Link>
