@@ -39,7 +39,7 @@ const DesktopSidebar = () => {
             <SidebarMenu>
               {menuItems.map(item => <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton asChild>
-                    <Link to={item.path} title={item.title} className="">
+                    <Link to={item.path} className={`flex flex-col items-center p-2 ${currentPath === item.path.substring(1) ? 'bg-accent text-accent-foreground' : ''}`} title={item.title}>
                       <item.icon className="h-5 w-5" />
                       <span className="text-xs mt-1">{item.title}</span>
                     </Link>
