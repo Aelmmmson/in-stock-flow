@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { Outlet } from 'react-router-dom';
 import { SidebarProvider } from '@/components/ui/sidebar';
@@ -19,14 +18,14 @@ const AppLayout = () => {
   
   return (
     <SidebarProvider>
-      <div className="min-h-screen w-full flex flex-col md:flex-row">
+      <div className="min-h-screen w-full flex flex-col md:flex-row gap-0 m-0">
         {/* Desktop Sidebar - fixed width */}
-        <div className="hidden md:block">
+        <div className="hidden md:block m-0">
           <DesktopSidebar />
         </div>
         
         {/* Main content area - flex-1 to take remaining space */}
-        <div className="flex-1 flex flex-col min-w-0"> {/* min-w-0 prevents overflow issues */}
+        <div className="flex-1 flex flex-col min-w-0 m-0 p-0">
           <MobileHeader
             activeTab={activeTab}
             toggleNotificationsPanel={toggleNotificationsPanel}

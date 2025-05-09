@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Sidebar, SidebarContent, SidebarFooter, SidebarGroup, SidebarGroupContent, SidebarHeader, SidebarMenu, SidebarMenuItem, SidebarMenuButton } from '@/components/ui/sidebar';
@@ -7,30 +6,40 @@ import { LayoutDashboard, Package, BarChart2, Settings, ShoppingCart } from 'luc
 const DesktopSidebar = () => {
   const location = useLocation();
   const currentPath = location.pathname.split('/')[1] || 'dashboard';
-  const menuItems = [{
-    title: 'Dashboard',
-    icon: LayoutDashboard,
-    path: '/dashboard'
-  }, {
-    title: 'Inventory',
-    icon: Package,
-    path: '/inventory'
-  }, {
-    title: 'Sales',
-    icon: ShoppingCart,
-    path: '/transactions'
-  }, {
-    title: 'Reports',
-    icon: BarChart2,
-    path: '/reports'
-  }, {
-    title: 'Settings',
-    icon: Settings,
-    path: '/settings'
-  }];
+  const menuItems = [
+    {
+      title: 'Dashboard',
+      icon: LayoutDashboard,
+      path: '/dashboard'
+    },
+    {
+      title: 'Inventory',
+      icon: Package,
+      path: '/inventory'
+    },
+    {
+      title: 'Sales',
+      icon: ShoppingCart,
+      path: '/transactions'
+    },
+    {
+      title: 'Reports',
+      icon: BarChart2,
+      path: '/reports'
+    },
+    {
+      title: 'Settings',
+      icon: Settings,
+      path: '/settings'
+    }
+  ];
   
   return (
-    <Sidebar className="hidden md:flex border-r w-[50px]" defaultCollapsed={true} collapsible="icon" variant="sidebar">
+    <Sidebar 
+      className="hidden md:flex border-r w-[50px] mr-0" 
+      collapsible="none" 
+      variant="sidebar"
+    >
       <SidebarHeader className="p-4">
         <div className="flex items-center justify-center">
           <img 
@@ -47,7 +56,10 @@ const DesktopSidebar = () => {
             <SidebarMenu>
               {menuItems.map(item => (
                 <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton asChild>
+                  <SidebarMenuButton 
+                    asChild
+                    tooltip={item.title} // Keep tooltip for hover
+                  >
                     <Link 
                       to={item.path} 
                       className={`
@@ -60,7 +72,7 @@ const DesktopSidebar = () => {
                       title={item.title}
                     >
                       <item.icon className="h-5 w-5" />
-                      <span className="text-xs mt-1.5 text-center leading-tight">
+                      <span className="text-[10px] mt-1 text-center leading-tight">
                         {item.title}
                       </span>
                     </Link>
