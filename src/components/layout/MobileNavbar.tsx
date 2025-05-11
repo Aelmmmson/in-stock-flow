@@ -1,6 +1,6 @@
 
 import { Link } from 'react-router-dom';
-import { BarChart, Package, Tag, Settings, LayoutDashboard, ShoppingCart } from 'lucide-react';
+import { BarChart, Package, Settings, LayoutDashboard, ShoppingCart } from 'lucide-react';
 import { TabsType } from '@/types';
 
 interface MobileNavbarProps {
@@ -18,7 +18,7 @@ const MobileNavbar = ({ activeTab, setActiveTab }: MobileNavbarProps) => {
   ];
 
   return (
-    <div className="md:hidden fixed bottom-0 left-0 right-0 border-t border-border bg-white dark:bg-gray-800 py-2 px-4 z-10">
+    <div className="fixed bottom-0 left-0 right-0 border-t border-border bg-white dark:bg-gray-800 py-2 px-4 z-10">
       <div className="flex justify-between items-center overflow-x-auto">
         {tabs.map((tab) => {
           const isActive = activeTab === tab.name;
