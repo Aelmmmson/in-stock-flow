@@ -2,11 +2,72 @@
 import { useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { useInventory } from '@/contexts/InventoryContext';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { ShieldAlert } from 'lucide-react';
 
 const ReportsSales = () => {
-  const { transactions, products, currencySymbol } = useInventory();
+  const navigate = useNavigate();
+  const { getFilteredTransactions, products, currencySymbol, canViewSensitiveData } = useInventory();
+  
+  // Get transactions filtered by role
+  const transactions = getFilteredTransactions();
+
+  // Redirect non-admin users if they try to access this page directly and are not authenticated
+  if (!canViewSensitiveData()) {
+    // For non-admin users, we'll show a limited version
+    const salesTransactions = transactions.filter(t => t.type === 'sale');
+    const totalSalesAmount = salesTransactions.reduce((sum, t) => sum + t.totalAmount, 0);
+    
+    return (
+      <div className="space-y-4">
+        <div>
+          <h1 className="text-2xl font-bold">Your Sales Reports</h1>
+        </div>
+        
+        <Card className="border-none shadow-sm">
+          <CardContent className="p-4">
+            <div className="flex items-center mb-3">
+              <div className="h-6 w-6 bg-green-100 dark:bg-green-900/30 rounded-full flex items-center justify-center mr-2">
+                <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-green-500">
+                  <line x1="18" y1="20" x2="18" y2="10" />
+                  <line x1="12" y1="20" x2="12" y2="4" />
+                  <line x1="6" y1="20" x2="6" y2="14" />
+                </svg>
+              </div>
+              <h2 className="text-base font-medium">Your Sales Summary</h2>
+            </div>
+            
+            <div className="grid grid-cols-2 gap-4 mt-4">
+              <div>
+                <div className="text-sm text-gray-500">Total Sales</div>
+                <div className="text-lg font-bold">{currencySymbol}{totalSalesAmount.toFixed(2)}</div>
+              </div>
+              <div>
+                <div className="text-sm text-gray-500">Transactions</div>
+                <div className="text-lg font-bold">{salesTransactions.length}</div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+        
+        <Card className="border-none shadow-sm">
+          <CardContent className="p-4">
+            <div className="flex items-center mb-3">
+              <ShieldAlert className="h-5 w-5 text-amber-500 mr-2" />
+              <h2 className="text-base font-medium">Limited Access</h2>
+            </div>
+            
+            <p className="text-sm text-gray-500">
+              You can only view your own sales data. For complete sales reports, please contact an administrator.
+            </p>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+  
+  // Admin view - Full report
   
   // Calculate total sales
   const salesTransactions = transactions.filter(t => t.type === 'sale');

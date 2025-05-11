@@ -7,7 +7,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { InventoryProvider } from "@/contexts/InventoryContext";
 import { ThemeProvider } from "@/contexts/ThemeContext";
-import { AuthProvider } from "@/contexts/AuthContext";
+import { AuthProvider, useAuth } from "@/contexts/AuthContext";
 import AppLayout from "@/components/layout/AppLayout";
 import LoadingScreen from "@/components/common/LoadingScreen";
 
@@ -40,6 +40,25 @@ import Notifications from "./pages/Notifications";
 // Create a new QueryClient instance outside the component
 const queryClient = new QueryClient();
 
+// Route protection component
+const ProtectedRoute = ({ children, adminOnly = false }) => {
+  const { isAuthenticated, isLoading, hasAdminAccess } = useAuth();
+  
+  if (isLoading) {
+    return <LoadingScreen />;
+  }
+  
+  if (!isAuthenticated) {
+    return <Navigate to="/login" replace />;
+  }
+  
+  if (adminOnly && !hasAdminAccess()) {
+    return <Navigate to="/dashboard" replace />;
+  }
+
+  return children;
+};
+
 function App() {
   const [loading, setLoading] = useState(true);
 
@@ -49,6 +68,74 @@ function App() {
       setLoading(false);
     }, 1000);
   }, []);
+
+  // Wrap the routes with AuthProvider first
+  const AppRoutes = () => {
+    const { isAuthenticated } = useAuth();
+    
+    return (
+      <Routes>
+        <Route path="/login" element={!isAuthenticated ? <Login /> : <Navigate to="/dashboard" replace />} />
+        
+        {/* Redirect from root to dashboard if authenticated, otherwise to login */}
+        <Route path="/" element={isAuthenticated ? <Navigate to="/dashboard" replace /> : <Navigate to="/login" replace />} />
+        
+        {/* Protected routes */}
+        <Route path="/" element={
+          <ProtectedRoute>
+            <AppLayout />
+          </ProtectedRoute>
+        }>
+          <Route path="dashboard" element={<Dashboard />} />
+          <Route path="inventory" element={<Inventory />} />
+          <Route path="inventory/:id" element={<ProductDetail />} />
+          <Route path="inventory/:id/edit" element={
+            <ProtectedRoute adminOnly>
+              <EditProduct />
+            </ProtectedRoute>
+          } />
+          <Route path="inventory/:id/barcode" element={<ProductBarcode />} />
+          <Route path="inventory/scan/:sku" element={<ScanProduct />} />
+          <Route path="inventory/add" element={
+            <ProtectedRoute adminOnly>
+              <AddProduct />
+            </ProtectedRoute>
+          } />
+          <Route path="inventory/categories" element={
+            <ProtectedRoute adminOnly>
+              <Categories />
+            </ProtectedRoute>
+          } />
+          <Route path="transactions" element={<Transactions />} />
+          <Route path="transactions/add" element={<AddTransaction />} />
+          <Route path="transactions/:id" element={<TransactionDetail />} />
+          <Route path="reports" element={<Reports />} />
+          <Route path="reports/inventory" element={<ReportsInventory />} />
+          <Route path="reports/sales" element={<ReportsSales />} />
+          <Route path="reports/financial" element={
+            <ProtectedRoute adminOnly>
+              <FinancialReports />
+            </ProtectedRoute>
+          } />
+          <Route path="settings" element={<Settings />} />
+          <Route path="settings/profile" element={<Profile />} />
+          <Route path="discounts" element={
+            <ProtectedRoute adminOnly>
+              <Discounts />
+            </ProtectedRoute>
+          } />
+          <Route path="help" element={<Help />} />
+          <Route path="notifications" element={<Notifications />} />
+          <Route path="low-stock" element={
+            <ProtectedRoute adminOnly>
+              <LowStockItems />
+            </ProtectedRoute>
+          } />
+          <Route path="*" element={<NotFound />} />
+        </Route>
+      </Routes>
+    );
+  };
 
   return (
     <QueryClientProvider client={queryClient}>
@@ -62,35 +149,7 @@ function App() {
                 <LoadingScreen />
               ) : (
                 <BrowserRouter>
-                  <Routes>
-                    <Route path="/login" element={<Login />} />
-                    {/* Redirect from root to dashboard */}
-                    <Route path="/" element={<Navigate to="/dashboard" replace />} />
-                    <Route path="/" element={<AppLayout />}>
-                      <Route path="dashboard" element={<Dashboard />} />
-                      <Route path="inventory" element={<Inventory />} />
-                      <Route path="inventory/:id" element={<ProductDetail />} />
-                      <Route path="inventory/:id/edit" element={<EditProduct />} />
-                      <Route path="inventory/:id/barcode" element={<ProductBarcode />} />
-                      <Route path="inventory/scan/:sku" element={<ScanProduct />} />
-                      <Route path="inventory/add" element={<AddProduct />} />
-                      <Route path="inventory/categories" element={<Categories />} />
-                      <Route path="transactions" element={<Transactions />} />
-                      <Route path="transactions/add" element={<AddTransaction />} />
-                      <Route path="transactions/:id" element={<TransactionDetail />} />
-                      <Route path="reports" element={<Reports />} />
-                      <Route path="reports/inventory" element={<ReportsInventory />} />
-                      <Route path="reports/sales" element={<ReportsSales />} />
-                      <Route path="reports/financial" element={<FinancialReports />} />
-                      <Route path="settings" element={<Settings />} />
-                      <Route path="settings/profile" element={<Profile />} />
-                      <Route path="discounts" element={<Discounts />} />
-                      <Route path="help" element={<Help />} />
-                      <Route path="notifications" element={<Notifications />} />
-                      <Route path="low-stock" element={<LowStockItems />} />
-                      <Route path="*" element={<NotFound />} />
-                    </Route>
-                  </Routes>
+                  <AppRoutes />
                 </BrowserRouter>
               )}
             </InventoryProvider>

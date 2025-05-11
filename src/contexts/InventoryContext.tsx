@@ -1,7 +1,7 @@
-
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { Product, Transaction, User, Expense, Discount } from '../types';
 import { useToast } from '@/hooks/use-toast';
+import { useAuth } from './AuthContext';
 
 // Sample products data
 const sampleProducts: Product[] = [
@@ -159,6 +159,8 @@ interface InventoryContextType {
   getActiveDiscounts: () => Discount[];
   getDiscountedPrice: (product: Product) => number;
   discounts: Discount[];
+  getFilteredTransactions: () => Transaction[]; // New function to get role-filtered transactions
+  canViewSensitiveData: () => boolean; // Check if user can view sensitive data
 }
 
 const InventoryContext = createContext<InventoryContextType | undefined>(undefined);
@@ -181,6 +183,7 @@ export const InventoryProvider = ({ children }: InventoryProviderProps) => {
   const [expenses, setExpenses] = useState<Expense[]>([]);
   const [discounts, setDiscounts] = useState<Discount[]>([]);
   const { toast } = useToast();
+  const { currentUser, hasAdminAccess } = useAuth();
   const currencySymbol = '₵'; // Ghana Cedi symbol
   
   // Mock current user
@@ -311,6 +314,7 @@ export const InventoryProvider = ({ children }: InventoryProviderProps) => {
       id: Date.now().toString(),
       priceDelta,
       createdAt: new Date().toISOString(),
+      createdBy: currentUser?.id || 'unknown', // Add the user ID who created the transaction
     };
 
     // Update the product quantity
@@ -348,6 +352,24 @@ export const InventoryProvider = ({ children }: InventoryProviderProps) => {
         variant: "destructive",
       });
     }
+  };
+
+  // Function to check if user can view sensitive data
+  const canViewSensitiveData = () => {
+    return hasAdminAccess();
+  };
+
+  // Function to get filtered transactions based on user role
+  const getFilteredTransactions = () => {
+    // If user has admin access, show all transactions
+    if (hasAdminAccess()) {
+      return transactions;
+    }
+    
+    // Otherwise, only show transactions created by this user
+    return transactions.filter(transaction => 
+      transaction.createdBy === currentUser?.id
+    );
   };
 
   const addExpense = (expense: Omit<Expense, 'id'>) => {
@@ -396,11 +418,16 @@ export const InventoryProvider = ({ children }: InventoryProviderProps) => {
 
   const getFinancialSummary = (startDate: Date, endDate: Date) => {
     // Filter transactions within date range
-    const salesInPeriod = transactions.filter(
+    let salesInPeriod = transactions.filter(
       t => t.type === 'sale' && 
       new Date(t.createdAt) >= startDate && 
       new Date(t.createdAt) <= endDate
     );
+
+    // If user doesn't have admin access, only show their own transactions
+    if (!hasAdminAccess()) {
+      salesInPeriod = salesInPeriod.filter(t => t.createdBy === currentUser?.id);
+    }
 
     // Calculate total sales
     const totalSales = salesInPeriod.reduce(
@@ -475,6 +502,8 @@ export const InventoryProvider = ({ children }: InventoryProviderProps) => {
     getFinancialSummary,
     getActiveDiscounts,
     getDiscountedPrice,
+    getFilteredTransactions,
+    canViewSensitiveData,
   };
 
   return (

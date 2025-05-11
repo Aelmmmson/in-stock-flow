@@ -5,15 +5,26 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useInventory } from '@/contexts/InventoryContext';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { ArrowUp, ArrowDown, ChevronRight } from 'lucide-react';
+import { ArrowUp, ArrowDown, ChevronRight, ShieldAlert } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { useAuth } from '@/contexts/AuthContext';
 
 const Reports = () => {
-  const { products, transactions, currencySymbol } = useInventory();
+  const { products, currencySymbol, canViewSensitiveData, getFilteredTransactions } = useInventory();
+  const { currentUser } = useAuth();
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('overview');
   const [showProductAnalysis, setShowProductAnalysis] = useState(false);
+  
+  // Get transactions filtered by role
+  const transactions = getFilteredTransactions();
+
+  // Redirect non-admin users if they try to access this page directly
+  if (!canViewSensitiveData() && !currentUser) {
+    navigate('/dashboard');
+    return null;
+  }
   
   // Calculate total inventory value at cost
   const inventoryValue = products.reduce(
@@ -39,6 +50,54 @@ const Reports = () => {
   const totalPriceAdjustments = transactions
     .filter(t => t.type === 'sale')
     .reduce((acc, t) => acc + t.priceDelta, 0);
+
+  // If user doesn't have admin access, show limited reports
+  if (!canViewSensitiveData()) {
+    return (
+      <div className="space-y-4">
+        <div>
+          <h1 className="text-2xl font-bold">Your Sales Reports</h1>
+        </div>
+        
+        <Card className="border-none shadow-sm">
+          <CardContent className="p-4">
+            <div className="flex items-center mb-3">
+              <div className="h-5 w-5 bg-pink-100 dark:bg-pink-900/30 rounded-md flex items-center justify-center mr-2">
+                <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-pink-500"><path d="M3 3v18h18"></path><path d="m19 9-5 5-4-4-3 3"></path></svg>
+              </div>
+              <h2 className="text-sm font-medium">Your Sales Overview</h2>
+            </div>
+            
+            <div className="grid grid-cols-2 gap-4 mt-3">
+              <div>
+                <div className="text-xs text-gray-500 dark:text-gray-400">Your Total Sales</div>
+                <div className="text-lg font-bold">GH₵{totalSales.toFixed(2)}</div>
+              </div>
+              <div>
+                <div className="text-xs text-gray-500 dark:text-gray-400">Number of Transactions</div>
+                <div className="text-lg font-bold">{transactions.filter(t => t.type === 'sale').length}</div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+        
+        <Card className="border-none shadow-sm">
+          <CardHeader>
+            <div className="flex items-center">
+              <ShieldAlert className="h-5 w-5 text-amber-500 mr-2" />
+              <CardTitle>Access Limited</CardTitle>
+            </div>
+          </CardHeader>
+          <CardContent>
+            <p className="text-sm text-gray-500">
+              You don't have permission to view detailed financial reports. 
+              Please contact your administrator for more information.
+            </p>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
 
   const ProductAnalysisContent = () => (
     <Card className="border-none shadow-sm">

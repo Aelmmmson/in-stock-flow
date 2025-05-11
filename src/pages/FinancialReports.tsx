@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { useInventory } from '@/contexts/InventoryContext';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -13,10 +14,12 @@ import {
 import { FinancialPeriod } from '@/types';
 import { ChartContainer, ChartTooltip } from '@/components/ui/chart';
 import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer } from 'recharts';
-import { ArrowUpRight, ArrowDownRight, FileText, TrendingUp } from 'lucide-react';
+import { ArrowUpRight, ArrowDownRight, FileText, TrendingUp, ShieldAlert } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 const FinancialReports = () => {
-  const { expenses, transactions, getFinancialSummary, currencySymbol } = useInventory();
+  const { getFilteredTransactions, expenses, getFinancialSummary, currencySymbol, canViewSensitiveData } = useInventory();
+  const navigate = useNavigate();
   const [selectedPeriod, setSelectedPeriod] = useState<FinancialPeriod>({
     startDate: new Date(new Date().setDate(1)).toISOString(),
     endDate: new Date().toISOString(),
@@ -33,6 +36,36 @@ const FinancialReports = () => {
     profit: 0,
     topSellingProducts: [],
   });
+
+  // Redirect non-admin users who try to access this page directly
+  if (!canViewSensitiveData()) {
+    return (
+      <div className="space-y-6">
+        <h1 className="text-2xl font-bold">Restricted Access</h1>
+        
+        <Card>
+          <CardHeader>
+            <div className="flex items-center">
+              <ShieldAlert className="h-5 w-5 text-amber-500 mr-2" />
+              <CardTitle>Permission Denied</CardTitle>
+            </div>
+          </CardHeader>
+          <CardContent>
+            <p className="text-gray-500">
+              You don't have permission to access financial reports. 
+              This information is restricted to administrators and managers.
+            </p>
+            <Button 
+              onClick={() => navigate('/dashboard')}
+              className="mt-4"
+            >
+              Return to Dashboard
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
 
   const periods: FinancialPeriod[] = [
     {
@@ -89,6 +122,9 @@ const FinancialReports = () => {
       amount,
     }))
     .sort((a, b) => b.amount - a.amount);
+
+  // Get transactions filtered by role
+  const transactions = getFilteredTransactions();
 
   return (
     <div className="space-y-6">

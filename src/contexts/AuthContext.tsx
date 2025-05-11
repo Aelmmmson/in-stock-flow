@@ -1,11 +1,14 @@
 
 import { createContext, useState, useContext, useEffect, ReactNode } from 'react';
 
+// Define specific role types for better type safety
+export type UserRole = 'superadmin' | 'admin' | 'owner' | 'manager' | 'cashier' | 'attendant';
+
 interface User {
   id: string;
   name: string;
   email: string;
-  role: string;
+  role: UserRole;
   phone?: string;
   address?: string;
   avatar?: string | null;
@@ -18,17 +21,38 @@ interface AuthContextProps {
   login: (email: string, password: string) => Promise<boolean>;
   logout: () => void;
   updateUserProfile: (userData: Partial<User>) => Promise<void>;
+  hasAdminAccess: () => boolean; // Helper function to check if user has admin level access
 }
 
-// Mock user
-const mockUser: User = {
-  id: 'user-1',
-  name: 'Shop Owner',
-  email: 'owner@didizcloset.com',
-  role: 'admin',
-  phone: '+233 50 123 4567',
-  address: 'Accra, Ghana',
-  avatar: null
+// Mock users for different roles
+const mockUsers: Record<string, User> = {
+  'owner@didizcloset.com': {
+    id: 'user-1',
+    name: 'Shop Owner',
+    email: 'owner@didizcloset.com',
+    role: 'owner',
+    phone: '+233 50 123 4567',
+    address: 'Accra, Ghana',
+    avatar: null
+  },
+  'admin@didizcloset.com': {
+    id: 'user-2',
+    name: 'Admin User',
+    email: 'admin@didizcloset.com',
+    role: 'admin',
+    phone: '+233 50 987 6543',
+    address: 'Accra, Ghana',
+    avatar: null
+  },
+  'cashier@didizcloset.com': {
+    id: 'user-3',
+    name: 'Cashier',
+    email: 'cashier@didizcloset.com',
+    role: 'cashier',
+    phone: '+233 50 456 7890',
+    address: 'Accra, Ghana',
+    avatar: null
+  }
 };
 
 const AuthContext = createContext<AuthContextProps | undefined>(undefined);
@@ -70,16 +94,22 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     checkSession();
   }, []);
 
+  // Check if user has admin-level access
+  const hasAdminAccess = () => {
+    if (!currentUser) return false;
+    return ['superadmin', 'admin', 'owner', 'manager'].includes(currentUser.role);
+  };
+
   const login = async (email: string, password: string) => {
-    // Use static credentials for demo
-    if ((email === 'admin@didizcloset.com' && password === 'admin123') || 
-        (email === 'owner@didizcloset.com' && password === 'admin123')) {
+    // For demo purposes, check if we have a mock user with this email
+    if (mockUsers[email] && password === 'admin123') {
+      const user = mockUsers[email];
       setIsAuthenticated(true);
-      setCurrentUser(mockUser);
+      setCurrentUser(user);
       
       // Store session data
       localStorage.setItem('isAuthenticated', 'true');
-      localStorage.setItem('currentUser', JSON.stringify(mockUser));
+      localStorage.setItem('currentUser', JSON.stringify(user));
       
       return true;
     }
@@ -120,7 +150,8 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       currentUser,
       login, 
       logout,
-      updateUserProfile 
+      updateUserProfile,
+      hasAdminAccess
     }}>
       {children}
     </AuthContext.Provider>

@@ -2,11 +2,14 @@
 import { useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { useInventory } from '@/contexts/InventoryContext';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { ShieldAlert } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 
 const ReportsInventory = () => {
-  const { products, getLowStockProducts } = useInventory();
+  const navigate = useNavigate();
+  const { products, getLowStockProducts, canViewSensitiveData } = useInventory();
   const lowStockProducts = getLowStockProducts();
   const outOfStockProducts = products.filter(p => p.quantity === 0);
   
@@ -18,6 +21,38 @@ const ReportsInventory = () => {
     }
     categories[product.category]++;
   });
+
+  // For non-admin users, show restricted view
+  if (!canViewSensitiveData()) {
+    return (
+      <div className="space-y-4">
+        <div>
+          <h1 className="text-2xl font-bold">Inventory Reports</h1>
+        </div>
+        
+        <Card className="border-none shadow-sm">
+          <CardContent className="p-4">
+            <div className="flex items-center mb-3">
+              <ShieldAlert className="h-5 w-5 text-amber-500 mr-2" />
+              <h2 className="text-base font-medium">Restricted Access</h2>
+            </div>
+            
+            <p className="text-sm text-gray-500">
+              You don't have permission to view detailed inventory reports. 
+              This information is restricted to administrators and managers.
+            </p>
+            
+            <Button 
+              onClick={() => navigate('/dashboard')}
+              className="mt-4"
+            >
+              Return to Dashboard
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-4">

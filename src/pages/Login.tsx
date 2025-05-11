@@ -5,8 +5,9 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { toast } from 'sonner';
-import { Eye, EyeOff, LogIn } from 'lucide-react';
+import { Eye, EyeOff, LogIn, Info } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 
 const Login = () => {
   const navigate = useNavigate();
@@ -15,6 +16,7 @@ const Login = () => {
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [showTestAccounts, setShowTestAccounts] = useState(false);
   
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -26,7 +28,7 @@ const Login = () => {
     
     if (success) {
       toast.success("Login successful! Welcome to Didiz Closet!");
-      navigate('/');
+      navigate('/dashboard');
     } else {
       toast.error("Login failed. Please try again.");
     }
@@ -112,6 +114,29 @@ const Login = () => {
             )}
           </Button>
         </form>
+        
+        <div className="mt-4">
+          <button 
+            className="flex items-center text-sm text-gray-400 hover:text-white"
+            onClick={() => setShowTestAccounts(!showTestAccounts)}
+          >
+            <Info className="h-4 w-4 mr-1" />
+            {showTestAccounts ? 'Hide test accounts' : 'Show test accounts'}
+          </button>
+          
+          {showTestAccounts && (
+            <Alert className="mt-2 bg-gray-700 text-white border-gray-600">
+              <AlertDescription>
+                <p className="text-sm mb-1 font-medium">Demo Accounts:</p>
+                <ul className="text-xs space-y-1 list-disc pl-4">
+                  <li>Owner: owner@didizcloset.com / admin123</li>
+                  <li>Admin: admin@didizcloset.com / admin123</li>
+                  <li>Cashier: cashier@didizcloset.com / admin123</li>
+                </ul>
+              </AlertDescription>
+            </Alert>
+          )}
+        </div>
         
         <div className="mt-6 text-center text-sm">
           <span className="text-gray-400">Don't have an account? </span>

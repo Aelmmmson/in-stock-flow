@@ -5,14 +5,21 @@ import { Button } from '@/components/ui/button';
 import { Plus } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { useAuth } from '@/contexts/AuthContext';
 
 const Transactions = () => {
   const navigate = useNavigate();
   const {
-    transactions,
     products,
     currencySymbol,
+    getFilteredTransactions,
+    canViewSensitiveData
   } = useInventory();
+  
+  const { currentUser } = useAuth();
+  
+  // Get transactions filtered by user role
+  const transactions = getFilteredTransactions();
 
   // Check if there are items in cart from localStorage
   useEffect(() => {
@@ -47,7 +54,9 @@ const Transactions = () => {
   return <ScrollArea className="h-full scrollbar-none">
       <div className="space-y-6 pb-20">
         <div className="flex justify-between items-center">
-          <h1 className="text-xl font-bold">Sales</h1>
+          <h1 className="text-xl font-bold">
+            {!canViewSensitiveData() ? 'Your Sales' : 'All Sales'}
+          </h1>
           <Button asChild className="bg-pink-500 hover:bg-pink-600">
             <Link to="/transactions/add">
               <Plus className="mr-1 h-4 w-4" /> New
@@ -73,10 +82,14 @@ const Transactions = () => {
                   <div className="text-gray-400">Customer</div>
                   <div className="text-gray-700">{transaction.customer || 'Walk-in Customer'}</div>
                   
-                  <div className="text-gray-400">Price Adjustment</div>
-                  <div className={transaction.priceDelta < 0 ? 'text-red-500' : 'text-gray-200'}>
-                    {transaction.priceDelta !== 0 ? `${transaction.priceDelta > 0 ? '+' : ''}${currencySymbol}${transaction.priceDelta.toFixed(2)}` : 'None'}
-                  </div>
+                  {canViewSensitiveData() && (
+                    <>
+                      <div className="text-gray-400">Price Adjustment</div>
+                      <div className={transaction.priceDelta < 0 ? 'text-red-500' : 'text-gray-200'}>
+                        {transaction.priceDelta !== 0 ? `${transaction.priceDelta > 0 ? '+' : ''}${currencySymbol}${transaction.priceDelta.toFixed(2)}` : 'None'}
+                      </div>
+                    </>
+                  )}
                   
                   <div className="text-gray-400">Payment</div>
                   <div className="text-gray-700">{transaction.paymentMethod || 'Cash'}</div>

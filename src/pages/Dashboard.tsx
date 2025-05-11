@@ -2,18 +2,24 @@
 import { Box, ShoppingCart, TrendingUp, Tag } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useInventory } from '@/contexts/InventoryContext';
+import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import { AlertTriangle } from 'lucide-react';
 
 const Dashboard = () => {
   const {
     products,
-    transactions,
+    getFilteredTransactions,
     getLowStockProducts,
     currencySymbol,
-    getDiscountedPrice
+    canViewSensitiveData
   } = useInventory();
+  
+  const { currentUser } = useAuth();
   const lowStockProducts = getLowStockProducts();
+  
+  // Get transactions filtered by user role
+  const transactions = getFilteredTransactions();
 
   // Get sales transactions
   const salesTransactions = transactions.filter(t => t.type === 'sale');
@@ -67,15 +73,25 @@ const Dashboard = () => {
           </div>
         </Link>
         
-        <Link to="/reports/financial" className="block">
+        {canViewSensitiveData() ? (
+          <Link to="/reports/financial" className="block">
+            <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-sm text-center">
+              <div className="rounded-full bg-gray-100 dark:bg-gray-700 p-3 w-12 h-12 flex items-center justify-center mx-auto">
+                <TrendingUp className="h-6 w-6 text-green-500" />
+              </div>
+              <div className="mt-3 text-gray-500 dark:text-gray-400">Potential Profit</div>
+              <div className="text-2xl md:text-2xl text-sm font-bold">{currencySymbol}{potentialProfit.toFixed(2)}</div>
+            </div>
+          </Link>
+        ) : (
           <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-sm text-center">
             <div className="rounded-full bg-gray-100 dark:bg-gray-700 p-3 w-12 h-12 flex items-center justify-center mx-auto">
               <TrendingUp className="h-6 w-6 text-green-500" />
             </div>
-            <div className="mt-3 text-gray-500 dark:text-gray-400">Potential Profit</div>
-            <div className="text-2xl md:text-2xl text-sm font-bold">{currencySymbol}{potentialProfit.toFixed(2)}</div>
+            <div className="mt-3 text-gray-500 dark:text-gray-400">Your Sales</div>
+            <div className="text-2xl md:text-2xl text-sm font-bold">{currencySymbol}{salesTransactions.reduce((sum, t) => sum + t.totalAmount, 0).toFixed(2)}</div>
           </div>
-        </Link>
+        )}
         
         <Link to="/transactions" className="block">
           <div className="bg-white dark:bg-gray-800 p-3 rounded-lg shadow-sm text-center">
@@ -88,28 +104,35 @@ const Dashboard = () => {
         </Link>
       </div>
 
-      <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-sm">
-        <div className="flex items-center gap-2 mb-3">
-          <AlertTriangle className="h-5 w-5 text-amber-500" />
-          <h3 className="font-bold">Low Stock Alerts</h3>
+      {canViewSensitiveData() && (
+        <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-sm">
+          <div className="flex items-center gap-2 mb-3">
+            <AlertTriangle className="h-5 w-5 text-amber-500" />
+            <h3 className="font-bold">Low Stock Alerts</h3>
+          </div>
+          
+          <div className="divide-y">
+            {lowStockProducts.length > 0 ? lowStockProducts.map(product => <Link key={product.id} to={`/inventory/${product.id}`} className="flex items-center justify-between py-3">
+                  <div className="text-gray-800 dark:text-gray-200">{product.name}</div>
+                  <div className="text-amber-600 dark:text-amber-400 font-semibold">
+                    {product.quantity} left
+                  </div>
+                </Link>) : <div className="py-3 text-gray-500 dark:text-gray-400">
+                No low stock items
+              </div>}
+          </div>
         </div>
-        
-        <div className="divide-y">
-          {lowStockProducts.length > 0 ? lowStockProducts.map(product => <Link key={product.id} to={`/inventory/${product.id}`} className="flex items-center justify-between py-3">
-                <div className="text-gray-800 dark:text-gray-200">{product.name}</div>
-                <div className="text-amber-600 dark:text-amber-400 font-semibold">
-                  {product.quantity} left
-                </div>
-              </Link>) : <div className="py-3 text-gray-500 dark:text-gray-400">
-              No low stock items
-            </div>}
-        </div>
-      </div>
+      )}
 
       <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-sm">
         <div className="flex items-center gap-2 mb-3">
           <ShoppingCart className="h-5 w-5 text-purple-500" />
           <h3 className="font-bold">Recent Sales</h3>
+          {!canViewSensitiveData() && currentUser && (
+            <span className="text-xs text-gray-500 ml-2">
+              (Made by you)
+            </span>
+          )}
         </div>
         
         <div className="divide-y">
