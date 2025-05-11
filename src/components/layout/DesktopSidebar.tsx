@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Sidebar, SidebarContent, SidebarFooter, SidebarGroup, SidebarGroupContent, SidebarHeader, SidebarMenu, SidebarMenuItem, SidebarMenuButton } from '@/components/ui/sidebar';
@@ -36,7 +37,7 @@ const DesktopSidebar = () => {
 
   return (
     <Sidebar 
-      className="hidden md:flex border-r w-[85px] mr-0" 
+      className="hidden md:flex border-r w-[70px] mr-0" 
       collapsible="none" 
       variant="sidebar"
     >
@@ -53,9 +54,9 @@ const DesktopSidebar = () => {
       <SidebarContent>
         <SidebarGroup>
           <SidebarGroupContent>
-            <SidebarMenu>
+            <SidebarMenu className="flex flex-col gap-6 pt-4">
               {menuItems.map(item => (
-                <SidebarMenuItem key={item.title}>
+                <SidebarMenuItem key={item.title} className="w-full">
                   <SidebarMenuButton 
                     asChild
                     tooltip={item.title}
@@ -63,22 +64,22 @@ const DesktopSidebar = () => {
                     <Link 
                       to={item.path} 
                       className={`
-                        flex flex-col items-center 
-                        p-2 mx-1 my-1 rounded-md
+                        flex flex-col items-center justify-center
+                        p-1 w-full
                         ${currentPath === item.path.substring(1) ? 
-                          'bg-accent text-accent-foreground' : 
-                          'hover:bg-gray-100'}
+                          'text-primary' : 
+                          'text-gray-600 hover:text-primary'}
                       `}
                       title={item.title}
                     >
-                      <div className="flex items-center justify-center">
+                      <div className="flex items-center justify-center mb-1">
                         {item.icon ? (
-                          <item.icon className="h-5 w-5 inline-block" />
+                          <item.icon className="h-5 w-5" />
                         ) : (
-                          <span className="h-5 w-5 text-red-500 inline-block">[Icon Missing]</span>
+                          <span className="h-5 w-5 text-red-500">[Icon Missing]</span>
                         )}
                       </div>
-                      <span className="text-[10px] mt-1 text-center leading-tight !truncate-0 block">
+                      <span className="text-xs font-medium text-center">
                         {item.title}
                       </span>
                     </Link>
