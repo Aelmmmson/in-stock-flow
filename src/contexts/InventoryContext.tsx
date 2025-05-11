@@ -139,7 +139,7 @@ interface InventoryContextType {
   products: Product[];
   transactions: Transaction[];
   expenses: Expense[];
-  currentUser: User;
+  currentUser: User | null;  // Updated to match AuthContext's User | null type
   currencySymbol: string;
   addProduct: (product: Omit<Product, 'id' | 'createdAt' | 'updatedAt'>) => void;
   updateProduct: (product: Product) => void;
@@ -186,13 +186,7 @@ export const InventoryProvider = ({ children }: InventoryProviderProps) => {
   const { currentUser, hasAdminAccess } = useAuth();
   const currencySymbol = '₵'; // Ghana Cedi symbol
   
-  // Mock current user
-  const currentUser: User = {
-    id: '1',
-    name: 'Admin User',
-    role: 'admin',
-    email: 'admin@didizcloset.com'
-  };
+  // Removed the mock currentUser as we're now using the one from AuthContext
 
   useEffect(() => {
     // Load data from localStorage if available or use sample data
