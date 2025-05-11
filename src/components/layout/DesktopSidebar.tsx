@@ -59,7 +59,7 @@ const DesktopSidebar = () => {
                 <SidebarMenuItem key={item.title} className="w-full">
                   <SidebarMenuButton 
                     asChild
-                    tooltip={item.title}
+                    // Remove tooltip prop to prevent tooltip from showing
                   >
                     <Link 
                       to={item.path} 
@@ -70,7 +70,6 @@ const DesktopSidebar = () => {
                           'text-primary' : 
                           'text-gray-600 hover:text-primary'}
                       `}
-                      title={item.title}
                     >
                       <div className="flex items-center justify-center mb-1">
                         {item.icon ? (
@@ -79,7 +78,7 @@ const DesktopSidebar = () => {
                           <span className="h-5 w-5 text-red-500">[Icon Missing]</span>
                         )}
                       </div>
-                      <span className="text-xs font-medium text-center">
+                      <span className="text-xs font-medium text-center block">
                         {item.title}
                       </span>
                     </Link>
