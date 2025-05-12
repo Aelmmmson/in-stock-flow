@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useInventory } from '@/contexts/InventoryContext';
@@ -6,12 +7,13 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
 import { Plus, User, Wallet, Trash2, Edit, ShoppingCart, Minus, X, ScanLine, Tag } from 'lucide-react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { ProductVariant } from '@/types';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Label } from '@/components/ui/label';
 import { BarcodeScannerDialog } from '@/components/inventory/BarcodeScanner';
 import { Badge } from '@/components/ui/badge';
+import { Card, CardContent } from '@/components/ui/card';
 
 interface CartItem {
   productId: string;
@@ -90,8 +92,19 @@ const AddTransaction = () => {
     p.sku.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
+  // Calculate subtotals and total
+  const cartSubtotal = cartItems.reduce(
+    (sum, item) => sum + item.quantity * item.price,
+    0
+  );
+  
+  const totalDiscounts = cartItems.reduce(
+    (sum, item) => sum + (item.quantity * item.priceDelta),
+    0
+  );
+  
   const totalAmount = cartItems.reduce(
-    (sum, item) => sum + item.quantity * (item.price - parseFloat(item.priceDelta.toString())),
+    (sum, item) => sum + item.quantity * (item.price - item.priceDelta),
     0
   );
 
@@ -218,7 +231,14 @@ const AddTransaction = () => {
       // Process each item in the transaction
       cartItems.forEach(item => {
         const product = products.find(p => p.id === item.productId);
-        if (!product) return;
+        if (!product) {
+          toast({
+            title: "Product not found",
+            description: `Could not find product for item in cart`,
+            variant: "destructive",
+          });
+          return;
+        }
         
         addTransaction({
           type: 'sale',
@@ -231,8 +251,11 @@ const AddTransaction = () => {
           notes,
           customer,
           paymentMethod,
-        } as any);
+        });
       });
+      
+      // Clear cart from localStorage
+      localStorage.removeItem('cart-items');
       
       toast({
         title: "Transaction completed",
@@ -248,6 +271,19 @@ const AddTransaction = () => {
       });
     }
   };
+
+  // Save cart items to localStorage whenever they change
+  useEffect(() => {
+    localStorage.setItem('cart-items', JSON.stringify(cartItems));
+  }, [cartItems]);
+
+  // Load cart items from localStorage on component mount
+  useEffect(() => {
+    const savedCart = localStorage.getItem('cart-items');
+    if (savedCart) {
+      setCartItems(JSON.parse(savedCart));
+    }
+  }, []);
 
   const getProductName = (productId: string) => {
     const product = products.find(p => p.id === productId);
@@ -442,10 +478,31 @@ const AddTransaction = () => {
         </div>
       </div>
       
-      <div className="flex justify-between items-center py-4">
-        <div className="font-medium text-white">Total</div>
-        <div className="text-xl font-bold text-white">{currencySymbol}{totalAmount.toFixed(2)}</div>
-      </div>
+      {cartItems.length > 0 && (
+        <Card className="bg-gray-800 border-gray-700">
+          <CardContent className="p-4 space-y-3">
+            <h3 className="font-medium text-lg text-white">Order Summary</h3>
+            <div className="space-y-1">
+              <div className="flex justify-between">
+                <div className="text-gray-300">Subtotal ({cartItems.reduce((sum, item) => sum + item.quantity, 0)} items)</div>
+                <div className="text-white">{currencySymbol}{cartSubtotal.toFixed(2)}</div>
+              </div>
+              
+              {totalDiscounts > 0 && (
+                <div className="flex justify-between">
+                  <div className="text-gray-300">Discounts</div>
+                  <div className="text-green-400">-{currencySymbol}{totalDiscounts.toFixed(2)}</div>
+                </div>
+              )}
+              
+              <div className="border-t border-gray-700 pt-2 mt-2 flex justify-between font-semibold">
+                <div className="text-white">Total</div>
+                <div className="text-white text-xl">{currencySymbol}{totalAmount.toFixed(2)}</div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      )}
       
       <Button
         className="w-full bg-pink-500 hover:bg-pink-600"
@@ -460,6 +517,9 @@ const AddTransaction = () => {
         <DialogContent className="sm:max-w-md bg-gray-900 border-gray-700 text-white">
           <DialogHeader>
             <DialogTitle>Select Item</DialogTitle>
+            <DialogDescription className="text-gray-400">
+              Choose a product to add to your cart
+            </DialogDescription>
           </DialogHeader>
           <div className="space-y-4">
             <Input
