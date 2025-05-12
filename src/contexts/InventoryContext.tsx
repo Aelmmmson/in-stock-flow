@@ -1,7 +1,19 @@
+
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { Product, Transaction, User, Expense, Discount } from '../types';
+import { Product, Transaction, Expense, Discount } from '../types';
 import { useToast } from '@/hooks/use-toast';
-import { useAuth } from './AuthContext';
+import { useAuth, UserRole } from './AuthContext';
+
+// Update the User interface to use the UserRole from AuthContext
+interface User {
+  id: string;
+  name: string;
+  role: UserRole;
+  email: string;
+  phone?: string;
+  address?: string;
+  avatar?: string | null;
+}
 
 // Sample products data
 const sampleProducts: Product[] = [
