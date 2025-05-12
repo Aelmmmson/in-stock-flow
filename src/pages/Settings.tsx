@@ -1,5 +1,5 @@
 
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { useInventory } from '@/contexts/InventoryContext';
@@ -8,15 +8,24 @@ import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { Sun, Moon, Monitor, LogOut, User, Bell, AlertCircle, Printer, HelpCircle } from 'lucide-react';
 import { toast } from 'sonner';
+import { useAuth } from '@/contexts/AuthContext';
 
 const Settings = () => {
   const { currentUser } = useInventory();
   const { theme, setTheme } = useTheme();
+  const { logout, hasAdminAccess } = useAuth();
+  const navigate = useNavigate();
 
   const handleExport = (dataType: string) => {
     toast(`${dataType} export feature coming soon`, {
       description: "This functionality will be added in a future update"
     });
+  };
+
+  const handleLogout = () => {
+    logout();
+    navigate('/login');
+    toast("Logged out successfully");
   };
 
   return (
@@ -122,10 +131,13 @@ const Settings = () => {
               <span>Help & Support</span>
             </Link>
             
-            <Link to="/login" className="flex items-center space-x-3 py-2 text-red-500">
+            <button 
+              onClick={handleLogout}
+              className="flex items-center space-x-3 py-2 text-red-500 w-full text-left"
+            >
               <LogOut className="h-5 w-5" />
               <span>Logout</span>
-            </Link>
+            </button>
           </div>
         </CardContent>
       </Card>

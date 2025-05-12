@@ -10,7 +10,7 @@ const ProductDetail = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { toast } = useToast();
-  const { products, currencySymbol } = useInventory();
+  const { products, currencySymbol, canViewSensitiveData } = useInventory();
   
   const [product, setProduct] = useState(products.find(p => p.id === id));
   
@@ -112,20 +112,24 @@ const ProductDetail = () => {
         <div className="space-y-2">
           <h3 className="font-medium">Pricing</h3>
           
-          <div className="flex justify-between">
-            <span className="text-gray-500">Purchase Cost</span>
-            <span>{currencySymbol}{product.purchaseCost.toFixed(2)}</span>
-          </div>
+          {canViewSensitiveData() && (
+            <div className="flex justify-between">
+              <span className="text-gray-500">Purchase Cost</span>
+              <span>{currencySymbol}{product.purchaseCost.toFixed(2)}</span>
+            </div>
+          )}
           
           <div className="flex justify-between">
             <span className="text-gray-500">Selling Price</span>
             <span>{currencySymbol}{product.sellingPrice.toFixed(2)}</span>
           </div>
           
-          <div className="flex justify-between">
-            <span className="text-gray-500">Profit Margin</span>
-            <span className="text-green-600">{profitMargin.toFixed(2)}%</span>
-          </div>
+          {canViewSensitiveData() && (
+            <div className="flex justify-between">
+              <span className="text-gray-500">Profit Margin</span>
+              <span className="text-green-600">{profitMargin.toFixed(2)}%</span>
+            </div>
+          )}
         </div>
         
         {product.description && (

@@ -308,7 +308,7 @@ export const InventoryProvider = ({ children }: InventoryProviderProps) => {
       id: Date.now().toString(),
       priceDelta,
       createdAt: new Date().toISOString(),
-      createdBy: currentUser?.id || 'unknown', // Add the user ID who created the transaction
+      createdBy: currentUser?.id || 'unknown', // Use optional chaining since currentUser can be null
     };
 
     // Update the product quantity

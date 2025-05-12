@@ -7,7 +7,7 @@ import { ChevronLeft } from 'lucide-react';
 
 const ProductBarcode = () => {
   const { id } = useParams<{ id: string }>();
-  const { getProduct } = useInventory();
+  const { getProduct, canViewSensitiveData } = useInventory();
   
   const product = getProduct(id || '');
 
@@ -74,10 +74,12 @@ const ProductBarcode = () => {
                 <p className="text-gray-500">Selling Price</p>
                 <p className="font-medium">${product.sellingPrice.toFixed(2)}</p>
               </div>
-              <div>
-                <p className="text-gray-500">Purchase Cost</p>
-                <p className="font-medium">${product.purchaseCost.toFixed(2)}</p>
-              </div>
+              {canViewSensitiveData() && (
+                <div>
+                  <p className="text-gray-500">Purchase Cost</p>
+                  <p className="font-medium">${product.purchaseCost.toFixed(2)}</p>
+                </div>
+              )}
               <div>
                 <p className="text-gray-500">Tax Rate</p>
                 <p className="font-medium">{product.taxRate}%</p>

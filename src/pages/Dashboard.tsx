@@ -15,7 +15,7 @@ const Dashboard = () => {
     canViewSensitiveData
   } = useInventory();
   
-  const { currentUser } = useAuth();
+  const { currentUser, hasAdminAccess } = useAuth();
   const lowStockProducts = getLowStockProducts();
   
   // Get transactions filtered by user role
@@ -53,13 +53,15 @@ const Dashboard = () => {
           <span className="mr-1">+</span> New Sale
         </Button>
         
-        <Button 
-          onClick={() => window.location.href = '/discounts'} 
-          className="bg-green-500 hover:bg-green-600 flex items-center justify-center py-3"
-        >
-          <Tag className="h-4 w-4 mr-1" />
-          <span>Discounts</span>
-        </Button>
+        {hasAdminAccess() && (
+          <Button 
+            onClick={() => window.location.href = '/discounts'} 
+            className="bg-green-500 hover:bg-green-600 flex items-center justify-center py-3"
+          >
+            <Tag className="h-4 w-4 mr-1" />
+            <span>Discounts</span>
+          </Button>
+        )}
       </div>
       
       <div className="grid grid-cols-3 gap-4">
