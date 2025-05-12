@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useInventory } from '@/contexts/InventoryContext';
@@ -246,7 +245,6 @@ const AddTransaction = () => {
           quantity: item.quantity,
           originalPrice: item.price,
           actualPrice: item.price - item.priceDelta,
-          priceDelta: -item.priceDelta, // Negative because discounts are stored as positive values in the cart
           totalAmount: item.quantity * (item.price - item.priceDelta),
           notes,
           customer,
