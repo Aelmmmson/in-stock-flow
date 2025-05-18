@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useInventory } from '@/contexts/InventoryContext';
+import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -27,6 +28,7 @@ const AddTransaction = () => {
   const location = useLocation();
   const { toast } = useToast();
   const { products, addTransaction, currencySymbol, getActiveDiscounts, getDiscountedPrice } = useInventory();
+  const { currentUser } = useAuth();
   
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
   const [customer, setCustomer] = useState('Walk-in Customer');
@@ -249,6 +251,7 @@ const AddTransaction = () => {
           notes,
           customer,
           paymentMethod,
+          createdBy: currentUser?.id || 'unknown', // Add the createdBy property with current user ID
         });
       });
       
