@@ -3,7 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { useInventory } from '@/contexts/InventoryContext';
-import { useTheme } from '@/contexts/ThemeContext';
+import { useTheme } from '@/components/ui/theme-provider';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { Sun, Moon, Monitor, LogOut, User, Bell, AlertCircle, Printer, HelpCircle, Building2, Users } from 'lucide-react';
