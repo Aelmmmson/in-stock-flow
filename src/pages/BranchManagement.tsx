@@ -27,7 +27,8 @@ const BranchManagement = () => {
     address: '',
     phone: '',
     email: '',
-    manager: ''
+    manager: '',
+    isActive: true
   });
 
   const [staffForm, setStaffForm] = useState({
@@ -36,7 +37,6 @@ const BranchManagement = () => {
     role: 'cashier' as 'cashier' | 'salesperson' | 'manager',
     branchId: '',
     phone: '',
-    address: '',
     hireDate: new Date().toISOString().split('T')[0],
     isActive: true
   });
@@ -77,7 +77,7 @@ const BranchManagement = () => {
   };
 
   const resetBranchForm = () => {
-    setBranchForm({ name: '', address: '', phone: '', email: '', manager: '' });
+    setBranchForm({ name: '', address: '', phone: '', email: '', manager: '', isActive: true });
     setSelectedBranch(null);
   };
 
@@ -88,7 +88,6 @@ const BranchManagement = () => {
       role: 'cashier',
       branchId: '',
       phone: '',
-      address: '',
       hireDate: new Date().toISOString().split('T')[0],
       isActive: true
     });
@@ -102,7 +101,8 @@ const BranchManagement = () => {
       address: branch.address,
       phone: branch.phone || '',
       email: branch.email || '',
-      manager: branch.manager || ''
+      manager: branch.manager || '',
+      isActive: branch.isActive
     });
     setBranchDialogOpen(true);
   };
@@ -115,7 +115,6 @@ const BranchManagement = () => {
       role: staffMember.role,
       branchId: staffMember.branchId,
       phone: staffMember.phone || '',
-      address: staffMember.address || '',
       hireDate: staffMember.hireDate,
       isActive: staffMember.isActive
     });

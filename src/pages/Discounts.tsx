@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -85,7 +84,7 @@ const Discounts = () => {
       return;
     }
     
-    const discountData = {
+    const discountData: Discount = {
       id: editingDiscount?.id || Date.now().toString(),
       name,
       type,
@@ -96,7 +95,9 @@ const Discounts = () => {
       startDate: startDate || undefined,
       endDate: endDate || undefined,
       active,
-      createdAt: editingDiscount?.createdAt || new Date().toISOString()
+      timesUsed: editingDiscount?.timesUsed || 0,
+      createdAt: editingDiscount?.createdAt || new Date().toISOString(),
+      updatedAt: new Date().toISOString()
     };
     
     if (editingDiscount) {
