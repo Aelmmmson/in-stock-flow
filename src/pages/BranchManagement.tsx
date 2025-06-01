@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -34,7 +33,7 @@ const BranchManagement = () => {
   const [staffForm, setStaffForm] = useState({
     name: '',
     email: '',
-    role: 'cashier' as 'cashier' | 'salesperson' | 'manager',
+    role: 'cashier' as Staff['role'],
     branchId: '',
     phone: '',
     hireDate: new Date().toISOString().split('T')[0],
@@ -274,14 +273,15 @@ const BranchManagement = () => {
                 </div>
                 <div>
                   <Label htmlFor="staffRole">Role</Label>
-                  <Select value={staffForm.role} onValueChange={(value: 'cashier' | 'salesperson' | 'manager') => setStaffForm({ ...staffForm, role: value })}>
+                  <Select value={staffForm.role} onValueChange={(value: Staff['role']) => setStaffForm({ ...staffForm, role: value })}>
                     <SelectTrigger>
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
+                      <SelectItem value="owner">Owner</SelectItem>
+                      <SelectItem value="manager">Manager</SelectItem>
                       <SelectItem value="cashier">Cashier</SelectItem>
                       <SelectItem value="salesperson">Salesperson</SelectItem>
-                      <SelectItem value="manager">Manager</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
