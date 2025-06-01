@@ -3,8 +3,10 @@ import { Box, ShoppingCart, TrendingUp, Tag } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useInventory } from '@/contexts/InventoryContext';
 import { useAuth } from '@/contexts/AuthContext';
+import { useBranch } from '@/contexts/BranchContext';
 import { Button } from '@/components/ui/button';
 import { AlertTriangle } from 'lucide-react';
+import BranchSelector from '@/components/layout/BranchSelector';
 
 const Dashboard = () => {
   const {
@@ -16,6 +18,7 @@ const Dashboard = () => {
   } = useInventory();
   
   const { currentUser, hasAdminAccess } = useAuth();
+  const { canSwitchBranches } = useBranch();
   const lowStockProducts = getLowStockProducts();
   
   // Get transactions filtered by user role
@@ -43,7 +46,18 @@ const Dashboard = () => {
     });
   };
   
-  return <div className="space-y-6">
+  return (
+    <div className="space-y-6">
+      {/* Branch Selector for Owners */}
+      {canSwitchBranches() && (
+        <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-sm">
+          <div className="flex items-center justify-between">
+            <h2 className="text-lg font-semibold">Branch View</h2>
+            <BranchSelector />
+          </div>
+        </div>
+      )}
+
       <div className="grid grid-cols-3 gap-4">
         {/* Only show Add Item button for users with admin access */}
         {hasAdminAccess() && (
@@ -117,14 +131,18 @@ const Dashboard = () => {
           </div>
           
           <div className="divide-y">
-            {lowStockProducts.length > 0 ? lowStockProducts.map(product => <Link key={product.id} to={`/inventory/${product.id}`} className="flex items-center justify-between py-3">
-                  <div className="text-gray-800 dark:text-gray-200">{product.name}</div>
-                  <div className="text-amber-600 dark:text-amber-400 font-semibold">
-                    {product.quantity} left
-                  </div>
-                </Link>) : <div className="py-3 text-gray-500 dark:text-gray-400">
+            {lowStockProducts.length > 0 ? lowStockProducts.map(product => (
+              <Link key={product.id} to={`/inventory/${product.id}`} className="flex items-center justify-between py-3">
+                <div className="text-gray-800 dark:text-gray-200">{product.name}</div>
+                <div className="text-amber-600 dark:text-amber-400 font-semibold">
+                  {product.quantity} left
+                </div>
+              </Link>
+            )) : (
+              <div className="py-3 text-gray-500 dark:text-gray-400">
                 No low stock items
-              </div>}
+              </div>
+            )}
           </div>
         </div>
       )}
@@ -142,26 +160,31 @@ const Dashboard = () => {
         
         <div className="divide-y">
           {transactions.length > 0 ? transactions.filter(t => t.type === 'sale').slice(0, 3).map(transaction => {
-          const product = products.find(p => p.id === transaction.productId);
-          return <Link key={transaction.id} to={`/transactions/${transaction.id}`} className="flex items-center justify-between py-3">
-                    <div>
-                      <div className="text-gray-600 dark:text-gray-400">
-                        {formatDate(transaction.createdAt)}
-                      </div>
-                      <div className="text-gray-800 dark:text-gray-200">
-                        #{transaction.id.substring(0, 7)}
-                      </div>
-                    </div>
-                    <div className="font-semibold">
-                      {currencySymbol}{transaction.totalAmount.toFixed(2)}
-                    </div>
-                  </Link>;
-        }) : <div className="py-3 text-gray-500 dark:text-gray-400">
+            const product = products.find(p => p.id === transaction.productId);
+            return (
+              <Link key={transaction.id} to={`/transactions/${transaction.id}`} className="flex items-center justify-between py-3">
+                <div>
+                  <div className="text-gray-600 dark:text-gray-400">
+                    {formatDate(transaction.createdAt)}
+                  </div>
+                  <div className="text-gray-800 dark:text-gray-200">
+                    #{transaction.id.substring(0, 7)}
+                  </div>
+                </div>
+                <div className="font-semibold">
+                  {currencySymbol}{transaction.totalAmount.toFixed(2)}
+                </div>
+              </Link>
+            );
+          }) : (
+            <div className="py-3 text-gray-500 dark:text-gray-400">
               No recent sales
-            </div>}
+            </div>
+          )}
         </div>
       </div>
-    </div>;
+    </div>
+  );
 };
 
 export default Dashboard;

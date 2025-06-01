@@ -1,254 +1,164 @@
 
-# API Endpoints Documentation
+# API Endpoints
 
-This document outlines the API endpoints needed for production deployment of the Didiz Closet POS System.
+This document outlines the API endpoints available in the Didiz Closet inventory management system.
 
-## Base URL
-```
-https://api.didizcloset.com/v1
-```
+## Authentication Endpoints
 
-## Authentication
-All endpoints require authentication via Bearer token in the Authorization header:
-```
-Authorization: Bearer <token>
-```
+### POST /api/auth/login
+- **Description**: Authenticate user and create session
+- **Body**: `{ email: string, password: string }`
+- **Response**: `{ user: User, token: string }`
 
-## Endpoints
+### POST /api/auth/logout
+- **Description**: End user session
+- **Response**: `{ success: boolean }`
 
-### Authentication
-```http
-POST /auth/login
-POST /auth/logout
-POST /auth/refresh
-GET /auth/profile
-PUT /auth/profile
-```
+## Inventory Endpoints
 
-### Branch Management
-```http
-GET /branches
-POST /branches
-GET /branches/{id}
-PUT /branches/{id}
-DELETE /branches/{id}
-GET /branches/{id}/staff
-GET /branches/{id}/products
-GET /branches/{id}/transactions
-GET /branches/{id}/reports
-```
+### GET /api/inventory
+- **Description**: Retrieve all products
+- **Query Parameters**: 
+  - `category`: Filter by category
+  - `search`: Search by name or SKU
+  - `branch`: Filter by branch ID
+- **Response**: `Product[]`
 
-### Staff Management
-```http
-GET /staff
-POST /staff
-GET /staff/{id}
-PUT /staff/{id}
-DELETE /staff/{id}
-PUT /staff/{id}/status
-GET /staff/branch/{branchId}
-```
+### POST /api/inventory
+- **Description**: Create new product
+- **Body**: `Omit<Product, 'id' | 'createdAt' | 'updatedAt'>`
+- **Response**: `Product`
 
-### Products
-```http
-GET /products
-POST /products
-GET /products/{id}
-PUT /products/{id}
-DELETE /products/{id}
-GET /products/search?q={query}
-GET /products/category/{category}
-GET /products/branch/{branchId}
-GET /products/low-stock
-POST /products/bulk-import
-```
+### PUT /api/inventory/:id
+- **Description**: Update existing product
+- **Body**: `Partial<Product>`
+- **Response**: `Product`
 
-### Transactions
-```http
-GET /transactions
-POST /transactions
-GET /transactions/{id}
-PUT /transactions/{id}
-DELETE /transactions/{id}
-GET /transactions/branch/{branchId}
-GET /transactions/staff/{staffId}
-GET /transactions/reports
-```
+### DELETE /api/inventory/:id
+- **Description**: Delete product
+- **Response**: `{ success: boolean }`
 
-### Expenses
-```http
-GET /expenses
-POST /expenses
-GET /expenses/{id}
-PUT /expenses/{id}
-DELETE /expenses/{id}
-GET /expenses/branch/{branchId}
-GET /expenses/category/{category}
-```
+## Transaction Endpoints
 
-### Reports
-```http
-GET /reports/financial
-GET /reports/inventory
-GET /reports/sales
-GET /reports/branch/{branchId}/financial
-GET /reports/branch/{branchId}/inventory
-GET /reports/branch/{branchId}/sales
-GET /reports/export/{type}
-```
+### GET /api/transactions
+- **Description**: Retrieve all transactions
+- **Query Parameters**:
+  - `type`: Filter by transaction type (sale, purchase, adjustment)
+  - `branch`: Filter by branch ID
+  - `startDate`: Filter from date
+  - `endDate`: Filter to date
+- **Response**: `Transaction[]`
 
-### Categories
-```http
-GET /categories
-POST /categories
-GET /categories/{id}
-PUT /categories/{id}
-DELETE /categories/{id}
-```
+### POST /api/transactions
+- **Description**: Create new transaction
+- **Body**: `Omit<Transaction, 'id' | 'createdAt'>`
+- **Response**: `Transaction`
 
-### Discounts
-```http
-GET /discounts
-POST /discounts
-GET /discounts/{id}
-PUT /discounts/{id}
-DELETE /discounts/{id}
-GET /discounts/active
-```
+### GET /api/transactions/:id
+- **Description**: Get specific transaction
+- **Response**: `Transaction`
 
-### Business Information
-```http
-GET /business
-PUT /business
-```
+## Branch Management Endpoints
 
-### Notifications
-```http
-GET /notifications
-POST /notifications
-PUT /notifications/{id}/read
-DELETE /notifications/{id}
-```
+### GET /api/branches
+- **Description**: Retrieve all branches
+- **Response**: `Branch[]`
 
-### File Upload
-```http
-POST /upload/image
-POST /upload/document
-DELETE /upload/{fileId}
-```
+### POST /api/branches
+- **Description**: Create new branch
+- **Body**: `Omit<Branch, 'id' | 'createdAt' | 'updatedAt'>`
+- **Response**: `Branch`
 
-## Request/Response Examples
+### PUT /api/branches/:id
+- **Description**: Update branch
+- **Body**: `Partial<Branch>`
+- **Response**: `Branch`
 
-### Create Product
-```http
-POST /products
-Content-Type: application/json
+### DELETE /api/branches/:id
+- **Description**: Delete branch
+- **Response**: `{ success: boolean }`
 
-{
-  "name": "Summer Dress",
-  "sku": "DRESS-001",
-  "category": "Dresses",
-  "supplier": "Fashion Co.",
-  "quantity": 10,
-  "purchaseCost": 50.00,
-  "sellingPrice": 100.00,
-  "description": "Beautiful summer dress",
-  "branchId": "branch-1",
-  "lowStockThreshold": 5,
-  "taxRate": 10,
-  "taxInclusive": false
-}
-```
+## Staff Management Endpoints
 
-### Create Transaction
-```http
-POST /transactions
-Content-Type: application/json
+### GET /api/staff
+- **Description**: Retrieve all staff members
+- **Response**: `Staff[]`
 
-{
-  "productId": "product-1",
-  "quantity": 2,
-  "originalPrice": 100.00,
-  "actualPrice": 95.00,
-  "totalAmount": 190.00,
-  "type": "sale",
-  "notes": "Customer discount",
-  "branchId": "branch-1",
-  "customer": "John Doe",
-  "paymentMethod": "cash"
-}
-```
+### POST /api/staff
+- **Description**: Add new staff member
+- **Body**: `Omit<Staff, 'id' | 'createdAt' | 'updatedAt'>`
+- **Response**: `Staff`
 
-### Get Branch Report
-```http
-GET /reports/branch/branch-1/financial?startDate=2024-01-01&endDate=2024-12-31
-```
+### PUT /api/staff/:id
+- **Description**: Update staff member
+- **Body**: `Partial<Staff>`
+- **Response**: `Staff`
 
-## Error Responses
+### DELETE /api/staff/:id
+- **Description**: Remove staff member
+- **Response**: `{ success: boolean }`
 
-### Standard Error Format
+## Discount Endpoints
+
+### GET /api/discounts
+- **Description**: Retrieve all discounts
+- **Response**: `Discount[]`
+
+### POST /api/discounts
+- **Description**: Create new discount
+- **Body**: `Omit<Discount, 'id' | 'createdAt' | 'updatedAt'>`
+- **Response**: `Discount`
+
+### PUT /api/discounts/:id
+- **Description**: Update discount
+- **Body**: `Partial<Discount>`
+- **Response**: `Discount`
+
+### DELETE /api/discounts/:id
+- **Description**: Delete discount
+- **Response**: `{ success: boolean }`
+
+## Reports Endpoints
+
+### GET /api/reports/financial
+- **Description**: Get financial reports
+- **Query Parameters**:
+  - `startDate`: Report start date
+  - `endDate`: Report end date
+  - `branch`: Branch ID
+- **Response**: `FinancialReport`
+
+### GET /api/reports/inventory
+- **Description**: Get inventory reports
+- **Response**: `InventoryReport`
+
+### GET /api/reports/sales
+- **Description**: Get sales reports
+- **Query Parameters**:
+  - `startDate`: Report start date
+  - `endDate`: Report end date
+  - `branch`: Branch ID
+- **Response**: `SalesReport`
+
+## Response Format
+
+All API responses follow this format:
+
 ```json
 {
-  "error": {
-    "code": "VALIDATION_ERROR",
-    "message": "Invalid input data",
-    "details": {
-      "field": "email",
-      "issue": "Invalid email format"
-    }
-  }
+  "success": boolean,
+  "data": any,
+  "message": string,
+  "error": string | null
 }
 ```
 
-### HTTP Status Codes
-- `200` - OK
-- `201` - Created
-- `400` - Bad Request
-- `401` - Unauthorized
-- `403` - Forbidden
-- `404` - Not Found
-- `422` - Unprocessable Entity
-- `500` - Internal Server Error
+## Error Codes
 
-## Rate Limiting
-- 1000 requests per hour per user
-- 10000 requests per hour per branch (for owner accounts)
-
-## Pagination
-For endpoints returning lists, use:
-```
-GET /products?page=1&limit=20&sort=name&order=asc
-```
-
-Response includes:
-```json
-{
-  "data": [...],
-  "pagination": {
-    "page": 1,
-    "limit": 20,
-    "total": 150,
-    "totalPages": 8
-  }
-}
-```
-
-## Filtering
-Most GET endpoints support filtering:
-```
-GET /transactions?type=sale&branchId=branch-1&startDate=2024-01-01&endDate=2024-12-31
-```
-
-## Data Backup
-```http
-GET /backup/full
-POST /backup/restore
-```
-
-## Analytics
-```http
-GET /analytics/dashboard
-GET /analytics/sales-trends
-GET /analytics/inventory-turnover
-GET /analytics/branch-performance
-```
+- **200**: Success
+- **201**: Created
+- **400**: Bad Request
+- **401**: Unauthorized
+- **403**: Forbidden
+- **404**: Not Found
+- **500**: Internal Server Error

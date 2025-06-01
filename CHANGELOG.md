@@ -1,60 +1,77 @@
 
 # Changelog
 
-All notable changes to Didiz Closet POS System will be documented in this file.
+All notable changes to the Didiz Closet inventory management system will be documented in this file.
 
-The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
-and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
-
-## [Unreleased]
+## [1.2.0] - 2025-01-01
 
 ### Added
-- Branch management system for multi-location support
-- Staff management with role-based access control
-- Business information management
-- Owner role with ability to switch between branches
-- Branch-specific data filtering for products, transactions, and expenses
-- Staff can only view data from their assigned branch
-- Owner can view data from all branches and switch between them
-- Enhanced authentication system with branch assignments
-- Branch context for managing branch-related operations
+- **Desktop Navigation**: Added desktop sidebar navigation for better desktop experience
+- **Branch Management**: Complete branch management system for multi-location businesses
+  - Create, edit, and delete branches
+  - Assign staff to specific branches
+  - Branch-specific inventory and sales tracking
+- **Branch Selector**: Added branch selector on dashboard for owners to switch between branches
+- **Staff Management**: Comprehensive staff management with role-based access control
+  - Add, edit, and remove staff members
+  - Role-based permissions (Owner, Manager, Cashier, Salesperson)
+  - Branch-specific staff assignments
+- **Discount Management**: Full discount system implementation
+  - Percentage and fixed amount discounts
+  - Product-specific or category-specific discounts
+  - Time-limited promotional offers
+  - Discount usage tracking
+- **Enhanced Navigation**: Improved routing and navigation structure
+  - Proper routes for all major features
+  - Breadcrumb navigation
+  - Mobile and desktop responsive navigation
+
+### Fixed
+- **TypeScript Errors**: Resolved all TypeScript compilation errors
+- **Type Definitions**: Updated and corrected type definitions for all interfaces
+- **Component Structure**: Improved component organization and file structure
+- **Navigation Issues**: Fixed navigation routing and link handling
 
 ### Changed
-- Updated Product model to include branchId for branch association
-- Updated Transaction model to include branchId for branch tracking  
-- Updated Expense model to include branchId for branch-specific expenses
-- Enhanced user roles to support branch-based permissions
-- Modified inventory context to filter data by branch
-- Updated reports to show branch-specific data based on user permissions
+- **Dashboard Layout**: Enhanced dashboard with branch selector for owners
+- **Inventory Display**: Improved inventory listing with discount information
+- **User Interface**: Better responsive design for mobile and desktop
+- **Code Organization**: Refactored components for better maintainability
 
-### Technical
-- Created BranchContext for managing branch operations
-- Added Branch, Staff, and BusinessInfo interfaces
-- Enhanced type definitions for branch management
-- Added role-based access control throughout the application
-- Implemented branch switching functionality for owners
-- Added localStorage persistence for branch data
+### Technical Improvements
+- **Type Safety**: Enhanced TypeScript type definitions
+- **Component Architecture**: Better separation of concerns
+- **State Management**: Improved context and state management
+- **Performance**: Optimized component rendering and data fetching
 
-## [1.0.0] - 2024-12-XX
+## [1.1.0] - 2024-12-15
 
 ### Added
-- Initial release of Didiz Closet POS System
-- Product inventory management
-- Transaction processing (sales, purchases, adjustments)
-- Basic reporting and analytics
-- User authentication system
-- Mobile-responsive design
-- Barcode generation and scanning
-- Low stock alerts
-- Expense tracking
-- Discount management system
+- **User Authentication**: Login/logout functionality with role-based access
+- **Inventory Management**: Complete product inventory system
+- **Transaction Processing**: Sales and purchase transaction handling
+- **Financial Reports**: Basic financial reporting and analytics
+- **Mobile Responsive**: Mobile-first responsive design
+- **Dark Theme**: Dark mode support
 
 ### Features
-- Dashboard with key metrics
-- Inventory management with categories
-- Sales transaction processing
-- Purchase order management
-- Financial reporting
+- Product management (add, edit, delete, search)
+- Transaction recording and history
+- Low stock alerts and notifications
+- Basic reporting and analytics
 - User profile management
 - Settings and preferences
-- Theme support (light/dark mode)
+
+## [1.0.0] - 2024-12-01
+
+### Initial Release
+- **Core Features**: Basic inventory management system
+- **Product Catalog**: Simple product listing and management
+- **Basic UI**: Initial user interface design
+- **Data Storage**: Local storage implementation
+
+### Foundation
+- React + TypeScript architecture
+- Tailwind CSS styling
+- Basic routing structure
+- Initial component library

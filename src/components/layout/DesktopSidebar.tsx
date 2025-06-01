@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Sidebar, SidebarContent, SidebarFooter, SidebarGroup, SidebarGroupContent, SidebarHeader, SidebarMenu, SidebarMenuItem, SidebarMenuButton } from '@/components/ui/sidebar';
@@ -5,7 +6,6 @@ import { LayoutDashboard, Package, BarChart2, Settings, ShoppingCart } from 'luc
 
 const DesktopSidebar = () => {
   const location = useLocation();
-  const currentPath = location.pathname.split('/')[1] || 'dashboard';
   const menuItems = [
     {
       title: 'Dashboard',
@@ -34,6 +34,13 @@ const DesktopSidebar = () => {
     }
   ];
 
+  const isActive = (path: string) => {
+    if (path === '/dashboard' && (location.pathname === '/' || location.pathname === '/dashboard')) {
+      return true;
+    }
+    return location.pathname.startsWith(path);
+  };
+
   return (
     <Sidebar 
       className="hidden md:flex border-r w-[70px] bg-white" 
@@ -58,13 +65,14 @@ const DesktopSidebar = () => {
                 <SidebarMenuItem key={item.title} className="w-full">
                   <SidebarMenuButton 
                     asChild
+                    isActive={isActive(item.path)}
                   >
                     <Link 
                       to={item.path} 
                       className={`
                         flex flex-col items-center justify-center
                         p-2 w-full rounded-lg
-                        ${currentPath === item.path.substring(1) ? 
+                        ${isActive(item.path) ? 
                           'bg-gray-100 text-primary' : 
                           'text-gray-600 hover:bg-gray-50 hover:text-primary'}
                       `}

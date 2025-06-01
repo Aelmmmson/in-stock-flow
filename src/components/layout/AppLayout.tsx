@@ -4,6 +4,7 @@ import { Outlet } from 'react-router-dom';
 import { SidebarProvider } from '@/components/ui/sidebar';
 import MobileHeader from './MobileHeader';
 import MobileNavbar from './MobileNavbar';
+import DesktopSidebar from './DesktopSidebar';
 import NotificationsPanel from '@/components/notifications/NotificationsPanel';
 import { TabsType } from '@/types';
 import Breadcrumb from '@/components/navigation/Breadcrumb';
@@ -18,9 +19,12 @@ const AppLayout = () => {
   
   return (
     <SidebarProvider>
-      <div className="min-h-screen w-full flex flex-col gap-0 m-0">
-        {/* Main content area - flex-1 to take remaining space */}
-        <div className="flex-1 flex flex-col min-w-0 m-0 p-0">
+      <div className="min-h-screen w-full flex">
+        {/* Desktop Sidebar */}
+        <DesktopSidebar />
+        
+        {/* Main content area */}
+        <div className="flex-1 flex flex-col min-w-0">
           <MobileHeader
             activeTab={activeTab}
             toggleNotificationsPanel={toggleNotificationsPanel}
