@@ -6,7 +6,7 @@ import { useInventory } from '@/contexts/InventoryContext';
 import { useTheme } from '@/contexts/ThemeContext';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
-import { Sun, Moon, Monitor, LogOut, User, Bell, AlertCircle, Printer, HelpCircle } from 'lucide-react';
+import { Sun, Moon, Monitor, LogOut, User, Bell, AlertCircle, Printer, HelpCircle, Building2, Users } from 'lucide-react';
 import { toast } from 'sonner';
 import { useAuth } from '@/contexts/AuthContext';
 
@@ -32,6 +32,28 @@ const Settings = () => {
     <div className="space-y-6">
       <h1 className="text-2xl font-bold">Settings</h1>
 
+      {/* Owner/Admin Management Section */}
+      {hasAdminAccess() && (
+        <Card className="border-none shadow-sm">
+          <CardContent className="p-4">
+            <h3 className="font-medium mb-4">Management</h3>
+            
+            <div className="space-y-3">
+              <Link to="/branch-management" className="flex items-center space-x-3 py-2">
+                <Building2 className="h-5 w-5 text-gray-500" />
+                <span>Branch Management</span>
+              </Link>
+              
+              <Link to="/branch-management" className="flex items-center space-x-3 py-2">
+                <Users className="h-5 w-5 text-gray-500" />
+                <span>Staff Management</span>
+              </Link>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Notifications Settings */}
       <Card className="border-none shadow-sm">
         <CardContent className="p-4">
           <div className="flex items-center justify-between py-2">
@@ -58,6 +80,7 @@ const Settings = () => {
         </CardContent>
       </Card>
 
+      {/* Printer Settings */}
       <Card className="border-none shadow-sm">
         <CardContent className="p-4">
           <div className="flex items-center justify-between py-2">
@@ -74,6 +97,7 @@ const Settings = () => {
         </CardContent>
       </Card>
 
+      {/* Theme Settings */}
       <Card className="border-none shadow-sm">
         <CardContent className="p-4">
           <div className="flex items-center justify-between py-2">
@@ -116,6 +140,7 @@ const Settings = () => {
         </CardContent>
       </Card>
 
+      {/* Account Settings */}
       <Card className="border-none shadow-sm">
         <CardContent className="p-4">
           <h3 className="font-medium mb-4">Account</h3>

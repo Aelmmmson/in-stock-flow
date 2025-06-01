@@ -14,15 +14,16 @@ export interface Product {
   lowStockThreshold: number;
   taxRate: number;
   taxInclusive: boolean;
-  discount?: number; // Added discount property as optional
+  discount?: number;
+  branchId: string; // Add branch association
   createdAt: string;
   updatedAt: string;
 }
 
 export interface ProductVariant {
   id: string;
-  name: string; // e.g. "Size", "Color"
-  value: string; // e.g. "Small", "Red"
+  name: string;
+  value: string;
 }
 
 export interface Transaction {
@@ -37,6 +38,7 @@ export interface Transaction {
   notes: string;
   createdAt: string;
   createdBy: string;
+  branchId: string; // Add branch association
   customer?: string;
   paymentMethod?: string;
 }
@@ -74,6 +76,7 @@ export interface Expense {
   date: string;
   notes: string;
   paymentMethod: string;
+  branchId: string; // Add branch association
   recurring?: boolean;
   frequency?: 'daily' | 'weekly' | 'monthly' | 'yearly';
 }
@@ -97,6 +100,46 @@ export interface Discount {
   endDate?: string;
   active: boolean;
   createdAt: string;
+}
+
+// New interfaces for branch management
+export interface Branch {
+  id: string;
+  name: string;
+  address: string;
+  phone?: string;
+  email?: string;
+  manager?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface Staff {
+  id: string;
+  name: string;
+  email: string;
+  role: 'cashier' | 'salesperson' | 'manager';
+  branchId: string;
+  phone?: string;
+  address?: string;
+  hireDate: string;
+  isActive: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface BusinessInfo {
+  id: string;
+  name: string;
+  description?: string;
+  address: string;
+  phone: string;
+  email: string;
+  website?: string;
+  logo?: string;
+  taxId?: string;
+  registrationNumber?: string;
+  updatedAt: string;
 }
 
 export type DateFilterType = 'week' | 'month' | 'year' | 'custom' | 'quarter';
