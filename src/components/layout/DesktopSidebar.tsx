@@ -1,7 +1,6 @@
 
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Sidebar, SidebarContent, SidebarFooter, SidebarGroup, SidebarGroupContent, SidebarHeader, SidebarMenu, SidebarMenuItem, SidebarMenuButton } from '@/components/ui/sidebar';
 import { Home, Package, ArrowRightLeft, BarChart3, Settings, Receipt } from 'lucide-react';
 
 const DesktopSidebar = () => {
@@ -25,62 +24,29 @@ const DesktopSidebar = () => {
   };
 
   return (
-    <Sidebar 
-      className="hidden md:flex border-r w-[70px] bg-white" 
-      collapsible="none" 
-      variant="sidebar"
-    >
-      <SidebarHeader className="p-4">
-        <div className="flex items-center justify-center">
-          <img 
-            src="/lovable-uploads/2a3413ad-6596-43b9-9a24-eaa892ea1627.png" 
-            alt="Didiz Closet" 
-            className="h-8 w-8 object-contain" 
-          />
-        </div>
-      </SidebarHeader>
-      
-      <SidebarContent>
-        <SidebarGroup>
-          <SidebarGroupContent>
-            <SidebarMenu className="flex flex-col items-center gap-1 px-1">
-              {menuItems.map(item => (
-                <SidebarMenuItem key={item.title} className="w-full">
-                  <SidebarMenuButton 
-                    asChild
-                    isActive={isActive(item.path)}
-                  >
-                    <Link 
-                      to={item.path} 
-                      className={`
-                        flex flex-col items-center justify-center
-                        p-2 w-full rounded-lg
-                        ${isActive(item.path) ? 
-                          'text-pink-600' : 
-                          'text-gray-500 hover:text-pink-600'}
-                      `}
-                    >
-                      <div className="flex items-center justify-center h-6 w-6">
-                        <item.icon className="h-5 w-5" />
-                      </div>
-                      <span className="text-xs font-medium text-center mt-1">
-                        {item.title}
-                      </span>
-                    </Link>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              ))}
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
-      </SidebarContent>
-      
-      <SidebarFooter className="p-4 border-t">
-        <div className="text-xs text-gray-500 text-center">
-          © 2025
-        </div>
-      </SidebarFooter>
-    </Sidebar>
+    <nav className="fixed bottom-0 left-0 right-0 bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-800 hidden md:block z-40">
+      <div className="grid grid-cols-6 h-16">
+        {menuItems.map((item) => {
+          const Icon = item.icon;
+          const active = isActive(item.path);
+          
+          return (
+            <Link
+              key={item.id}
+              to={item.path}
+              className={`flex flex-col items-center justify-center space-y-1 ${
+                active
+                  ? 'text-pink-600 dark:text-pink-400'
+                  : 'text-gray-500 dark:text-gray-400 hover:text-pink-600'
+              }`}
+            >
+              <Icon className="h-5 w-5" />
+              <span className="text-xs">{item.title}</span>
+            </Link>
+          );
+        })}
+      </div>
+    </nav>
   );
 };
 

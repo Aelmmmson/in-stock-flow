@@ -1,7 +1,6 @@
 
 import { useState } from 'react';
 import { Outlet } from 'react-router-dom';
-import { SidebarProvider } from '@/components/ui/sidebar';
 import MobileHeader from './MobileHeader';
 import MobileNavbar from './MobileNavbar';
 import DesktopSidebar from './DesktopSidebar';
@@ -18,32 +17,28 @@ const AppLayout = () => {
   };
   
   return (
-    <SidebarProvider>
-      <div className="min-h-screen w-full flex">
-        {/* Desktop Sidebar */}
-        <DesktopSidebar />
-        
-        {/* Main content area */}
-        <div className="flex-1 flex flex-col min-w-0">
-          <MobileHeader
-            activeTab={activeTab}
-            toggleNotificationsPanel={toggleNotificationsPanel}
-          />
-          
-          {/* Content area with proper spacing */}
-          <main className="flex-1 p-4 pb-20 md:pb-4 overflow-auto">
-            <Breadcrumb />
-            <Outlet />
-          </main>
-          
-          <MobileNavbar activeTab={activeTab} setActiveTab={setActiveTab} />
-          
-          {notificationsPanelOpen && (
-            <NotificationsPanel onClose={toggleNotificationsPanel} />
-          )}
-        </div>
-      </div>
-    </SidebarProvider>
+    <div className="min-h-screen w-full flex flex-col">
+      <MobileHeader
+        activeTab={activeTab}
+        toggleNotificationsPanel={toggleNotificationsPanel}
+      />
+      
+      {/* Content area with proper spacing for bottom navigation on both mobile and desktop */}
+      <main className="flex-1 p-4 pb-20 overflow-auto">
+        <Breadcrumb />
+        <Outlet />
+      </main>
+      
+      {/* Mobile navbar - only visible on mobile */}
+      <MobileNavbar activeTab={activeTab} setActiveTab={setActiveTab} />
+      
+      {/* Desktop navbar - only visible on desktop, same bottom position */}
+      <DesktopSidebar />
+      
+      {notificationsPanelOpen && (
+        <NotificationsPanel onClose={toggleNotificationsPanel} />
+      )}
+    </div>
   );
 };
 
