@@ -1,4 +1,5 @@
 
+
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { ThemeProvider } from "@/components/ui/theme-provider"
 import { Toaster } from "@/components/ui/toaster"
@@ -53,20 +54,20 @@ function App() {
                     }
                   >
                     <Route index element={<Dashboard />} />
-                    <Route path="/dashboard" element={<Dashboard />} />
-                    <Route path="/inventory" element={<Inventory />} />
-                    <Route path="/transactions" element={<Transactions />} />
-                    <Route path="/reports" element={<Reports />} />
-                    <Route path="/settings" element={<Settings />} />
-                    <Route path="/add-product" element={<AddProduct />} />
-                    <Route path="/edit-product/:id" element={<EditProduct />} />
-                    <Route path="/add-transaction" element={<AddTransaction />} />
-                    <Route path="/reports/financial" element={<FinancialReports />} />
-                    <Route path="/reports/inventory" element={<ReportsInventory />} />
-                    <Route path="/reports/sales" element={<ReportsSales />} />
-                    <Route path="/settings/profile" element={<Profile />} />
-                    <Route path="/help" element={<Help />} />
-                    <Route path="/branch-management" element={<BranchManagement />} />
+                    <Route path="dashboard" element={<Dashboard />} />
+                    <Route path="inventory" element={<Inventory />} />
+                    <Route path="transactions" element={<Transactions />} />
+                    <Route path="reports" element={<Reports />} />
+                    <Route path="settings" element={<Settings />} />
+                    <Route path="add-product" element={<AddProduct />} />
+                    <Route path="edit-product/:id" element={<EditProduct />} />
+                    <Route path="add-transaction" element={<AddTransaction />} />
+                    <Route path="reports/financial" element={<FinancialReports />} />
+                    <Route path="reports/inventory" element={<ReportsInventory />} />
+                    <Route path="reports/sales" element={<ReportsSales />} />
+                    <Route path="settings/profile" element={<Profile />} />
+                    <Route path="help" element={<Help />} />
+                    <Route path="branch-management" element={<BranchManagement />} />
                   </Route>
                 </Routes>
               </InventoryProvider>
@@ -79,3 +80,4 @@ function App() {
 }
 
 export default App;
+
