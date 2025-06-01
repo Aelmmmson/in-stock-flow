@@ -2,10 +2,19 @@
 // Basic types
 export type TabsType = 'dashboard' | 'inventory' | 'transactions' | 'expenses' | 'reports' | 'settings';
 
+export type DateFilterType = 'week' | 'month' | 'year' | 'quarter' | 'custom';
+
 export interface ProductVariant {
   id: string;
   name: string;
   value: string;
+}
+
+export interface ProductCategory {
+  id: string;
+  name: string;
+  description?: string;
+  createdAt: string;
 }
 
 export interface Product {
@@ -39,6 +48,8 @@ export interface Transaction {
   totalAmount: number;
   type: 'sale' | 'purchase' | 'adjustment';
   notes: string;
+  customer?: string;
+  paymentMethod?: string;
   createdAt: string;
   createdBy: string;
   branchId: string;
@@ -91,6 +102,42 @@ export interface Branch {
   isActive: boolean;
   createdAt: string;
   updatedAt: string;
+}
+
+export interface Staff {
+  id: string;
+  name: string;
+  email: string;
+  role: 'owner' | 'manager' | 'cashier' | 'salesperson';
+  branchId: string;
+  phone: string;
+  hireDate: string;
+  isActive: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface BusinessInfo {
+  id: string;
+  name: string;
+  description: string;
+  address: string;
+  phone: string;
+  email: string;
+  website?: string;
+  taxId?: string;
+  registrationNumber?: string;
+  updatedAt: string;
+}
+
+export interface Notification {
+  id: string;
+  title: string;
+  description: string;
+  date: string;
+  read: boolean;
+  type: 'lowStock' | 'sale' | 'system';
+  linkTo?: string;
 }
 
 export interface NotificationItem {

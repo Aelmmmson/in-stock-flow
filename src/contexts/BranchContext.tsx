@@ -1,4 +1,3 @@
-
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { Branch, Staff, BusinessInfo } from '../types';
 import { useToast } from '@/hooks/use-toast';
@@ -13,6 +12,7 @@ const sampleBranches: Branch[] = [
     phone: '+233 50 123 4567',
     email: 'accra@didizcloset.com',
     manager: 'user-2',
+    isActive: true,
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
   },
@@ -22,6 +22,8 @@ const sampleBranches: Branch[] = [
     address: 'Adum, Kumasi',
     phone: '+233 50 987 6543',
     email: 'kumasi@didizcloset.com',
+    manager: 'user-3',
+    isActive: true,
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
   }
