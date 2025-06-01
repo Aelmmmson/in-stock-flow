@@ -1,3 +1,4 @@
+
 import { useState, useRef, useCallback, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useInventory } from '@/contexts/InventoryContext';
@@ -107,6 +108,15 @@ const AddProduct = () => {
       });
       return;
     }
+
+    if (!currentBranch) {
+      toast({
+        title: "No branch selected",
+        description: "Please select a branch before adding products",
+        variant: "destructive",
+      });
+      return;
+    }
     
     try {
       const sku = generateSKU();
@@ -124,6 +134,7 @@ const AddProduct = () => {
         variants: variants.filter(v => v.name && v.value),
         taxRate: 0,
         taxInclusive: false,
+        branchId: currentBranch.id,
       });
       
       toast({
