@@ -1,5 +1,4 @@
 
-
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { ThemeProvider } from "@/components/ui/theme-provider"
 import { Toaster } from "@/components/ui/toaster"
@@ -19,6 +18,7 @@ import ReportsInventory from './pages/ReportsInventory';
 import ReportsSales from './pages/ReportsSales';
 import Profile from './pages/Profile';
 import Help from './pages/Help';
+import ExpensesPage from './pages/ExpensesPage';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { AuthProvider } from './contexts/AuthContext';
 import { InventoryProvider } from './contexts/InventoryContext';
@@ -58,14 +58,15 @@ function App() {
                     <Route path="inventory" element={<Inventory />} />
                     <Route path="transactions" element={<Transactions />} />
                     <Route path="reports" element={<Reports />} />
-                    <Route path="settings" element={<Settings />} />
-                    <Route path="add-product" element={<AddProduct />} />
-                    <Route path="edit-product/:id" element={<EditProduct />} />
-                    <Route path="add-transaction" element={<AddTransaction />} />
                     <Route path="reports/financial" element={<FinancialReports />} />
                     <Route path="reports/inventory" element={<ReportsInventory />} />
                     <Route path="reports/sales" element={<ReportsSales />} />
+                    <Route path="expenses" element={<ExpensesPage />} />
+                    <Route path="settings" element={<Settings />} />
                     <Route path="settings/profile" element={<Profile />} />
+                    <Route path="add-product" element={<AddProduct />} />
+                    <Route path="edit-product/:id" element={<EditProduct />} />
+                    <Route path="add-transaction" element={<AddTransaction />} />
                     <Route path="help" element={<Help />} />
                     <Route path="branch-management" element={<BranchManagement />} />
                   </Route>
@@ -80,4 +81,3 @@ function App() {
 }
 
 export default App;
-

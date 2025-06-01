@@ -5,13 +5,13 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useInventory } from '@/contexts/InventoryContext';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { ArrowUp, ArrowDown, ChevronRight, ShieldAlert } from 'lucide-react';
+import { ArrowUp, ArrowDown, ChevronRight, ShieldAlert, TrendingUp, TrendingDown, DollarSign } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useAuth } from '@/contexts/AuthContext';
 
 const Reports = () => {
-  const { products, currencySymbol, canViewSensitiveData, getFilteredTransactions } = useInventory();
+  const { products, currencySymbol, canViewSensitiveData, getFilteredTransactions, expenses } = useInventory();
   const { currentUser } = useAuth();
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('overview');
@@ -38,21 +38,45 @@ const Reports = () => {
     0
   );
   
-  // Calculate potential profit
+  // Calculate potential profit from inventory
   const potentialProfit = retailValue - inventoryValue;
   
-  // Calculate total sales
+  // Calculate total sales revenue
   const totalSales = transactions
     .filter(t => t.type === 'sale')
     .reduce((acc, t) => acc + t.totalAmount, 0);
+    
+  // Calculate cost of goods sold (COGS)
+  const costOfGoodsSold = transactions
+    .filter(t => t.type === 'sale')
+    .reduce((acc, t) => {
+      const product = products.find(p => p.id === t.productId);
+      return acc + (product ? product.purchaseCost * t.quantity : 0);
+    }, 0);
+    
+  // Calculate gross profit (Sales - COGS)
+  const grossProfit = totalSales - costOfGoodsSold;
+  
+  // Calculate total expenses
+  const totalExpenses = expenses.reduce((acc, expense) => acc + expense.amount, 0);
+  
+  // Calculate net profit (Gross Profit - Expenses)
+  const netProfit = grossProfit - totalExpenses;
     
   // Calculate total price adjustments
   const totalPriceAdjustments = transactions
     .filter(t => t.type === 'sale')
     .reduce((acc, t) => acc + t.priceDelta, 0);
 
+  // Calculate margin percentages
+  const grossMarginPercentage = totalSales > 0 ? (grossProfit / totalSales) * 100 : 0;
+  const netMarginPercentage = totalSales > 0 ? (netProfit / totalSales) * 100 : 0;
+
   // If user doesn't have admin access, show limited reports
   if (!canViewSensitiveData()) {
+    const userSales = transactions.filter(t => t.type === 'sale' && t.createdBy === currentUser?.id);
+    const userTotalSales = userSales.reduce((acc, t) => acc + t.totalAmount, 0);
+    
     return (
       <div className="space-y-4">
         <div>
@@ -63,7 +87,7 @@ const Reports = () => {
           <CardContent className="p-4">
             <div className="flex items-center mb-3">
               <div className="h-5 w-5 bg-pink-100 dark:bg-pink-900/30 rounded-md flex items-center justify-center mr-2">
-                <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-pink-500"><path d="M3 3v18h18"></path><path d="m19 9-5 5-4-4-3 3"></path></svg>
+                <TrendingUp className="h-3 w-3 text-pink-500" />
               </div>
               <h2 className="text-sm font-medium">Your Sales Overview</h2>
             </div>
@@ -71,11 +95,11 @@ const Reports = () => {
             <div className="grid grid-cols-2 gap-4 mt-3">
               <div>
                 <div className="text-xs text-gray-500 dark:text-gray-400">Your Total Sales</div>
-                <div className="text-lg font-bold">GH₵{totalSales.toFixed(2)}</div>
+                <div className="text-lg font-bold">{currencySymbol}{userTotalSales.toFixed(2)}</div>
               </div>
               <div>
                 <div className="text-xs text-gray-500 dark:text-gray-400">Number of Transactions</div>
-                <div className="text-lg font-bold">{transactions.filter(t => t.type === 'sale').length}</div>
+                <div className="text-lg font-bold">{userSales.length}</div>
               </div>
             </div>
           </CardContent>
@@ -200,31 +224,111 @@ const Reports = () => {
           </TabsList>
           
           <TabsContent value="overview" className="space-y-4">
+            {/* Financial Performance Overview */}
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+              <Card className="border-none shadow-sm">
+                <CardContent className="p-4">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <div className="text-xs text-gray-500 dark:text-gray-400">Total Sales</div>
+                      <div className="text-lg font-bold">{currencySymbol}{totalSales.toFixed(2)}</div>
+                    </div>
+                    <TrendingUp className="h-5 w-5 text-green-500" />
+                  </div>
+                </CardContent>
+              </Card>
+              
+              <Card className="border-none shadow-sm">
+                <CardContent className="p-4">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <div className="text-xs text-gray-500 dark:text-gray-400">Total Expenses</div>
+                      <div className="text-lg font-bold">{currencySymbol}{totalExpenses.toFixed(2)}</div>
+                    </div>
+                    <TrendingDown className="h-5 w-5 text-red-500" />
+                  </div>
+                </CardContent>
+              </Card>
+              
+              <Card className="border-none shadow-sm">
+                <CardContent className="p-4">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <div className="text-xs text-gray-500 dark:text-gray-400">Gross Profit</div>
+                      <div className={`text-lg font-bold ${grossProfit >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                        {currencySymbol}{grossProfit.toFixed(2)}
+                      </div>
+                      <div className="text-xs text-gray-500">
+                        {grossMarginPercentage.toFixed(1)}% margin
+                      </div>
+                    </div>
+                    <DollarSign className="h-5 w-5 text-blue-500" />
+                  </div>
+                </CardContent>
+              </Card>
+              
+              <Card className="border-none shadow-sm">
+                <CardContent className="p-4">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <div className="text-xs text-gray-500 dark:text-gray-400">Net Profit</div>
+                      <div className={`text-lg font-bold ${netProfit >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                        {currencySymbol}{netProfit.toFixed(2)}
+                      </div>
+                      <div className="text-xs text-gray-500">
+                        {netMarginPercentage.toFixed(1)}% margin
+                      </div>
+                    </div>
+                    {netProfit >= 0 ? (
+                      <TrendingUp className="h-5 w-5 text-green-500" />
+                    ) : (
+                      <TrendingDown className="h-5 w-5 text-red-500" />
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+
+            {/* Detailed Breakdown */}
             <Card className="border-none shadow-sm">
-              <CardContent className="p-4">
-                <div className="flex items-center mb-2">
-                  <div className="h-5 w-5 bg-pink-100 dark:bg-pink-900/30 rounded-md flex items-center justify-center mr-2">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-pink-500"><path d="M3 3v18h18"></path><path d="m19 9-5 5-4-4-3 3"></path></svg>
+              <CardHeader>
+                <CardTitle>Profit & Loss Breakdown</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-3">
+                  <div className="flex justify-between items-center border-b pb-2">
+                    <span className="font-medium">Revenue (Sales)</span>
+                    <span className="font-bold text-green-600">
+                      +{currencySymbol}{totalSales.toFixed(2)}
+                    </span>
                   </div>
-                  <h2 className="text-sm font-medium">Financial Overview</h2>
-                </div>
-                
-                <div className="grid grid-cols-2 gap-4 mt-3">
-                  <div>
-                    <div className="text-xs text-gray-500 dark:text-gray-400">Inventory Value</div>
-                    <div className="text-lg font-bold">GH₵{inventoryValue.toFixed(2)}</div>
+                  
+                  <div className="flex justify-between items-center border-b pb-2">
+                    <span className="text-gray-600">Less: Cost of Goods Sold</span>
+                    <span className="text-red-600">
+                      -{currencySymbol}{costOfGoodsSold.toFixed(2)}
+                    </span>
                   </div>
-                  <div>
-                    <div className="text-xs text-gray-500 dark:text-gray-400">Retail Value</div>
-                    <div className="text-lg font-bold">GH₵{retailValue.toFixed(2)}</div>
+                  
+                  <div className="flex justify-between items-center border-b pb-2 font-medium">
+                    <span>Gross Profit</span>
+                    <span className={grossProfit >= 0 ? 'text-green-600' : 'text-red-600'}>
+                      {currencySymbol}{grossProfit.toFixed(2)}
+                    </span>
                   </div>
-                  <div>
-                    <div className="text-xs text-gray-500 dark:text-gray-400">Potential Profit</div>
-                    <div className="text-lg font-bold text-green-600">GH₵{potentialProfit.toFixed(2)}</div>
+                  
+                  <div className="flex justify-between items-center border-b pb-2">
+                    <span className="text-gray-600">Less: Operating Expenses</span>
+                    <span className="text-red-600">
+                      -{currencySymbol}{totalExpenses.toFixed(2)}
+                    </span>
                   </div>
-                  <div>
-                    <div className="text-xs text-gray-500 dark:text-gray-400">Total Sales</div>
-                    <div className="text-lg font-bold">GH₵{totalSales.toFixed(2)}</div>
+                  
+                  <div className="flex justify-between items-center font-bold text-lg">
+                    <span>Net Profit/Loss</span>
+                    <span className={netProfit >= 0 ? 'text-green-600' : 'text-red-600'}>
+                      {currencySymbol}{netProfit.toFixed(2)}
+                    </span>
                   </div>
                 </div>
               </CardContent>
@@ -242,7 +346,7 @@ const Reports = () => {
                 <div className="mt-2">
                   <div className="text-xs mb-1">Total Price Adjustments</div>
                   <div className={`text-lg font-bold ${totalPriceAdjustments < 0 ? 'text-red-500' : 'text-green-500'}`}>
-                    {totalPriceAdjustments === 0 ? 'GH₵0.00' : `${totalPriceAdjustments > 0 ? '+' : ''}GH₵${totalPriceAdjustments.toFixed(2)}`}
+                    {totalPriceAdjustments === 0 ? `${currencySymbol}0.00` : `${totalPriceAdjustments > 0 ? '+' : ''}${currencySymbol}${totalPriceAdjustments.toFixed(2)}`}
                   </div>
                   <div className="text-xs text-gray-500 dark:text-gray-400 mt-1">
                     Your price adjustments have {totalPriceAdjustments < 0 ? 'decreased' : 'increased'} revenue

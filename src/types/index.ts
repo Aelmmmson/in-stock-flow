@@ -1,4 +1,13 @@
 
+// Basic types
+export type TabsType = 'dashboard' | 'inventory' | 'transactions' | 'expenses' | 'reports' | 'settings';
+
+export interface ProductVariant {
+  id: string;
+  name: string;
+  value: string;
+}
+
 export interface Product {
   id: string;
   name: string;
@@ -10,20 +19,14 @@ export interface Product {
   sellingPrice: number;
   description: string;
   variants: ProductVariant[];
-  image: string | null;
+  image?: string | null;
   lowStockThreshold: number;
   taxRate: number;
   taxInclusive: boolean;
   discount?: number;
-  branchId: string; // Add branch association
+  branchId: string;
   createdAt: string;
   updatedAt: string;
-}
-
-export interface ProductVariant {
-  id: string;
-  name: string;
-  value: string;
 }
 
 export interface Transaction {
@@ -38,54 +41,19 @@ export interface Transaction {
   notes: string;
   createdAt: string;
   createdBy: string;
-  branchId: string; // Add branch association
-  customer?: string;
-  paymentMethod?: string;
-}
-
-export type TabsType = 'dashboard' | 'inventory' | 'transactions' | 'reports' | 'settings';
-
-export interface FinancialPeriod {
-  startDate: string;
-  endDate: string;
-  label: string;
-}
-
-export interface User {
-  id: string;
-  name: string;
-  role: 'admin' | 'manager' | 'cashier';
-  email: string;
-  avatar?: string;
-}
-
-export interface Notification {
-  id: string;
-  title: string;
-  description: string;
-  date: string;
-  read: boolean;
-  type: 'lowStock' | 'sale' | 'system' | 'other';
-  linkTo?: string;
+  branchId: string;
 }
 
 export interface Expense {
   id: string;
   category: string;
   amount: number;
-  date: string;
   notes: string;
+  date: string;
   paymentMethod: string;
-  branchId: string; // Add branch association
   recurring?: boolean;
   frequency?: 'daily' | 'weekly' | 'monthly' | 'yearly';
-}
-
-export interface ProductCategory {
-  id: string;
-  name: string;
-  description?: string;
-  createdAt: string;
+  branchId?: string;
 }
 
 export interface Discount {
@@ -93,53 +61,44 @@ export interface Discount {
   name: string;
   type: 'percentage' | 'fixed';
   value: number;
-  applyToAll: boolean;
-  appliedCategories?: string[];
-  appliedProducts?: string[];
+  active: boolean;
   startDate?: string;
   endDate?: string;
-  active: boolean;
-  createdAt: string;
-}
-
-// New interfaces for branch management
-export interface Branch {
-  id: string;
-  name: string;
-  address: string;
-  phone?: string;
-  email?: string;
-  manager?: string;
+  applyToAll: boolean;
+  appliedProducts?: string[];
+  appliedCategories?: string[];
+  minimumPurchase?: number;
+  maximumDiscount?: number;
+  usageLimit?: number;
+  timesUsed: number;
   createdAt: string;
   updatedAt: string;
 }
 
-export interface Staff {
+export interface FinancialPeriod {
+  startDate: string;
+  endDate: string;
+  label: string;
+}
+
+export interface Branch {
   id: string;
   name: string;
+  address: string;
+  phone: string;
   email: string;
-  role: 'cashier' | 'salesperson' | 'manager';
-  branchId: string;
-  phone?: string;
-  address?: string;
-  hireDate: string;
+  manager: string;
   isActive: boolean;
   createdAt: string;
   updatedAt: string;
 }
 
-export interface BusinessInfo {
+export interface NotificationItem {
   id: string;
-  name: string;
-  description?: string;
-  address: string;
-  phone: string;
-  email: string;
-  website?: string;
-  logo?: string;
-  taxId?: string;
-  registrationNumber?: string;
-  updatedAt: string;
+  title: string;
+  message: string;
+  type: 'info' | 'warning' | 'error' | 'success';
+  read: boolean;
+  createdAt: string;
+  actionUrl?: string;
 }
-
-export type DateFilterType = 'week' | 'month' | 'year' | 'custom' | 'quarter';

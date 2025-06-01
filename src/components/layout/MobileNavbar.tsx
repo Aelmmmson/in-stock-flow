@@ -1,7 +1,7 @@
 
-import { Link } from 'react-router-dom';
-import { BarChart, Package, Settings, LayoutDashboard, ShoppingCart } from 'lucide-react';
 import { TabsType } from '@/types';
+import { Link, useLocation } from 'react-router-dom';
+import { Home, Package, ArrowRightLeft, BarChart3, Settings, Receipt } from 'lucide-react';
 
 interface MobileNavbarProps {
   activeTab: TabsType;
@@ -9,40 +9,47 @@ interface MobileNavbarProps {
 }
 
 const MobileNavbar = ({ activeTab, setActiveTab }: MobileNavbarProps) => {
-  const tabs = [
-    { name: 'dashboard', path: '/', icon: LayoutDashboard, label: 'Dashboard' },
-    { name: 'inventory', path: '/inventory', icon: Package, label: 'Inventory' },
-    { name: 'transactions', path: '/transactions', icon: ShoppingCart, label: 'Sales' },
-    { name: 'reports', path: '/reports', icon: BarChart, label: 'Reports' },
-    { name: 'settings', path: '/settings', icon: Settings, label: 'Settings' },
+  const location = useLocation();
+
+  const navItems = [
+    { id: 'dashboard' as TabsType, label: 'Dashboard', icon: Home, path: '/dashboard' },
+    { id: 'inventory' as TabsType, label: 'Inventory', icon: Package, path: '/inventory' },
+    { id: 'transactions' as TabsType, label: 'Transactions', icon: ArrowRightLeft, path: '/transactions' },
+    { id: 'expenses' as TabsType, label: 'Expenses', icon: Receipt, path: '/expenses' },
+    { id: 'reports' as TabsType, label: 'Reports', icon: BarChart3, path: '/reports' },
+    { id: 'settings' as TabsType, label: 'Settings', icon: Settings, path: '/settings' },
   ];
 
+  const isActive = (path: string) => {
+    if (path === '/dashboard' && location.pathname === '/') return true;
+    return location.pathname.startsWith(path);
+  };
+
   return (
-    <div className="fixed bottom-0 left-0 right-0 border-t border-border bg-white dark:bg-gray-800 py-2 px-4 z-10">
-      <div className="flex justify-between items-center overflow-x-auto">
-        {tabs.map((tab) => {
-          const isActive = activeTab === tab.name;
+    <nav className="fixed bottom-0 left-0 right-0 bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-800 md:hidden z-40">
+      <div className="grid grid-cols-6 h-16">
+        {navItems.map((item) => {
+          const Icon = item.icon;
+          const active = isActive(item.path);
+          
           return (
             <Link
-              to={tab.path}
-              key={tab.name}
-              className={`flex flex-col items-center px-2 py-2 rounded-md relative ${
-                isActive
-                  ? 'text-pink-500 dark:text-pink-400'
-                  : 'text-gray-500 dark:text-gray-400 hover:text-pink-500 dark:hover:text-pink-400'
+              key={item.id}
+              to={item.path}
+              onClick={() => setActiveTab(item.id)}
+              className={`flex flex-col items-center justify-center space-y-1 ${
+                active
+                  ? 'text-pink-600 dark:text-pink-400'
+                  : 'text-gray-500 dark:text-gray-400'
               }`}
-              onClick={() => setActiveTab(tab.name as TabsType)}
             >
-              {isActive && (
-                <span className="absolute -top-2 left-1/2 transform -translate-x-1/2 w-1 h-1 rounded-full bg-pink-500 dark:bg-pink-400"></span>
-              )}
-              <tab.icon className="h-5 w-5" />
-              <span className="text-xs mt-1">{tab.label}</span>
+              <Icon className="h-5 w-5" />
+              <span className="text-xs">{item.label}</span>
             </Link>
           );
         })}
       </div>
-    </div>
+    </nav>
   );
 };
 
