@@ -2,36 +2,19 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Sidebar, SidebarContent, SidebarFooter, SidebarGroup, SidebarGroupContent, SidebarHeader, SidebarMenu, SidebarMenuItem, SidebarMenuButton } from '@/components/ui/sidebar';
-import { LayoutDashboard, Package, BarChart2, Settings, ShoppingCart } from 'lucide-react';
+import { Home, Package, ArrowRightLeft, BarChart3, Settings, Receipt } from 'lucide-react';
 
 const DesktopSidebar = () => {
   const location = useLocation();
+  
+  // Using the exact same menu items as mobile navigation
   const menuItems = [
-    {
-      title: 'Dashboard',
-      icon: LayoutDashboard,
-      path: '/dashboard'
-    },
-    {
-      title: 'Inventory',
-      icon: Package,
-      path: '/inventory'
-    },
-    {
-      title: 'Sales',
-      icon: ShoppingCart,
-      path: '/transactions'
-    },
-    {
-      title: 'Reports',
-      icon: BarChart2,
-      path: '/reports'
-    },
-    {
-      title: 'Settings',
-      icon: Settings,
-      path: '/settings'
-    }
+    { id: 'dashboard', title: 'Dashboard', icon: Home, path: '/dashboard' },
+    { id: 'inventory', title: 'Inventory', icon: Package, path: '/inventory' },
+    { id: 'transactions', title: 'Transactions', icon: ArrowRightLeft, path: '/transactions' },
+    { id: 'expenses', title: 'Expenses', icon: Receipt, path: '/expenses' },
+    { id: 'reports', title: 'Reports', icon: BarChart3, path: '/reports' },
+    { id: 'settings', title: 'Settings', icon: Settings, path: '/settings' },
   ];
 
   const isActive = (path: string) => {
@@ -73,14 +56,14 @@ const DesktopSidebar = () => {
                         flex flex-col items-center justify-center
                         p-2 w-full rounded-lg
                         ${isActive(item.path) ? 
-                          'bg-gray-100 text-primary' : 
-                          'text-gray-600 hover:bg-gray-50 hover:text-primary'}
+                          'text-pink-600' : 
+                          'text-gray-500 hover:text-pink-600'}
                       `}
                     >
                       <div className="flex items-center justify-center h-6 w-6">
                         <item.icon className="h-5 w-5" />
                       </div>
-                      <span className="text-[10px] font-medium text-center mt-1">
+                      <span className="text-xs font-medium text-center mt-1">
                         {item.title}
                       </span>
                     </Link>
