@@ -1,5 +1,5 @@
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { Product, Transaction, Expense, Discount } from '../types';
+import { Product, Transaction, Expense, Discount, ProductCategory } from '../types';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth, UserRole } from './AuthContext';
 
@@ -154,6 +154,28 @@ const sampleExpenses: Expense[] = [
   }
 ];
 
+// Sample categories
+const sampleCategories: ProductCategory[] = [
+  {
+    id: '1',
+    name: 'Dresses',
+    description: 'Women\'s dresses and formal wear',
+    createdAt: new Date().toISOString()
+  },
+  {
+    id: '2',
+    name: 'Bags',
+    description: 'Handbags, purses, and accessories',
+    createdAt: new Date().toISOString()
+  },
+  {
+    id: '3',
+    name: 'Jewelry',
+    description: 'Rings, earrings, necklaces and accessories',
+    createdAt: new Date().toISOString()
+  }
+];
+
 interface InventoryContextType {
   products: Product[];
   transactions: Transaction[];
@@ -178,6 +200,10 @@ interface InventoryContextType {
   getActiveDiscounts: () => Discount[];
   getDiscountedPrice: (product: Product) => number;
   discounts: Discount[];
+  categories: ProductCategory[];
+  addDiscount: (discount: Omit<Discount, 'id' | 'createdAt' | 'updatedAt'>) => void;
+  updateDiscount: (discount: Discount) => void;
+  deleteDiscount: (id: string) => void;
   getFilteredTransactions: () => Transaction[]; // New function to get role-filtered transactions
   canViewSensitiveData: () => boolean; // Check if user can view sensitive data
 }
@@ -201,6 +227,7 @@ export const InventoryProvider = ({ children }: InventoryProviderProps) => {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [expenses, setExpenses] = useState<Expense[]>([]);
   const [discounts, setDiscounts] = useState<Discount[]>([]);
+  const [categories, setCategories] = useState<ProductCategory[]>([]);
   const { toast } = useToast();
   const { currentUser, hasAdminAccess } = useAuth();
   const currencySymbol = '₵'; // Ghana Cedi symbol
@@ -213,11 +240,13 @@ export const InventoryProvider = ({ children }: InventoryProviderProps) => {
     const storedTransactions = localStorage.getItem('didiz-closet-transactions');
     const storedExpenses = localStorage.getItem('didiz-closet-expenses');
     const storedDiscounts = localStorage.getItem('didiz-closet-discounts');
+    const storedCategories = localStorage.getItem('didiz-closet-categories');
     
     setProducts(storedProducts ? JSON.parse(storedProducts) : sampleProducts);
     setTransactions(storedTransactions ? JSON.parse(storedTransactions) : sampleTransactions);
     setExpenses(storedExpenses ? JSON.parse(storedExpenses) : sampleExpenses);
     setDiscounts(storedDiscounts ? JSON.parse(storedDiscounts) : []);
+    setCategories(storedCategories ? JSON.parse(storedCategories) : sampleCategories);
   }, []);
 
   useEffect(() => {
@@ -225,7 +254,9 @@ export const InventoryProvider = ({ children }: InventoryProviderProps) => {
     localStorage.setItem('didiz-closet-products', JSON.stringify(products));
     localStorage.setItem('didiz-closet-transactions', JSON.stringify(transactions));
     localStorage.setItem('didiz-closet-expenses', JSON.stringify(expenses));
-  }, [products, transactions, expenses]);
+    localStorage.setItem('didiz-closet-discounts', JSON.stringify(discounts));
+    localStorage.setItem('didiz-closet-categories', JSON.stringify(categories));
+  }, [products, transactions, expenses, discounts, categories]);
 
   // Function to get active discounts
   const getActiveDiscounts = () => {
@@ -265,6 +296,47 @@ export const InventoryProvider = ({ children }: InventoryProviderProps) => {
     });
     
     return finalPrice;
+  };
+
+  // Discount management functions
+  const addDiscount = (discount: Omit<Discount, 'id' | 'createdAt' | 'updatedAt'>) => {
+    const newDiscount: Discount = {
+      ...discount,
+      id: Date.now().toString(),
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    };
+    setDiscounts([...discounts, newDiscount]);
+    toast({
+      title: "Discount Created",
+      description: `${newDiscount.name} has been added to discounts`,
+    });
+  };
+
+  const updateDiscount = (updatedDiscount: Discount) => {
+    setDiscounts(
+      discounts.map((discount) =>
+        discount.id === updatedDiscount.id
+          ? { ...updatedDiscount, updatedAt: new Date().toISOString() }
+          : discount
+      )
+    );
+    toast({
+      title: "Discount Updated",
+      description: `${updatedDiscount.name} has been updated`,
+    });
+  };
+
+  const deleteDiscount = (id: string) => {
+    const discountToDelete = discounts.find(d => d.id === id);
+    if (discountToDelete) {
+      setDiscounts(discounts.filter((discount) => discount.id !== id));
+      toast({
+        title: "Discount Deleted",
+        description: `${discountToDelete.name} has been removed`,
+        variant: "destructive",
+      });
+    }
   };
 
   const addProduct = (product: Omit<Product, 'id' | 'createdAt' | 'updatedAt'>) => {
@@ -501,6 +573,7 @@ export const InventoryProvider = ({ children }: InventoryProviderProps) => {
     transactions,
     expenses,
     discounts,
+    categories,
     currentUser,
     currencySymbol,
     addProduct,
@@ -515,6 +588,9 @@ export const InventoryProvider = ({ children }: InventoryProviderProps) => {
     getFinancialSummary,
     getActiveDiscounts,
     getDiscountedPrice,
+    addDiscount,
+    updateDiscount,
+    deleteDiscount,
     getFilteredTransactions,
     canViewSensitiveData,
   };
