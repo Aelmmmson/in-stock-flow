@@ -1,4 +1,3 @@
-
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { Product, Transaction, Expense, Discount } from '../types';
 import { useToast } from '@/hooks/use-toast';
@@ -35,7 +34,8 @@ const sampleProducts: Product[] = [
     lowStockThreshold: 5,
     taxRate: 10,
     taxInclusive: false,
-    discount: 10, // Adding a 10% discount to this product for demonstration
+    discount: 10,
+    branchId: '1',
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
   },
@@ -57,6 +57,7 @@ const sampleProducts: Product[] = [
     lowStockThreshold: 3,
     taxRate: 8,
     taxInclusive: true,
+    branchId: '1',
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
   },
@@ -77,7 +78,8 @@ const sampleProducts: Product[] = [
     lowStockThreshold: 5,
     taxRate: 10,
     taxInclusive: false,
-    discount: 15, // Adding a 15% discount to this product for demonstration
+    discount: 15,
+    branchId: '2',
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
   }
@@ -90,13 +92,14 @@ const sampleTransactions: Transaction[] = [
     productId: '1',
     quantity: 2,
     originalPrice: 150,
-    actualPrice: 140, // Slight discount given
+    actualPrice: 140,
     priceDelta: -10,
     totalAmount: 280,
     type: 'sale',
     notes: 'Loyal customer discount',
     createdAt: new Date().toISOString(),
     createdBy: '1',
+    branchId: '1',
   },
   {
     id: '2',
@@ -110,6 +113,7 @@ const sampleTransactions: Transaction[] = [
     notes: '',
     createdAt: new Date().toISOString(),
     createdBy: '1',
+    branchId: '2',
   }
 ];
 
@@ -123,7 +127,8 @@ const sampleExpenses: Expense[] = [
     date: new Date().toISOString(),
     paymentMethod: 'Bank Transfer',
     recurring: true,
-    frequency: 'monthly'
+    frequency: 'monthly',
+    branchId: '1'
   },
   {
     id: '2',
@@ -133,7 +138,8 @@ const sampleExpenses: Expense[] = [
     date: new Date().toISOString(),
     paymentMethod: 'Cash',
     recurring: true,
-    frequency: 'monthly'
+    frequency: 'monthly',
+    branchId: '1'
   },
   {
     id: '3',
@@ -143,7 +149,8 @@ const sampleExpenses: Expense[] = [
     date: new Date().toISOString(),
     paymentMethod: 'Bank Transfer',
     recurring: true,
-    frequency: 'monthly'
+    frequency: 'monthly',
+    branchId: '2'
   }
 ];
 

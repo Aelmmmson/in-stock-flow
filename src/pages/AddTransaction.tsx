@@ -14,6 +14,7 @@ import { Label } from '@/components/ui/label';
 import { BarcodeScannerDialog } from '@/components/inventory/BarcodeScanner';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
+import { useBranch } from '@/contexts/BranchContext';
 
 interface CartItem {
   productId: string;
@@ -29,6 +30,7 @@ const AddTransaction = () => {
   const { toast } = useToast();
   const { products, addTransaction, currencySymbol, getActiveDiscounts, getDiscountedPrice } = useInventory();
   const { currentUser } = useAuth();
+  const { currentBranch, getUserBranch } = useBranch();
   
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
   const [customer, setCustomer] = useState('Walk-in Customer');
@@ -241,17 +243,24 @@ const AddTransaction = () => {
           return;
         }
         
+        const transactionType = item.priceDelta > 0 ? 'adjustment' : 'sale';
+        const quantity = item.quantity;
+        const originalPrice = item.price;
+        const actualPrice = item.price - item.priceDelta;
+        const totalAmount = item.quantity * (item.price - item.priceDelta);
+        
         addTransaction({
-          type: 'sale',
-          productId: item.productId,
-          quantity: item.quantity,
-          originalPrice: item.price,
-          actualPrice: item.price - item.priceDelta,
-          totalAmount: item.quantity * (item.price - item.priceDelta),
-          notes,
-          customer,
-          paymentMethod,
-          createdBy: currentUser?.id || 'unknown', // Add the createdBy property with current user ID
+          type: transactionType as 'sale' | 'purchase' | 'adjustment',
+          productId: selectedProduct.id,
+          quantity: quantity,
+          originalPrice: originalPrice,
+          actualPrice: actualPrice,
+          totalAmount: totalAmount,
+          notes: notes,
+          customer: customer,
+          paymentMethod: paymentMethod,
+          createdBy: currentUser?.id || 'unknown',
+          branchId: currentUser?.role === 'owner' ? (currentBranch?.id || '1') : getUserBranch()?.id || '1',
         });
       });
       

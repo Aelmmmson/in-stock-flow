@@ -1,3 +1,4 @@
+
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { ThemeProvider } from "@/components/ui/theme-provider"
 import { Toaster } from "@/components/ui/toaster"
@@ -17,11 +18,13 @@ import ReportsInventory from './pages/ReportsInventory';
 import ReportsSales from './pages/ReportsSales';
 import Profile from './pages/Profile';
 import Help from './pages/Help';
-import { QueryClient } from '@tanstack/react-query';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { AuthProvider } from './contexts/AuthContext';
 import { InventoryProvider } from './contexts/InventoryContext';
 import { BranchProvider } from './contexts/BranchContext';
 import BranchManagement from './pages/BranchManagement';
+
+const queryClient = new QueryClient();
 
 function App() {
   return (
@@ -29,9 +32,9 @@ function App() {
       <AuthProvider>
         <BranchProvider>
           <ThemeProvider defaultTheme="system" storageKey="vite-ui-theme">
-            <InventoryProvider>
-              <Toaster />
-              <QueryClient>
+            <QueryClientProvider client={queryClient}>
+              <InventoryProvider>
+                <Toaster />
                 <Routes>
                   <Route
                     path="/login"
@@ -66,8 +69,8 @@ function App() {
                     <Route path="/branch-management" element={<BranchManagement />} />
                   </Route>
                 </Routes>
-              </QueryClient>
-            </InventoryProvider>
+              </InventoryProvider>
+            </QueryClientProvider>
           </ThemeProvider>
         </BranchProvider>
       </AuthProvider>

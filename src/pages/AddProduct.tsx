@@ -1,4 +1,3 @@
-
 import { useState, useRef, useCallback, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useInventory } from '@/contexts/InventoryContext';
@@ -11,12 +10,14 @@ import { Camera, X, Plus, Trash2 } from 'lucide-react';
 import { ProductVariant, ProductCategory } from '@/types';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Link } from 'react-router-dom';
+import { useBranch } from '@/contexts/BranchContext';
 
 const AddProduct = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const { addProduct, products } = useInventory();
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const { currentBranch, getUserBranch } = useBranch();
   
   const [name, setName] = useState('');
   const [category, setCategory] = useState('');
